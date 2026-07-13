@@ -12,7 +12,7 @@ func Save(cfg *Config) error {
 	if err != nil {
 		return err
 	}
-	configFile, err := ConfigDir()
+	configFile, err := ConfigFile()
 	if err != nil {
 		return err
 	}
