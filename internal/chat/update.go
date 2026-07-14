@@ -12,7 +12,58 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 
+	case tea.WindowSizeMsg:
+
+		m.width = msg.Width
+		m.height = msg.Height
+
+		// Leave space for:
+		// - Header
+		// - Input
+		// - Padding
+		headerHeight := 5
+		inputHeight := 3
+
+		m.viewport.Width = msg.Width
+		m.viewport.Height = msg.Height - headerHeight - inputHeight
+
+		if m.viewport.Height < 5 {
+			m.viewport.Height = 5
+		}
+
+		return m, nil
+
 	case tea.KeyMsg:
+		// Scroll conversation when command palette is closed.
+		if !m.showCommands {
+			switch msg.String() {
+
+			case "up":
+				m.viewport.ScrollUp(1)
+				return m, nil
+
+			case "down":
+				m.viewport.ScrollDown(1)
+				return m, nil
+
+			case "pgup":
+				m.viewport.ScrollUp(m.viewport.Height / 2)
+				return m, nil
+
+			case "pgdown":
+				m.viewport.ScrollDown(m.viewport.Height / 2)
+				return m, nil
+
+			case "home":
+				m.viewport.GotoTop()
+				return m, nil
+
+			case "end":
+				m.viewport.GotoBottom()
+				return m, nil
+			}
+		}
+
 		switch msg.String() {
 		case "ctrl+c", "esc":
 			return m, tea.Quit
@@ -101,7 +152,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			// Normal AI message.
 			m.conversation.AddUser(prompt)
-
+			m.refreshViewport()
 			m.loading = true
 
 			m.input.SetValue("")
@@ -109,6 +160,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			// Create an empty assistant message.
 			// Streaming chunks will be appended to this.
 			m.conversation.AddAssistant("")
+			m.refreshViewport()
 
 			m.sendMessage(prompt)
 
@@ -123,6 +175,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if len(m.conversation.Messages) > 0 {
 				m.conversation.Messages[len(m.conversation.Messages)-1].Content =
 					"Error: " + msg.Err.Error()
+					
+				m.refreshViewport()
 			}
 
 			return m, nil
@@ -133,6 +187,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			if last.Role == "assistant" {
 				last.Content += msg.Text
+				m.refreshViewport()
 			}
 		}
 

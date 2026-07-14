@@ -36,6 +36,7 @@ var Registry = []Command{
 		Description: "Start a new conversation",
 		Execute: func(m *Model) tea.Cmd {
 			m.conversation.Clear()
+			m.refreshViewport()
 			return nil
 		},
 	},
@@ -44,6 +45,7 @@ var Registry = []Command{
 		Description: "Clear conversation",
 		Execute: func(m *Model) tea.Cmd {
 			m.conversation.Clear()
+			m.refreshViewport()
 			return nil
 		},
 	},

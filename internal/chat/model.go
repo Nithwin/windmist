@@ -3,8 +3,8 @@ package chat
 import (
 	"github.com/Nithwin/WindMist/internal/ai"
 	"github.com/Nithwin/WindMist/internal/config"
-
 	"github.com/charmbracelet/bubbles/textinput"
+	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -26,6 +26,8 @@ type Model struct {
 
 	loading   bool
 	streaming bool
+
+	viewport viewport.Model
 
 	width  int
 	height int
@@ -49,6 +51,7 @@ func New() Model {
 	input.Focus()
 	input.CharLimit = 0
 	input.Width = 60
+	vp := viewport.New(0, 0)
 
 	return Model{
 		cfg:          cfg,
@@ -64,6 +67,8 @@ func New() Model {
 
 		loading:   false,
 		streaming: false,
+
+		viewport: vp,
 	}
 }
 
