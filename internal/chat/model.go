@@ -3,7 +3,6 @@ package chat
 import (
 	"github.com/Nithwin/WindMist/internal/ai"
 	"github.com/Nithwin/WindMist/internal/config"
-	"github.com/Nithwin/WindMist/internal/ui"
 
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
@@ -21,10 +20,15 @@ type Model struct {
 
 	showSplash bool
 
+	showCommands bool
+
+	filteredCommands []Command
+
+	selectedCommand int
+
 	width  int
 	height int
 }
-
 // New creates a new Bubble Tea model.
 func New() Model {
 	cfg, err := config.Load()
@@ -38,18 +42,22 @@ func New() Model {
 	}
 
 	input := textinput.New()
-	input.Prompt = ui.PromptStyle.Render("❯ ")
-	input.Placeholder = "Ask anything..."
+	input.Prompt = ""
+	input.Placeholder = "message WindMist..."
 	input.Focus()
 	input.CharLimit = 0
-	input.Width = 80
+	input.Width = 60
 
-	return Model{
-		cfg:         cfg,
-		provider:    provider,
-		input:       input,
-		showSplash:  true,
-	}
+return Model{
+	cfg:              cfg,
+	provider:         provider,
+	conversation:     Conversation{},
+	input:            input,
+	showSplash:       true,
+	showCommands:     false,
+	filteredCommands: nil,
+	selectedCommand:  0,
+}
 }
 
 // Init initializes the application.

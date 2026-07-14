@@ -4,38 +4,56 @@ import (
 	"strings"
 
 	"github.com/Nithwin/WindMist/internal/ui"
+	"github.com/charmbracelet/lipgloss"
 )
 
 func renderConversation(m Model) string {
 	var b strings.Builder
 
 	if len(m.conversation.Messages) == 0 {
-		b.WriteString(ui.SubtitleStyle.Render("⚡ WindMist"))
-		b.WriteString("\n")
-		b.WriteString("Welcome! Ask me anything or type ")
-		b.WriteString(ui.LabelStyle.Render("/help"))
-		b.WriteString(".")
+		// ── empty state ───────────────────────────────────────────
+		hint := lipgloss.JoinVertical(
+			lipgloss.Left,
+			ui.AssistantLabelStyle.Render("⚡ WindMist is ready"),
+			ui.MutedStyle.Render("Type a message below, or try:"),
+			"",
+			"  "+ui.LabelStyle.Render("/help")+"  "+ui.MutedLightStyle.Render("→  show all commands"),
+			"  "+ui.LabelStyle.Render("/exit")+"  "+ui.MutedLightStyle.Render("→  quit"),
+		)
+		b.WriteString(hint)
 		b.WriteString("\n\n")
-
 		return b.String()
 	}
 
-	for _, msg := range m.conversation.Messages {
+	divider := ui.DividerStyle.Render(strings.Repeat("─", 76))
+
+	for i, msg := range m.conversation.Messages {
 		switch msg.Role {
 
 		case "user":
-			b.WriteString(ui.PromptStyle.Render("❯ You"))
+			label := ui.UserLabelStyle.Render("  you")
+			b.WriteString(label)
 			b.WriteString("\n")
-			b.WriteString(msg.Content)
-			b.WriteString("\n\n")
+			content := ui.UserBubbleStyle.Render(msg.Content)
+			b.WriteString(content)
+			b.WriteString("\n")
 
 		case "assistant":
-			b.WriteString(ui.TitleStyle.Render("⚡ WindMist"))
+			label := ui.AssistantLabelStyle.Render("⚡ WindMist")
+			b.WriteString(label)
 			b.WriteString("\n")
-			b.WriteString(msg.Content)
-			b.WriteString("\n\n")
+			content := ui.AssistantBubbleStyle.Render(msg.Content)
+			b.WriteString(content)
+			b.WriteString("\n")
+		}
+
+		// subtle divider between exchanges (not after last msg)
+		if i < len(m.conversation.Messages)-1 {
+			b.WriteString(divider)
+			b.WriteString("\n")
 		}
 	}
 
+	b.WriteString("\n")
 	return b.String()
 }

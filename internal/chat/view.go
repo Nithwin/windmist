@@ -4,24 +4,38 @@ import (
 	"strings"
 
 	"github.com/Nithwin/WindMist/internal/ui"
+	"github.com/charmbracelet/lipgloss"
 )
 
 func (m Model) View() string {
-	if m.showSplash {
-		return renderBanner(m)
-	}
-
 	var b strings.Builder
 
-	b.WriteString(renderHeader(m))
+	if m.showSplash {
+		b.WriteString(renderBanner(m))
+	} else {
+		b.WriteString(renderHeader(m))
+		b.WriteString(renderConversation(m))
 
-	b.WriteString(renderConversation(m))
+		// thin separator above input
+		b.WriteString(ui.DividerStyle.Render(strings.Repeat("─", 80)))
+		b.WriteString("\n")
+	}
 
-	b.WriteString(ui.DividerStyle.Render("────────────────────────────────────────────────────────────"))
-	b.WriteString("\n\n")
-
-	b.WriteString(m.input.View())
+	// ── input row ──────────────────────────────────────────────────
+	prompt := ui.PromptStyle.Render(" user")
+	inputLine := lipgloss.JoinHorizontal(
+		lipgloss.Center,
+		prompt,
+		lipgloss.NewStyle().Foreground(ui.Muted).Render("  ›  "),
+		m.input.View(),
+	)
+	b.WriteString(inputLine)
 	b.WriteString("\n")
+
+	// Show slash command palette.
+	if m.showCommands {
+		b.WriteString(renderCommandPalette(m))
+	}
 
 	return b.String()
 }

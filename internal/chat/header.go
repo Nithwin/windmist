@@ -2,33 +2,61 @@ package chat
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/Nithwin/WindMist/internal/ui"
 	"github.com/charmbracelet/lipgloss"
 )
 
 func renderHeader(m Model) string {
-	model := ""
-
+	model := "—"
 	if provider, err := m.cfg.ActiveProvider(); err == nil {
 		model = provider.Model
 	}
 
-	left := ui.TitleStyle.Render("⚡ WindMist")
-	right := fmt.Sprintf("%s • %s", m.cfg.AI.Provider, model)
+	// ── left: brand name ──────────────────────────────────────────
+	logo := lipgloss.NewStyle().
+		Bold(true).
+		Foreground(ui.Purple).
+		Render("⚡ WindMist")
 
-	header := lipgloss.JoinHorizontal(
-		lipgloss.Top,
-		left,
-		lipgloss.NewStyle().Width(8).Render(""),
-		ui.SuccessStyle.Render(right),
+	// ── right: provider badge ────────────────────────────────────
+	providerTag := lipgloss.NewStyle().
+		Bold(true).
+		Foreground(ui.Cyan).
+		Render(m.cfg.AI.Provider)
+
+	modelTag := lipgloss.NewStyle().
+		Foreground(ui.MutedLight).
+		Render(model)
+
+	right := fmt.Sprintf("%s %s %s",
+		providerTag,
+		lipgloss.NewStyle().Foreground(ui.Muted).Render("›"),
+		modelTag,
+	)
+
+	// ── padded spacer fills remaining width ──────────────────────
+	const totalWidth = 78
+	leftLen := lipgloss.Width(logo)
+	rightLen := lipgloss.Width(right)
+	gap := totalWidth - leftLen - rightLen
+	if gap < 1 {
+		gap = 1
+	}
+
+	row := lipgloss.JoinHorizontal(
+		lipgloss.Center,
+		logo,
+		strings.Repeat(" ", gap),
+		right,
 	)
 
 	box := lipgloss.NewStyle().
 		Border(lipgloss.RoundedBorder()).
-		BorderForeground(lipgloss.Color("#8B5CF6")).
+		BorderForeground(ui.PurpleDark).
 		Padding(0, 1).
-		Width(80)
+		Width(totalWidth)
 
-	return box.Render(header) + "\n\n"
+	return box.Render(row) + "\n\n"
 }
