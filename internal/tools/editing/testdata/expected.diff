@@ -1,0 +1,14 @@
+--- server.go
++++ server.go
+@@ line 42 @@
+-Provider
++Model
+@@ line 60 @@
++func health() bool {
++	return true
++}
+
+--- config.go
++++ config.go
+@@ line 15 @@
+-timeout=10
