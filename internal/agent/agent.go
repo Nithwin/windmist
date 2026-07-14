@@ -19,6 +19,10 @@ type Config struct {
 type Result struct {
 	// Content is the final response returned to the user.
 	Content string
+	// Usage accumulates token usage across all reasoning turns.
+	Usage ai.Usage
+	// Turns is the number of turns executed during the request.
+	Turns int
 }
 
 // Agent coordinates the language model and the available tools to solve
@@ -30,9 +34,6 @@ type Agent struct {
 	config Config
 
 	systemPrompt string
-
-	// messages contains the current conversation for this run.
-	messages []ai.Message
 }
 
 // New creates a new Agent.
@@ -55,5 +56,6 @@ func New(
 
 // Run executes a single user request.
 func (a *Agent) Run(ctx context.Context, userPrompt string) (*Result, error) {
-	return a.runLoop(ctx, userPrompt)
+	messages := make([]ai.Message, 0, 8)
+	return a.runLoop(ctx, messages, userPrompt)
 }
