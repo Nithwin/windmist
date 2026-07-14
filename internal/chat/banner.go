@@ -1,42 +1,48 @@
 package chat
 
 import (
-	"fmt"
+	"strings"
 
-	"github.com/Nithwin/WindMist/internal/config"
 	"github.com/Nithwin/WindMist/internal/ui"
 )
 
-// PrintBanner displays the WindMist welcome banner.
-func PrintBanner(cfg *config.Config) {
-	logo := `
-██╗    ██╗██╗███╗   ██╗██████╗ ███╗   ███╗██╗███████╗████████╗
+func renderBanner(m Model) string {
+	var b strings.Builder
+logo := `██╗    ██╗██╗███╗   ██╗██████╗ ███╗   ███╗██╗███████╗████████╗
 ██║    ██║██║████╗  ██║██╔══██╗████╗ ████║██║██╔════╝╚══██╔══╝
 ██║ █╗ ██║██║██╔██╗ ██║██║  ██║██╔████╔██║██║███████╗   ██║
 ██║███╗██║██║██║╚██╗██║██║  ██║██║╚██╔╝██║██║╚════██║   ██║
 ╚███╔███╔╝██║██║ ╚████║██████╔╝██║ ╚═╝ ██║██║███████║   ██║
- ╚══╝╚══╝ ╚═╝╚═╝  ╚═══╝╚═════╝ ╚═╝     ╚═╝╚══════╝   ╚═╝
-`
+ ╚══╝╚══╝ ╚═╝╚═╝  ╚═══╝╚═════╝ ╚═╝     ╚═╝╚══════╝   ╚═╝`
 
-	fmt.Println(ui.TitleStyle.Render(logo))
-	fmt.Println(ui.SubtitleStyle.Render("⚡ WindMist - AI Coding Assistant"))
-	fmt.Println()
+	b.WriteString(ui.TitleStyle.Render(logo))
+	b.WriteString("\n")
 
-	fmt.Print(ui.LabelStyle.Render("Provider : "))
-	fmt.Println(cfg.AI.Provider)
+	b.WriteString(ui.SubtitleStyle.Render("⚡ WindMist - AI Coding Assistant"))
+	b.WriteString("\n\n")
 
-	if provider, err := cfg.ActiveProvider(); err == nil {
-		fmt.Print(ui.LabelStyle.Render("Model    : "))
-		fmt.Println(provider.Model)
+	b.WriteString(ui.LabelStyle.Render("Provider : "))
+	b.WriteString(m.cfg.AI.Provider)
+	b.WriteString("\n")
+
+	b.WriteString(ui.LabelStyle.Render("Model    : "))
+	if provider, err := m.cfg.ActiveProvider(); err == nil {
+		b.WriteString(provider.Model)
 	}
 
-	fmt.Println()
+	b.WriteString("\n\n")
 
-	fmt.Println(ui.DividerStyle.Render("────────────────────────────────────────────────────────────"))
+	b.WriteString(ui.DividerStyle.Render("────────────────────────────────────────────────────────────"))
+	b.WriteString("\n")
 
-	fmt.Println(ui.SuccessStyle.Render("Type /help for commands"))
-	fmt.Println(ui.SuccessStyle.Render("Type /exit to quit"))
+	b.WriteString(ui.SuccessStyle.Render("Type /help for commands"))
+	b.WriteString("\n")
 
-	fmt.Println(ui.DividerStyle.Render("────────────────────────────────────────────────────────────"))
-	fmt.Println()
+	b.WriteString(ui.SuccessStyle.Render("Type /exit to quit"))
+	b.WriteString("\n")
+
+	b.WriteString(ui.DividerStyle.Render("────────────────────────────────────────────────────────────"))
+	b.WriteString("\n\n")
+
+	return b.String()
 }

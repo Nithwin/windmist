@@ -11,8 +11,8 @@ var rootCmd = &cobra.Command{
 	Use:   "windmist",
 	Short: "WindMist - AI Coding Assistant",
 	Long:  "WindMist is an AI-powered coding assistant for your terminal.",
-	Run: func(cmd *cobra.Command, args []string) {
-		chat.Start()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return chat.Run()
 	},
 }
 
