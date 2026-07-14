@@ -3,6 +3,7 @@ package chat
 import (
 	"github.com/Nithwin/WindMist/internal/ai"
 	"github.com/Nithwin/WindMist/internal/config"
+	"github.com/Nithwin/WindMist/internal/ui"
 	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
@@ -29,6 +30,8 @@ type Model struct {
 
 	viewport viewport.Model
 
+	markdown *ui.MarkdownRenderer
+
 	width  int
 	height int
 }
@@ -41,6 +44,11 @@ func New() Model {
 	}
 
 	provider, err := ai.New(cfg)
+	if err != nil {
+		panic(err)
+	}
+
+	renderer, err := ui.NewMarkdownRenderer()
 	if err != nil {
 		panic(err)
 	}
@@ -69,6 +77,8 @@ func New() Model {
 		streaming: false,
 
 		viewport: vp,
+
+		markdown: renderer,
 	}
 }
 
