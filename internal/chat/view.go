@@ -7,18 +7,24 @@ import (
 )
 
 func (m Model) View() string {
+	if m.showSplash {
+		return renderBanner(m)
+	}
+
 	var b strings.Builder
 
-	// Header
-	b.WriteString(renderBanner(m))
+	b.WriteString(renderHeader(m))
 
-	// Welcome
 	b.WriteString(ui.SubtitleStyle.Render("Welcome to WindMist!"))
 	b.WriteString("\n")
-	b.WriteString("Type /help to see available commands.")
+	b.WriteString("Ask me anything or type ")
+	b.WriteString(ui.LabelStyle.Render("/help"))
+	b.WriteString(".")
 	b.WriteString("\n\n")
-	
-	// Input
+
+	b.WriteString(ui.DividerStyle.Render("────────────────────────────────────────────────────────────"))
+	b.WriteString("\n\n")
+
 	b.WriteString(m.input.View())
 	b.WriteString("\n")
 

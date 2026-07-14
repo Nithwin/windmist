@@ -11,6 +11,20 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 
 	case tea.KeyMsg:
+
+		// Hide splash on first key press.
+		if m.showSplash {
+			m.showSplash = false
+
+			// Preserve the first typed character.
+			if len(msg.String()) == 1 {
+				m.input.SetValue(msg.String())
+				m.input.CursorEnd()
+			}
+
+			return m, nil
+		}
+
 		switch msg.String() {
 
 		case "ctrl+c":
@@ -20,8 +34,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 
 		case "enter":
-			// For now just clear the input.
-			// Later we'll send this to Gemini.
+			// We'll send the message to Gemini later.
 			m.input.SetValue("")
 		}
 	}
