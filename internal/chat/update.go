@@ -43,6 +43,29 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.selectedCommand = 0
 		}
 
+		// Navigate the command palette.
+		if m.showCommands {
+			switch msg.String() {
+
+			case "up":
+				if m.selectedCommand > 0 {
+					m.selectedCommand--
+				}
+				return m, nil
+
+			case "down":
+				if m.selectedCommand < len(m.filteredCommands)-1 {
+					m.selectedCommand++
+				}
+				return m, nil
+
+			case "esc":
+				m.showCommands = false
+				m.filteredCommands = nil
+				m.selectedCommand = 0
+				return m, nil
+			}
+		}
 		switch msg.String() {
 
 		case "enter":
@@ -52,7 +75,19 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, nil
 			}
 
-			// Is it a slash command?
+			// Execute selected command from palette.
+			if m.showCommands && len(m.filteredCommands) > 0 {
+				cmd := m.filteredCommands[m.selectedCommand]
+
+				m.showCommands = false
+				m.filteredCommands = nil
+				m.selectedCommand = 0
+				m.input.SetValue("")
+
+				return m, cmd.Execute(&m)
+			}
+
+			// Execute typed slash command.
 			if strings.HasPrefix(prompt, "/") {
 				if command, ok := FindCommand(prompt); ok {
 					m.input.SetValue("")
@@ -64,7 +99,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, nil
 			}
 
-			// Normal AI message
+			// Normal AI message.
 			if err := m.sendMessage(); err != nil {
 				m.conversation.AddAssistant("Error: " + err.Error())
 			}

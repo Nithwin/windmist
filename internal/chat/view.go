@@ -16,26 +16,31 @@ func (m Model) View() string {
 		b.WriteString(renderHeader(m))
 		b.WriteString(renderConversation(m))
 
-		// thin separator above input
+		// Separator above input area
 		b.WriteString(ui.DividerStyle.Render(strings.Repeat("─", 80)))
-		b.WriteString("\n")
+		b.WriteString("\n\n")
+
+		// Show command palette ABOVE the input
+		if m.showCommands {
+			b.WriteString(renderCommandPalette(m))
+			b.WriteString("\n")
+		}
 	}
 
-	// ── input row ──────────────────────────────────────────────────
+	// Input row
 	prompt := ui.PromptStyle.Render(" user")
+
 	inputLine := lipgloss.JoinHorizontal(
 		lipgloss.Center,
 		prompt,
-		lipgloss.NewStyle().Foreground(ui.Muted).Render("  ›  "),
+		lipgloss.NewStyle().
+			Foreground(ui.Muted).
+			Render("  ›  "),
 		m.input.View(),
 	)
+
 	b.WriteString(inputLine)
 	b.WriteString("\n")
-
-	// Show slash command palette.
-	if m.showCommands {
-		b.WriteString(renderCommandPalette(m))
-	}
 
 	return b.String()
 }
