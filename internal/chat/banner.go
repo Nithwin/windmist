@@ -18,7 +18,7 @@ logo := `██╗    ██╗██╗███╗   ██╗█████�
 	b.WriteString(ui.TitleStyle.Render(logo))
 	b.WriteString("\n")
 
-	b.WriteString(ui.SubtitleStyle.Render("⚡ WindMist - AI Coding Assistant"))
+	b.WriteString(ui.SubtitleStyle.Render("🐦‍🔥 WindMist v0.5 — AI Coding Assistant"))
 	b.WriteString("\n\n")
 
 	b.WriteString(ui.LabelStyle.Render("Provider : "))

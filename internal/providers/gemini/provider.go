@@ -26,7 +26,6 @@ func New(cfg config.ProviderConfig) ai.Provider {
 	}
 }
 
-
 // Generate generates content using the Gemini API.
 func (p *Provider) Generate(
 	ctx context.Context,
@@ -91,7 +90,6 @@ func (p *Provider) Generate(
 		},
 	}, nil
 }
-
 
 // Stream streams a response from Gemini.
 func (p *Provider) Stream(

@@ -1,23 +1,28 @@
-# WindMist ── AI Software Engineer in Your Terminal
-
 <div align="center">
 
-![WindMist Banner](https://img.shields.io/badge/WindMist-AI%20Software%20Engineer-6366f1?style=for-the-badge&logo=go&logoColor=white)
+# 🐦‍🔥 WindMist `v0.5`
+### Autonomous AI Software Engineer Running Directly in Your Terminal
+
+<img src="images/Gemini_Generated_Image_4fucu04fucu04fuc.png" alt="WindMist Hero Banner" width="860" />
+
+<br/>
+
+[![Version: v0.5](https://img.shields.io/badge/Version-v0.5-8B5CF6?style=for-the-badge)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
 [![Go Version](https://img.shields.io/badge/Go-1.25+-00ADD8?style=for-the-badge&logo=go)](https://golang.org)
 [![Python Version](https://img.shields.io/badge/Python-3.13+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=for-the-badge)](CONTRIBUTING.md)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-10B981?style=for-the-badge)](CONTRIBUTING.md)
 
 **Not just another ChatGPT wrapper.**  
 WindMist is an autonomous, lightning-fast AI Software Engineer running directly inside your terminal, engineered from the ground up for speed, deep repository awareness, and multi-step reasoning.
 
-[Key Features](#-key-features) • [Why WindMist?](#-why-windmist) • [Architecture](#-high-level-architecture) • [Getting Started](#-getting-started) • [Roadmap](ROADMAP.md) • [Contributing](CONTRIBUTING.md)
+[Key Features](#-key-features) • [Why WindMist?](#-why-go--python) • [Architecture](#-high-level-architecture) • [Getting Started](#-getting-started) • [Roadmap](ROADMAP.md) • [Contributing](CONTRIBUTING.md)
 
 </div>
 
 ---
 
-## ⚡ The Vision
+## 🐦‍🔥 The Vision
 
 When you type:
 
@@ -42,7 +47,7 @@ Our mission is to build the premier open-source terminal AI engineer to compete 
 ## 🚀 Key Features
 
 - **🧠 Multi-Model & Provider Agnostic:** Plug in your choice of **Gemini 2.5 / 3.0**, **OpenAI (GPT-4o)**, **Anthropic (Claude 3.5/3.7 Sonnet)**, **Groq**, **Azure OpenAI**, or completely local models via **Ollama**.
-- **⚡ Hybrid Go + Python Engine:** The best of both worlds — Go handles blazing-fast CLI interactions, concurrent file walking, Git operations, and tool loops; a decoupled Python microservice handles deep RAG, embeddings, vector indexing, and local evaluation.
+- **🐦‍🔥 Hybrid Go + Python Engine:** The best of both worlds — Go handles blazing-fast CLI interactions, concurrent file walking, Git operations, and tool loops; a decoupled Python microservice handles deep RAG, embeddings, vector indexing, and local evaluation.
 - **🏗️ Clean Architecture with Domain-Driven Modules:** Designed for longevity, extensibility, and maintainability. Every capability is encapsulated behind strict interfaces.
 - **🛠️ Autonomous Tool Ecosystem:** Built-in specialized tools for file reading/writing, shell command execution, semantic search, Git workflows, web browsing, testing, and linting.
 - **💾 Local First & Privacy Focused:** Uses localized **SQLite** (`~/.windmist/`) for persistent session history, agent state, and workspace memory without shipping your private code to third-party databases.

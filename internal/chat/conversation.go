@@ -13,7 +13,7 @@ func renderConversation(m Model) string {
 	// Always render the welcome state at the top of the conversation history
 	hint := lipgloss.JoinVertical(
 		lipgloss.Left,
-		ui.AssistantLabelStyle.Render("⚡ WindMist is ready"),
+		ui.AssistantLabelStyle.Render("🐦‍🔥 WindMist v0.5 is ready"),
 		ui.MutedStyle.Render("Type a message below, or try:"),
 		"",
 		"  "+ui.LabelStyle.Render("/help")+"  "+ui.MutedLightStyle.Render("→  show all commands"),
@@ -30,6 +30,11 @@ func renderConversation(m Model) string {
 	b.WriteString(divider)
 	b.WriteString("\n")
 
+	maxWidth := m.viewport.Width - 4
+	if maxWidth < 20 {
+		maxWidth = 76
+	}
+
 	for i, msg := range m.conversation.Messages {
 
 		switch msg.Role {
@@ -38,19 +43,19 @@ func renderConversation(m Model) string {
 			label := ui.UserLabelStyle.Render("  you")
 			b.WriteString(label)
 			b.WriteString("\n")
-			content := ui.UserBubbleStyle.Render(msg.Content)
+			content := ui.UserBubbleStyle.Width(maxWidth).Render(msg.Content)
 			b.WriteString(content)
 			b.WriteString("\n")
 
 		case "assistant":
-			label := ui.AssistantLabelStyle.Render("⚡ WindMist")
+			label := ui.AssistantLabelStyle.Render("🐦‍🔥 WindMist v0.5")
 			b.WriteString(label)
 			b.WriteString("\n")
 			contentStr := msg.Content
 			if contentStr == "" && m.loading && i == len(m.conversation.Messages)-1 {
 				contentStr = ui.MutedStyle.Render("Thinking...")
 			} else {
-				contentStr = ui.AssistantBubbleStyle.Render(contentStr)
+				contentStr = ui.AssistantBubbleStyle.Width(maxWidth).Render(contentStr)
 			}
 			b.WriteString(contentStr)
 			b.WriteString("\n")
