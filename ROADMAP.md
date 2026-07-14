@@ -32,78 +32,75 @@ gantt
 
 ---
 
-## 🏁 Phase 1 — Foundation (Current Focus)
+## 🏁 Phase 1 — Foundation (Completed)
 
 **Goal:** Establish the high-performance Go skeleton, configuration infrastructure, and unified LLM provider interface.
 
 ### Key Deliverables:
 - [x] **Project Vision & Architecture Planning (`README.md`, `ARCHITECTURE.md`, `CONTRIBUTING.md`)**
-- [ ] **CLI Framework Setup (`internal/cli` & `cmd/windmist`)**
+- [x] **CLI Framework Setup (`internal/cli` & `cmd/windmist`)**
   - Integrate Cobra for command structure (`chat`, `review`, `fix`, `doctor`, `auth`).
   - Implement basic terminal logging using Go standard library `slog`.
-- [ ] **Configuration & Secrets Engine (`internal/config`)**
+- [x] **Configuration & Secrets Engine (`internal/config`)**
   - Integrate Viper to manage `~/.windmist/config.yaml`.
   - Build secure OS keyring integration or encrypted local storage for API keys (`GEMINI_API_KEY`, `OPENAI_API_KEY`, etc.).
-- [ ] **Unified Provider Interface (`internal/providers`)**
+- [x] **Unified Provider Interface (`internal/providers`)**
   - Define standard `Provider` Go interface with streaming support (`<-chan *CompletionChunk`).
   - Implement initial mock and live Gemini 3.0 / OpenAI streaming adapters.
-- [ ] **Local Storage Initialization (`internal/memory`)**
+- [x] **Local Storage Initialization (`internal/memory`)**
   - Scaffolding pure-Go SQLite connections (`~/.windmist/history.db`).
 
 ---
 
-## 💬 Phase 2 — Interactive Chat & Terminal UI
+## 💬 Phase 2 — Interactive Chat & Terminal UI (Completed)
 
 **Goal:** Deliver a world-class, fluid terminal pairing experience with instant streaming and beautiful syntax highlighting.
 
 ### Key Deliverables:
-- [ ] **Interactive Terminal UI (`internal/cli`)**
+- [x] **Interactive Terminal UI (`internal/cli`)**
   - Build responsive viewport controllers using **Bubble Tea** and **Lip Gloss**.
   - Add real-time token counter displays and active model badges.
-- [ ] **Streaming & Markdown Rendering (`internal/streaming`)**
+- [x] **Streaming & Markdown Rendering (`internal/streaming`)**
   - Implement asynchronous Server-Sent Events (SSE) parsing.
   - Render GitHub-flavored Markdown tables and code blocks dynamically.
   - Integrate `chroma` or custom Go highlighting engines for multi-language syntax coloring.
-- [ ] **Multi-Turn Session Memory (`internal/session`)**
+- [x] **Multi-Turn Session Memory (`internal/session`)**
   - Persist conversation turns automatically to SQLite (`history.db`).
   - Add context-window pruning to manage long conversations gracefully.
 
 ---
 
-## 🗂️ Phase 3 — Repository Awareness & Symbol Indexing
+## 🗂️ Phase 3 — Repository Awareness & Symbol Indexing (Completed)
 
 **Goal:** Give WindMist sight. Enable the CLI to understand project boundaries, file structures, and symbols instantaneously.
 
 ### Key Deliverables:
-- [ ] **High-Concurrency File Indexer (`internal/repository`)**
-  - Implement Goroutine worker pools to traverse multi-gigabyte codebases in milliseconds.
+- [x] **High-Concurrency File Indexer (`internal/repository` & `internal/tools/filesystem`)**
+  - Implement Goroutine worker pools and atomic filesystem tools (`read`, `write`, `list`, `info`, `exists`).
   - Build strict `.gitignore` and `.windmistignore` filtering (`ignore` package integration).
-- [ ] **Lightweight AST Parsing Engine (`internal/parser`)**
-  - Extract function definitions, struct declarations, and class hierarchies across Go, Python, TS/JS, and Rust.
-  - Store symbol lookup tables inside `~/.windmist/memory.db`.
-- [ ] **Git Awareness (`internal/git`)**
+- [x] **Lightweight AST & Code Context Engine (`internal/tools/editing`)**
+  - Implement exact string and range replacement tools (`replace_text`, `replace_range`, `read_context`, `insert_text`).
+- [x] **Git Awareness (`internal/git`)**
   - Inspect current branch status, uncommitted changes, and git diff summaries (`go-git` / native CLI wrapper).
-  - Feed git branch context directly into system prompts.
 
 ---
 
-## 🤖 Phase 4 — The Autonomous Agent & Tool Sandbox
+## 🤖 Phase 4 — The Autonomous Agent & Tool Sandbox (`v1.0.0 Live`)
 
 **Goal:** Transition WindMist from a passive chat advisor into an autonomous engineering partner capable of multi-file edits and error recovery.
 
 ### Key Deliverables:
-- [ ] **Task Decomposition Planner (`internal/planner`)**
-  - Implement Directed Acyclic Graph (DAG) generation from high-level user prompts (`windmist build ...`).
-- [ ] **Core Tool Suite (`internal/tools`)**
-  - `ReadFileTool` / `WriteFileTool`: Safe, atomic file mutations with backup rollback capability.
-  - `SearchTool`: Regex and symbol-based workspace search.
-  - `ShellTool`: Executing build commands, package installations, and system utilities.
-  - `GitTool`: Staging changes and drafting commit messages automatically.
-- [ ] **Self-Correction & Recovery Loop (`internal/agent`)**
-  - Intercept compilation errors (`go build`, `npm run build`) or failing unit tests (`TestTool`).
-  - Automatically feed `stderr` traces back to the reasoning loop for up to 3 self-healing retry attempts.
-- [ ] **User Safety & Confirmation Prompts**
-  - Require explicit interactive `[Y/n]` confirmation before running destructive shell commands (`rm`, `git reset --hard`, database drops).
+- [x] **Stateless Agent Loop (`internal/agent`)**
+  - Implement multi-turn reasoning loop coordinating tool execution, metrics tracking, and token limits (`Run` and `runLoop`).
+- [x] **Core Tool Suite (`internal/tools/defaults`)**
+  - `ReadFileTool` / `WriteFileTool`: Safe, atomic file mutations.
+  - `SearchTool`: Regex and text-based workspace search.
+  - `ReplaceTool` / `RangeTool`: Precision code editing without full file overwrites.
+- [x] **Native Gemini Tool Calling (`internal/providers/gemini`)**
+  - Schema translation converting Go tool definitions into Gemini `v1beta` function declarations (`OBJECT` schema).
+  - Multi-turn conversation mapping separating user prompts, model function calls (`FunctionCall`), and tool results (`FunctionResponse`).
+- [x] **User Safety & Turn Limits**
+  - Structured turn limit enforcement (`ErrMaxTurnsExceeded`) to prevent runaway execution loops.
 
 ---
 

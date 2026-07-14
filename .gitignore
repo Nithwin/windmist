@@ -61,3 +61,6 @@ ENV/
 *~
 .DS_Store
 Thumbs.db
+
+# Test sandbox & generated examples
+examples/

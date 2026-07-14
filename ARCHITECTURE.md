@@ -1,12 +1,12 @@
-# WindMist Architecture & Engineering Specification
+# WindMist Architecture & Engineering Specification (`v1.0.0`)
 
-> **Design Philosophy:** WindMist adheres strictly to **Clean Architecture with Domain-Driven Modules**, rather than traditional layered MVC. Every capability is isolated behind strict interfaces, making the platform resilient, testable, and infinitely extensible without fear of architectural drift.
+> **Design Philosophy:** WindMist adheres strictly to **Clean Architecture with Domain-Driven Modules**. Every capability is isolated behind strict interfaces (`ai.Provider`, `tools.Tool`), making the platform resilient, testable, and maintainable without architectural bloat.
 
 ---
 
 ## 1. System Overview
 
-WindMist is a hybrid CLI-first autonomous AI software engineering platform. It is engineered to operate directly on the user's local filesystem and git repository, leveraging remote or local AI models to reason, plan, edit code, execute tests, and recover from runtime failures.
+WindMist is an autonomous AI software engineering agent running directly inside your terminal. It is built 100% in high-performance **Go**, operating locally on your filesystem to inspect code, edit exact ranges or full files, execute tools, and engage in multi-turn reasoning loops.
 
 ```text
 ┌──────────────────────────────────────────────────────────────────────────────────┐
@@ -18,151 +18,103 @@ WindMist is a hybrid CLI-first autonomous AI software engineering platform. It i
 │                             GO ENGINE (internal/)                                │
 │                                                                                  │
 │  ┌──────────────────┐    ┌──────────────────┐    ┌────────────────────────────┐  │
-│  │   CLI / UI       │    │     Commands     │    │       Config / Viper       │  │
-│  │  (Cobra/Bubble)  │    │  (chat/build/fix)│    │       (~/.windmist/)       │  │
+│  │     Cobra CLI    │    │  Bubble Tea TUI  │    │       Config / Viper       │  │
+│  │ (cmd/windmist/*) │    │ (internal/chat/*)│    │       (~/.windmist/)       │  │
 │  └────────┬─────────┘    └────────┬─────────┘    └─────────────┬──────────────┘  │
 │           │                       │                            │                 │
 │           └───────────────────────┼────────────────────────────┘                 │
 │                                   ▼                                              │
 │                  ┌──────────────────────────────────┐                            │
-│                  │           Agent Engine           │                            │
-│                  │  (Planner, Loop, Recovery State) │                            │
+│                  │           Agent Loop             │                            │
+│                  │      (internal/agent/*)          │                            │
 │                  └────────────────┬─────────────────┘                            │
 │                                   │                                              │
-│         ┌─────────────────────────┼─────────────────────────┐                    │
-│         ▼                         ▼                         ▼                    │
-│  ┌─────────────┐          ┌───────────────┐         ┌──────────────┐             │
-│  │ Repository  │          │ Tool Executor │         │  Memory Store│             │
-│  │ (AST / Git) │          │ (File/Shell)  │         │   (SQLite)   │             │
-│  └─────────────┘          └───────┬───────┘         └──────────────┘             │
-│                                   │                                              │
-│                                   ▼                                              │
-│                         ┌───────────────────┐                                    │
-│                         │  Provider Router  │                                    │
-│                         │ (Gemini/OpenAI/etc│                                    │
-│                         └─────────┬─────────┘                                    │
-└───────────────────────────────────┼──────────────────────────────────────────────┘
-                                    │ HTTP / gRPC / JSON
-                                    ▼
-┌──────────────────────────────────────────────────────────────────────────────────┐
-│                         PYTHON AI SERVICE (python/)                              │
-│                                                                                  │
-│  ┌──────────────────┐    ┌──────────────────┐    ┌────────────────────────────┐  │
-│  │    Embeddings    │    │   RAG Engine     │    │   Vector Store / Eval      │  │
-│  │  (SentenceTrans) │    │  (Semantic Ret.) │    │       (ChromaDB)           │  │
-│  └──────────────────┘    └──────────────────┘    └────────────────────────────┘  │
+│         ┌─────────────────────────┴─────────────────────────┐                    │
+│         ▼                                                   ▼                    │
+│  ┌──────────────────────────────────┐       ┌───────────────────────────────┐    │
+│  │        Atomic Tool Engine        │       │       Provider Router         │    │
+│  │     (internal/tools/defaults)    │       │     (internal/providers/*)    │    │
+│  └────────────────┬─────────────────┘       └───────────────┬───────────────┘    │
+│                   │                                         │                    │
+│         ┌─────────┴─────────┐                               │                    │
+│         ▼                   ▼                               ▼                    │
+│  ┌─────────────┐     ┌─────────────┐               ┌─────────────────┐           │
+│  │ Filesystem  │     │   Editing   │               │ Native Gemini   │           │
+│  │ (read/write)│     │(replace/rng)│               │  Tool Calling   │           │
+│  └─────────────┘     └─────────────┘               └─────────────────┘           │
 └──────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 2. Decoupled Language Strategy: Go vs. Python
-
-To compete directly with enterprise-grade tools like *Claude Code* and *Codex CLI*, WindMist divides labor based on strict performance and ecosystem realities.
-
-### Go: High-Performance Operating System Layer
-Go `1.25+` owns everything that requires **low latency, native concurrency, and direct OS interaction**:
-- **Instantaneous Startup:** Zero bytecode overhead or Python virtual environment latency.
-- **Concurrent File & Symbol Walking:** High-throughput traversal of massive codebases using Goroutines and worker pools (`internal/repository`).
-- **Git Integration:** Direct local repository mutation, diff generation, and commit atomic safety (`internal/git`).
-- **Tool Sandbox Execution:** Spawning, monitoring, and capturing `stdout`/`stderr` from terminal commands safely (`internal/executor`).
-- **Memory & Session State:** Fast SQLite transactions for prompt context and user history (`internal/memory`).
-
-### Python: Machine Learning & Intelligence Layer
-Python `3.13+` owns **AI-heavy computational tasks** where Go lacks native ecosystem depth:
-- **Embeddings & Transformers:** Generating vector representations for code snippets using `sentence-transformers` (`python/embeddings`).
-- **Vector Search & RAG:** Local index management via `ChromaDB` or `Qdrant` for semantic code retrieval (`python/rag`).
-- **Evaluation & Benchmarking:** Automated scoring of agent completions against standard code benchmarks (`python/evaluation`).
-
-### Inter-Process Communication (IPC)
-The Go engine communicates with the Python service exclusively via a localized **FastAPI HTTP/JSON server or gRPC**. Go never imports Python C-bindings. If the user only runs a basic `chat` command without vector search, the Python service does not even need to be running, preserving system memory.
-
----
-
-## 3. Domain-Driven Modules (`internal/`)
+## 2. Domain-Driven Modules (`internal/`)
 
 Go uses `internal/` to guarantee that core engine mechanisms cannot be imported directly by external Go repositories. Every subdirectory under `internal/` represents a self-contained domain module with explicit interfaces.
 
 ### `internal/agent`
-The central autonomous reasoning brain.
-- **`Planner` Interface:** Decomposes complex user requests (e.g., *"Refactor the authentication middleware to use JWT"*) into directed acyclic dependency graphs (DAGs) of execution steps.
-- **`AgentLoop`:** Executes steps, monitors tool outputs, manages token budgets, and invokes self-correction workflows if a sub-step fails.
+The stateless autonomous reasoning engine.
+- **`Agent` & `runLoop`:** Orchestrates multi-turn interactions between the user, the LLM provider, and tool executions.
+- **`toolDefinitions()`:** Translates registered `tools.Tool` items into provider-agnostic schemas (`ai.ToolDefinition`).
+- **Turn Tracking & Usage Metrics:** Accumulates prompt and candidate tokens (`ai.Usage`) across turns while enforcing `agent.Config.MaxTurns` (`ErrMaxTurnsExceeded`).
 
-### `internal/tools`
-The toolbox that allows the agent to interact with the world. Every tool implements the `Tool` interface:
+### `internal/tools` & Subpackages
+The toolbox that allows the agent to inspect and mutate the workspace. Every tool implements the `tools.Tool` interface:
 ```go
 type Tool interface {
-    Name() string
-    Description() string
-    InputSchema() json.RawMessage
-    Execute(ctx context.Context, input json.RawMessage) (*ToolOutput, error)
+    Definition() Definition
+    Run(ctx context.Context, call Call) Result
 }
 ```
-- Built-in Tools: `ReadFileTool`, `WriteFileTool`, `SearchTool`, `ShellTool`, `GitTool`, `TestTool`, `LintTool`.
+- **`internal/tools/filesystem`:** Atomic filesystem operations (`read`, `write`, `append`, `delete`, `rename`, `list`, `create`, `info`, `exists`).
+- **`internal/tools/editing`:** Precision code editing and context inspection (`replace_text`, `replace_range`, `delete_range`, `read_context`, `insert_text`, `search_text`).
+- **`internal/tools/defaults`:** Helper package (`RegisterAll`) that registers all 15 built-in tools without circular dependency cycles.
 
-### `internal/providers`
-The unified LLM gateway.
-- Isolates vendor-specific SDKs behind a singular `Provider` streaming interface:
-```go
-type Provider interface {
-    CompleteStream(ctx context.Context, req *CompletionRequest) (<-chan *CompletionChunk, error)
-    Models() []ModelInfo
-}
-```
-- Supported implementations: **Gemini**, **OpenAI**, **Anthropic**, **Groq**, **Ollama**, **Azure OpenAI**.
+### `internal/providers/gemini`
+The native LLM gateway.
+- Implements `ai.Provider` (`Generate`, `Stream`).
+- **Schema Translation (`translateTools`):** Maps Go `ai.ToolParameter` definitions directly into Gemini OpenAPI `OBJECT` schemas with typed property maps (`STRING`, `INTEGER`, `BOOLEAN`, `ARRAY`, `OBJECT`).
+- **Turn & Function Mapping (`translateMessages`):** Converts multi-turn `ai.Message` history into Gemini `Content`/`Part` arrays, separating user prompts, model `FunctionCall` requests, and `FunctionResponse` tool execution outputs.
 
-### `internal/repository`
-Code awareness and symbol tracking.
-- Parses Go, Python, TypeScript, and Rust ASTs to extract structural symbols, class definitions, and function signatures without needing full compiler server (LSP) overhead.
-- Respects `.gitignore` and `.windmistignore` patterns natively.
+### `internal/chat` & `internal/ui`
+The rich interactive terminal user interface (`windmist`).
+- Powered by **Bubble Tea** and **Lip Gloss** (`model.go`, `view.go`, `update.go`).
+- Renders GitHub-flavored Markdown tables and code blocks dynamically via `ui.MarkdownRenderer` and `glamour`.
+- Streams multi-turn agent responses cleanly to responsive terminal viewport bubbles.
 
-### `internal/memory` & Storage Schema
-Local persistence powered by **SQLite** (`~/.windmist/history.db` & `~/.windmist/memory.db`).
-- **Sessions Table:** Tracks multi-turn conversation histories, user prompts, and agent reasoning chains.
-- **Workspace Cache Table:** Stores file hashes, modification timestamps, and indexing metadata to prevent redundant embedding calculations.
+### `cmd/windmist`
+The command-line entrypoint (`main.go` & `cmd/`).
+- **`windmist chat <prompt>`:** Runs a synchronous, multi-turn `Agent.Run(ctx, prompt)` execution and prints final resolved output.
+- **`windmist` (no args):** Launches the interactive Bubble Tea TUI.
+- **`windmist set <key> <value>` / `windmist show`:** Manages local configuration via `viper` (`~/.windmist/config.yaml`).
+- **`windmist version`:** Displays current semantic release version (`v1.0.0`).
 
 ---
 
-## 4. Autonomous Agent Execution Loop
+## 3. Autonomous Agent Execution Loop
 
-When a user triggers an actionable task via `windmist build` or `windmist fix`, the Agent follows our standardized **Reason -> Plan -> Execute -> Verify** lifecycle:
+When a prompt is dispatched to `Agent.Run(ctx, prompt)`, the agent runs our stateless iterative loop (`runLoop` inside `loop.go`):
 
 ```text
-[User Command] -> [Agent Context Builder]
-                         │
-                         ▼
-             ┌───────────────────────┐
-             │  Generate Plan (DAG)  │
-             └───────────┬───────────┘
-                         │
-                         ▼
-        ┌─────────► [Step Selection] ◄────────┐
-        │                │                    │
-        │                ▼                    │
-        │       [Select Appropriate Tool]     │
-        │                │                    │
-        │                ▼                    │
-        │       [Execute Sandbox Tool]        │
-        │                │                    │
-        │                ▼                    │
- [Failure/Error]   [Verify Result Output]     │
-        │                │                    │
-        └────────────────┼────────────────────┘
-                         │ (Success)
-                         ▼
-              [Final Verification & Commit]
+[User Prompt] -> [appendUser] -> [Provider.Generate with Tools]
+                                            │
+                                            ▼
+                                  ┌──────────────────┐
+                                  │ Model Candidate  │
+                                  └─────────┬────────┘
+                                            │
+                           ┌────────────────┴────────────────┐
+                           ▼                                 ▼
+                 [No ToolCalls Found]               [ToolCalls Present]
+                           │                                 │
+                           ▼                                 ▼
+                     Return Result               For each Call in ToolCalls:
+                    (Done / Success)             1. appendAssistant(Call)
+                                                 2. executor.execute(Call)
+                                                 3. appendToolResults(Output)
+                                                             │
+                                                             └───────► Loop to Turn + 1
 ```
 
-1. **Context Construction:** Retrieves workspace symbols from `internal/repository` and relevant semantic snippets from `python/rag`.
-2. **Task Planning:** The `Planner` outputs a strict, sequential step plan.
-3. **Tool Dispatch:** For each step, the Agent constructs tool arguments and requests confirmation from the user if the action is deemed potentially destructive (e.g., `ShellTool` executing `rm -rf` or `git reset`).
-4. **Self-Correction & Recovery:** If `TestTool` or `LintTool` returns a non-zero exit code or error output, the Agent captures `stderr`, feeds it back into the prompt context, and initiates a recovery retry loop (up to `max_retries`).
-5. **Atomic Finalization:** Once all verification tests pass, `GitTool` stages mutated files and generates a semantic commit summary.
-
----
-
-## 5. Extensibility & Future Scaling
-
-By locking our architecture into Domain-Driven Modules today, WindMist is positioned for seamless enterprise expansion:
-- **Model Context Protocol (MCP):** Our tool framework directly maps to MCP definitions, allowing external third-party servers to inject custom tools dynamically into the agent loop.
-- **Go SDK (`sdk/`):** Allows IDE plugin developers (VS Code, Neovim, JetBrains) to embed WindMist's agent engine directly inside custom workflows without relying on terminal CLI wrappers.
+1. **State Isolation:** A fresh `[]ai.Message` slice is initialized for each `Run` invocation, preventing state leakage across concurrent requests or successive TUI turns.
+2. **Execution & Dispatch:** When the model returns one or more `ToolCalls`, `executor.execute()` looks up the tool in `tools.Manager` (`filesystem` or `editing`), runs `Run(ctx, call)`, and captures the output or error.
+3. **Structured Recovery:** The tool outputs (`ai.ToolResult`) are appended to the conversation history (`appendToolResults`), and the model is invoked again with updated context so it can verify its edits or self-correct any errors until it completes the task or reaches `MaxTurns`.

@@ -1,13 +1,13 @@
 <div align="center">
 
-# 🌀 WindMist `v0.5`
+# 🌀 WindMist `v1.0.0`
 ### Autonomous AI Software Engineer Running Directly in Your Terminal
 
 <img src="images/Gemini_Generated_Image_4fucu04fucu04fuc.png?v=2" alt="WindMist Hero Banner" width="860" />
 
 <br/>
 
-[![Version: v0.5](https://img.shields.io/badge/Version-v0.5-8B5CF6?style=for-the-badge)](CHANGELOG.md)
+[![Version: v1.0.0](https://img.shields.io/badge/Version-v1.0.0-8B5CF6?style=for-the-badge)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
 [![Go Version](https://img.shields.io/badge/Go-1.25+-00ADD8?style=for-the-badge&logo=go)](https://golang.org)
 [![Python Version](https://img.shields.io/badge/Python-3.13+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
@@ -177,13 +177,13 @@ windmist/
 
 ## 🗺️ Roadmap & Phases
 
-We are currently in **Phase 1: Foundation & Planning**. Check out [ROADMAP.md](ROADMAP.md) for full phase breakdowns:
+We are currently in **Phase 4: Autonomous Agent & Native Tool Calling (`v1.0.0 Live`)**. Check out [ROADMAP.md](ROADMAP.md) for full phase breakdowns:
 
-- [x] **Phase 0:** Product Vision, Architecture Design & Planning (`We are here`)
-- [ ] **Phase 1:** Foundation (CLI setup, Config, Provider Interfaces, Logging)
-- [ ] **Phase 2:** Interactive Chat (Terminal UI, Streaming, Markdown/Syntax Rendering)
-- [ ] **Phase 3:** Repository Awareness (AST/File Indexing, Git Integration, Ignore Patterns)
-- [ ] **Phase 4:** Autonomous Agent (Planner, Tool Execution Loop, Multi-Step Reasoning)
+- [x] **Phase 0:** Product Vision, Architecture Design & Planning
+- [x] **Phase 1:** Foundation (CLI setup, Config, Provider Interfaces, Logging)
+- [x] **Phase 2:** Interactive Chat (Terminal UI, Streaming, Markdown/Syntax Rendering)
+- [x] **Phase 3:** Repository Awareness & Filesystem Engine (All 15 atomic tools, Ignore Patterns)
+- [x] **Phase 4:** Autonomous Agent (Stateless Loop, Native Gemini Tool Calling, Multi-Step Reasoning) (`v1.0.0 Completed`)
 - [ ] **Phase 5:** Advanced AI Service (Python RAG, Embeddings, Semantic Search, SQLite Memory)
 - [ ] **Phase 6:** Production & Ecosystem (MCP Support, Plugin Engine, Telemetry, Cross-Platform Packaging)
 

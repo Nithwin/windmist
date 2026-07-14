@@ -16,22 +16,20 @@ Before writing any code, it is critical to understand our fundamental design dec
 
 Every feature must encapsulate its own logic, state, and dependencies behind clean, well-defined interfaces. This ensures WindMist can scale to support dozens of AI providers, custom tools, and complex plugins without spaghetti dependencies or architectural rot.
 
-### 1. Separation of Responsibilities: Go vs. Python
+### 1. High-Performance Go Core (`internal/`)
 
-We strictly separate our **Go** engine (`internal/`) from our **Python** AI microservice (`python/`):
+WindMist `v1.0.0` is engineered completely in **Go 1.25+** to provide instantaneous startup times, high concurrency, low memory overhead, and native cross-platform binaries:
 
-| Layer | Language | Responsibilities | Why? |
-| :--- | :--- | :--- | :--- |
-| **Core Engine (`internal/`)** | **Go 1.25+** | CLI commands, terminal UI, concurrent file walking, AST parsing, Git operations, tool execution loop, agent reasoning loop, SQLite storage, and provider HTTP routing. | Go provides instant startup times, high concurrency, low memory overhead, and native cross-platform binaries without virtual environments. |
-| **AI Service (`python/`)** | **Python 3.13+** | Local/remote embeddings (`Sentence Transformers`), advanced RAG pipelines, vector indexing (`ChromaDB`), evaluation benchmarks, and future model fine-tuning. | Python possesses an unmatched machine learning ecosystem that Go cannot replicate natively. |
-
-#### ⚠️ Communication Rule
-Go and Python must **never** tightly couple or share memory space. They communicate cleanly over decoupled HTTP (`FastAPI`) or gRPC endpoints. Go only starts or calls the Python service when heavy AI/RAG tasks are requested.
+| Package | Responsibilities |
+| :--- | :--- |
+| **`internal/agent`** | Stateless multi-turn reasoning loop, token usage tracking, and tool execution orchestration. |
+| **`internal/tools/...`** | Atomic filesystem (`read`, `write`, `list`, `info`, etc.) and precision editing (`replace_text`, `replace_range`, `read_context`, etc.) tools. |
+| **`internal/providers/gemini`** | Native Gemini `v1beta` function declaration schema translation (`OBJECT` schema) and multi-turn message handling. |
+| **`internal/chat` & `internal/ui`** | Rich Bubble Tea and Lip Gloss terminal user interface with streaming Server-Sent Events (SSE) and dynamic Markdown/syntax coloring. |
 
 ### 2. The `internal/` Boundary
 In Go, packages inside `internal/` cannot be imported by external applications.
-- **Always put WindMist engine modules inside `internal/`** (`internal/agent`, `internal/tools`, `internal/providers`, etc.).
-- Only put public code meant for external third-party integrations inside `sdk/` or `api/`.
+- **Always put WindMist engine modules inside `internal/`** (`internal/agent`, `internal/tools`, `internal/providers`, `internal/chat`, etc.).
 
 ### 3. Interface-Driven Providers & Tools
 When adding a new AI provider (e.g., Azure, Ollama) or a new tool (e.g., `LintTool`, `DockerTool`):
