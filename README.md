@@ -3,7 +3,7 @@
 # 🐦‍🔥 WindMist `v0.5`
 ### Autonomous AI Software Engineer Running Directly in Your Terminal
 
-<img src="images/Gemini_Generated_Image_4fucu04fucu04fuc.png" alt="WindMist Hero Banner" width="860" />
+<img src="images/Gemini_Generated_Image_4fucu04fucu04fuc.png?v=2" alt="WindMist Hero Banner" width="860" />
 
 <br/>
 
