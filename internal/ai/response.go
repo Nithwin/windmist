@@ -1,14 +1,16 @@
 package ai
 
-// GenerateResponse represents a response from an AI provider.
-type GenerateResponse struct {
-	Text string
-
-	Model string
-
-	InputTokens int
-
+// Usage contains token usage information returned by the provider.
+type Usage struct {
+	InputTokens  int
 	OutputTokens int
+	TotalTokens  int
+}
 
-	FinishReason string
+// GenerateResponse contains the provider's response.
+type GenerateResponse struct {
+	Text   string
+	Model  string
+	Finish string
+	Usage  Usage
 }

@@ -1,12 +1,16 @@
 package ai
 
-// GenerateRequest represents a request sent to an AI provider.
+// Message represents a single message in a conversation.
+type Message struct {
+	Role    string `json:"role"`
+	Content string `json:"content"`
+}
+
+// GenerateRequest contains everything required to generate a response.
 type GenerateRequest struct {
-	Prompt string
-
-	SystemPrompt string
-
+	System      string
+	Messages    []Message
 	Temperature float32
-
-	MaxTokens int
+	MaxTokens   int
+	Stream      bool
 }
