@@ -9,8 +9,9 @@ type Usage struct {
 
 // GenerateResponse contains the provider's response.
 type GenerateResponse struct {
-	Text   string
-	Model  string
-	Finish string
-	Usage  Usage
+	Text      string
+	ToolCalls []ToolCall
+	Model     string
+	Finish    string
+	Usage     Usage
 }
