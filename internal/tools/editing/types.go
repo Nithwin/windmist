@@ -91,6 +91,17 @@ type InsertResult struct {
 	Operation Operation `json:"operation"`
 }
 
+type DeleteOptions struct {
+	File      string `json:"file"`
+	StartLine int    `json:"start_line"`
+	EndLine   int    `json:"end_line"`
+}
+
+type DeleteResult struct {
+	Operation Operation `json:"operation"`
+}
+
+
 
 
 
