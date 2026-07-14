@@ -27,7 +27,12 @@ var chatCmd = &cobra.Command{
 		}
 
 		req := &ai.GenerateRequest{
-			Prompt: args[0],
+			Messages: []ai.Message{
+				{
+					Role:    ai.RoleUser,
+					Content: args[0],
+				},
+			},
 		}
 
 		resp, err := provider.Generate(context.Background(), req)

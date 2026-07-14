@@ -1,8 +1,17 @@
 package ai
 
-// Message represents a single message in a conversation.
+// Role represents the role of a message.
+type Role string
+
+const (
+	RoleSystem    Role = "system"
+	RoleUser      Role = "user"
+	RoleAssistant Role = "assistant"
+)
+
+// Message represents a single conversation message.
 type Message struct {
-	Role    string `json:"role"`
+	Role    Role   `json:"role"`
 	Content string `json:"content"`
 }
 

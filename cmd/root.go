@@ -3,6 +3,7 @@ package cmd
 import (
 	"os"
 
+	_ "github.com/Nithwin/WindMist/internal/providers/gemini"
 	"github.com/spf13/cobra"
 )
 

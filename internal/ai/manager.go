@@ -10,10 +10,11 @@ import (
 type Factory func(config.ProviderConfig) Provider
 
 // factories maps provider names to their constructors.
-var factories = map[string]Factory{
-	"gemini": NewGemini,
-	// "groq":   NewGroq,
-	// "ollama": NewOllama,
+var factories = make(map[string]Factory)
+
+// Register is called by provider packages in their init() functions to register themselves.
+func Register(name string, factory Factory) {
+	factories[name] = factory
 }
 
 // New creates the configured AI provider.
@@ -25,7 +26,7 @@ func New(cfg *config.Config) (Provider, error) {
 
 	factory, ok := factories[cfg.AI.Provider]
 	if !ok {
-		return nil, fmt.Errorf("unsupported provider: %s", cfg.AI.Provider)
+		return nil, fmt.Errorf("unsupported provider: %s (did you import it?)", cfg.AI.Provider)
 	}
 
 	return factory(providerCfg), nil
