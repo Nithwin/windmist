@@ -127,7 +127,7 @@ func TestInvalidPath(t *testing.T) {
 	}
 }
 
-func TestDefinition(t *testing.T) {
+func TestExistsDefinition(t *testing.T) {
 	tool := NewExistsTool()
 	def := tool.Definition()
 

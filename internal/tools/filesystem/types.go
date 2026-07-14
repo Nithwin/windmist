@@ -1,5 +1,7 @@
 package filesystem
 
+import "time"
+
 // ExistsResult represents the structured output of the exists tool.
 type ExistsResult struct {
 	Exists bool   `json:"exists"`
@@ -17,8 +19,10 @@ type Entry = ListEntry
 
 // InfoResult represents detailed information about a file or directory.
 type InfoResult struct {
-	Name string `json:"name"`
-	Size int64  `json:"size"`
-	Type string `json:"type"`
-	Mode string `json:"mode"`
+	Name         string    `json:"name"`
+	Path         string    `json:"path"`
+	Size         int64     `json:"size"`
+	Type         string    `json:"type"`
+	Mode         string    `json:"mode"`
+	LastModified time.Time `json:"last_modified"`
 }
