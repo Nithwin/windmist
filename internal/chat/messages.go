@@ -9,6 +9,8 @@ type ResponseMsg struct {
 // StreamingMsg represents a streamed chunk from the AI.
 type StreamingMsg struct {
 	Text string
+	Done bool
+	Err  error
 }
 
 // DoneMsg signals that streaming has completed.

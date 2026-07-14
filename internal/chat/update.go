@@ -106,19 +106,39 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			m.input.SetValue("")
 
-			return m, m.sendMessage(prompt)
-		}
+			// Create an empty assistant message.
+			// Streaming chunks will be appended to this.
+			m.conversation.AddAssistant("")
 
-	case ResponseMsg:
+			m.sendMessage(prompt)
 
-		m.loading = false
-
-		if msg.Err != nil {
-			m.conversation.AddAssistant("Error: " + msg.Err.Error())
 			return m, nil
 		}
 
-		m.conversation.AddAssistant(msg.Text)
+	case StreamingMsg:
+
+		if msg.Err != nil {
+			m.loading = false
+
+			if len(m.conversation.Messages) > 0 {
+				m.conversation.Messages[len(m.conversation.Messages)-1].Content =
+					"Error: " + msg.Err.Error()
+			}
+
+			return m, nil
+		}
+
+		if len(m.conversation.Messages) > 0 {
+			last := &m.conversation.Messages[len(m.conversation.Messages)-1]
+
+			if last.Role == "assistant" {
+				last.Content += msg.Text
+			}
+		}
+
+		if msg.Done {
+			m.loading = false
+		}
 
 		return m, nil
 	}

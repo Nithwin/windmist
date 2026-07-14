@@ -3,13 +3,12 @@ package chat
 import (
 	"context"
 
-	tea "github.com/charmbracelet/bubbletea"
 	"github.com/Nithwin/WindMist/internal/ai"
 )
 
-// sendMessage starts an AI request in the background.
-func (m Model) sendMessage(prompt string) tea.Cmd {
-	return func() tea.Msg {
+// sendMessage starts streaming the AI response.
+func (m Model) sendMessage(prompt string) {
+	go func() {
 
 		req := &ai.GenerateRequest{
 			Messages: []ai.Message{
@@ -20,15 +19,29 @@ func (m Model) sendMessage(prompt string) tea.Cmd {
 			},
 		}
 
-		resp, err := m.provider.Generate(context.Background(), req)
+		err := m.provider.Stream(
+			context.Background(),
+			req,
+			func(chunk string) {
+
+				program.Send(StreamingMsg{
+					Text: chunk,
+				})
+
+			},
+		)
+
 		if err != nil {
-			return ResponseMsg{
+			program.Send(StreamingMsg{
 				Err: err,
-			}
+				Done: true,
+			})
+			return
 		}
 
-		return ResponseMsg{
-			Text: resp.Text,
-		}
-	}
+		program.Send(StreamingMsg{
+			Done: true,
+		})
+
+	}()
 }
