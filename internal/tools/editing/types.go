@@ -70,4 +70,16 @@ type ReplaceResult struct {
 	Replacements int       `json:"replacements"`
 }
 
+type ReplaceRangeOptions struct {
+	File      string `json:"file"`
+	StartLine int    `json:"start_line"`
+	EndLine   int    `json:"end_line"`
+	NewText   string `json:"new_text"`
+}
+
+type ReplaceRangeResult struct {
+	Operation Operation `json:"operation"`
+}
+
+
 
