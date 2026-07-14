@@ -100,10 +100,27 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 			// Normal AI message.
-			if err := m.sendMessage(); err != nil {
-				m.conversation.AddAssistant("Error: " + err.Error())
-			}
+			m.conversation.AddUser(prompt)
+
+			m.loading = true
+
+			m.input.SetValue("")
+
+			return m, m.sendMessage(prompt)
 		}
+
+	case ResponseMsg:
+
+		m.loading = false
+
+		if msg.Err != nil {
+			m.conversation.AddAssistant("Error: " + msg.Err.Error())
+			return m, nil
+		}
+
+		m.conversation.AddAssistant(msg.Text)
+
+		return m, nil
 	}
 
 	m.input, cmd = m.input.Update(msg)

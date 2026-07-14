@@ -3,35 +3,32 @@ package chat
 import (
 	"context"
 
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/Nithwin/WindMist/internal/ai"
 )
 
-func (m *Model) sendMessage() error {
-	prompt := m.input.Value()
+// sendMessage starts an AI request in the background.
+func (m Model) sendMessage(prompt string) tea.Cmd {
+	return func() tea.Msg {
 
-	if prompt == "" {
-		return nil
-	}
-
-	m.conversation.AddUser(prompt)
-
-	req := &ai.GenerateRequest{
-		Messages: []ai.Message{
-			{
-				Role:    ai.RoleUser,
-				Content: prompt,
+		req := &ai.GenerateRequest{
+			Messages: []ai.Message{
+				{
+					Role:    ai.RoleUser,
+					Content: prompt,
+				},
 			},
-		},
+		}
+
+		resp, err := m.provider.Generate(context.Background(), req)
+		if err != nil {
+			return ResponseMsg{
+				Err: err,
+			}
+		}
+
+		return ResponseMsg{
+			Text: resp.Text,
+		}
 	}
-
-	resp, err := m.provider.Generate(context.Background(), req)
-	if err != nil {
-		return err
-	}
-
-	m.conversation.AddAssistant(resp.Text)
-
-	m.input.SetValue("")
-
-	return nil
 }

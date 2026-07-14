@@ -20,15 +20,17 @@ type Model struct {
 
 	showSplash bool
 
-	showCommands bool
-
+	showCommands     bool
 	filteredCommands []Command
+	selectedCommand  int
 
-	selectedCommand int
+	loading   bool
+	streaming bool
 
 	width  int
 	height int
 }
+
 // New creates a new Bubble Tea model.
 func New() Model {
 	cfg, err := config.Load()
@@ -48,16 +50,21 @@ func New() Model {
 	input.CharLimit = 0
 	input.Width = 60
 
-return Model{
-	cfg:              cfg,
-	provider:         provider,
-	conversation:     Conversation{},
-	input:            input,
-	showSplash:       true,
-	showCommands:     false,
-	filteredCommands: nil,
-	selectedCommand:  0,
-}
+	return Model{
+		cfg:          cfg,
+		provider:     provider,
+		conversation: Conversation{},
+		input:        input,
+
+		showSplash: true,
+
+		showCommands:     false,
+		filteredCommands: nil,
+		selectedCommand:  0,
+
+		loading:   false,
+		streaming: false,
+	}
 }
 
 // Init initializes the application.
