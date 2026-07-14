@@ -57,3 +57,17 @@ type Operation struct {
 	NewText     string        `json:"new_text,omitempty"`
 }
 
+type ReplaceOptions struct {
+	File            string `json:"file"`
+	OldText         string `json:"old_text"`
+	NewText         string `json:"new_text"`
+	ReplaceAll      bool   `json:"replace_all"`
+	MaxReplacements int    `json:"max_replacements"`
+}
+
+type ReplaceResult struct {
+	Operations []Operation `json:"operations"`
+	Replacements int       `json:"replacements"`
+}
+
+
