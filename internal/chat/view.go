@@ -15,12 +15,7 @@ func (m Model) View() string {
 
 	b.WriteString(renderHeader(m))
 
-	b.WriteString(ui.SubtitleStyle.Render("Welcome to WindMist!"))
-	b.WriteString("\n")
-	b.WriteString("Ask me anything or type ")
-	b.WriteString(ui.LabelStyle.Render("/help"))
-	b.WriteString(".")
-	b.WriteString("\n\n")
+	b.WriteString(renderConversation(m))
 
 	b.WriteString(ui.DividerStyle.Render("────────────────────────────────────────────────────────────"))
 	b.WriteString("\n\n")

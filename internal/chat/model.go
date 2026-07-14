@@ -15,6 +15,8 @@ type Model struct {
 
 	provider ai.Provider
 
+	conversation Conversation
+
 	input textinput.Model
 
 	showSplash bool
