@@ -81,5 +81,16 @@ type ReplaceRangeResult struct {
 	Operation Operation `json:"operation"`
 }
 
+type InsertOptions struct {
+	File    string `json:"file"`
+	Line    int    `json:"line"`
+	NewText string `json:"new_text"`
+}
+
+type InsertResult struct {
+	Operation Operation `json:"operation"`
+}
+
+
 
 
