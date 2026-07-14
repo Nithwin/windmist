@@ -1,9 +1,11 @@
 package chat
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/Nithwin/WindMist/internal/ui"
+	"github.com/charmbracelet/lipgloss"
 )
 
 func renderCommandPalette(m Model) string {
@@ -11,30 +13,38 @@ func renderCommandPalette(m Model) string {
 		return ""
 	}
 
-	var b strings.Builder
+	var rows []string
 
-	b.WriteString("\n")
+	title := ui.TitleStyle.Render("Commands")
 
-	b.WriteString(ui.DividerStyle.Render("┌──────────────────────────────────────────────────────────────┐"))
-	b.WriteString("\n")
+	rows = append(rows, title)
+	rows = append(rows, ui.DividerStyle.Render(strings.Repeat("─", 58)))
 
 	for i, cmd := range m.filteredCommands {
 
-		prefix := "  "
+		prefix := " "
 
 		if i == m.selectedCommand {
-			prefix = "▶ "
+			prefix = "▶"
 		}
 
-		b.WriteString(prefix)
-		b.WriteString(ui.LabelStyle.Render(cmd.Name))
-		b.WriteString("    ")
-		b.WriteString(ui.MutedStyle.Render(cmd.Description))
-		b.WriteString("\n")
+		row := fmt.Sprintf(
+			"%s %-12s %s",
+			prefix,
+			ui.LabelStyle.Render(cmd.Name),
+			ui.MutedStyle.Render(cmd.Description),
+		)
+
+		rows = append(rows, row)
 	}
 
-	b.WriteString(ui.DividerStyle.Render("└──────────────────────────────────────────────────────────────┘"))
-	b.WriteString("\n")
+	content := strings.Join(rows, "\n")
 
-	return b.String()
+	box := lipgloss.NewStyle().
+		Border(lipgloss.RoundedBorder()).
+		BorderForeground(ui.PurpleDark).
+		Padding(0, 1).
+		Width(76)
+
+	return box.Render(content)
 }
