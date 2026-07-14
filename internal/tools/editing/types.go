@@ -36,3 +36,24 @@ type SearchOptions struct {
 	MaxMatches    int        `json:"max_matches"`
 	MaxFiles      int        `json:"max_files"`
 }
+
+type OperationType int
+
+const (
+	Insert OperationType = iota
+	Replace
+	Delete
+)
+
+// Operation represents a common model for every file modification produced by editing functions.
+type Operation struct {
+	Type        OperationType `json:"type"`
+	File        string        `json:"file"`
+	StartLine   int           `json:"start_line"`
+	EndLine     int           `json:"end_line"`
+	StartColumn int           `json:"start_column,omitempty"`
+	EndColumn   int           `json:"end_column,omitempty"`
+	OldText     string        `json:"old_text,omitempty"`
+	NewText     string        `json:"new_text,omitempty"`
+}
+
