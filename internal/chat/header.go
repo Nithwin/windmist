@@ -18,7 +18,7 @@ func renderHeader(m Model) string {
 	logo := lipgloss.NewStyle().
 		Bold(true).
 		Foreground(ui.Purple).
-		Render("🐦‍🔥 WindMist v0.5")
+		Render("🌀 WindMist v0.5")
 
 	// ── right: provider badge ────────────────────────────────────
 	providerTag := lipgloss.NewStyle().

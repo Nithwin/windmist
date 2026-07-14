@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🐦‍🔥 WindMist `v0.5`
+# 🌀 WindMist `v0.5`
 ### Autonomous AI Software Engineer Running Directly in Your Terminal
 
 <img src="images/Gemini_Generated_Image_4fucu04fucu04fuc.png?v=2" alt="WindMist Hero Banner" width="860" />
@@ -22,7 +22,7 @@ WindMist is an autonomous, lightning-fast AI Software Engineer running directly 
 
 ---
 
-## 🐦‍🔥 The Vision
+## 🌀 The Vision
 
 When you type:
 
@@ -47,7 +47,7 @@ Our mission is to build the premier open-source terminal AI engineer to compete 
 ## 🚀 Key Features
 
 - **🧠 Multi-Model & Provider Agnostic:** Plug in your choice of **Gemini 2.5 / 3.0**, **OpenAI (GPT-4o)**, **Anthropic (Claude 3.5/3.7 Sonnet)**, **Groq**, **Azure OpenAI**, or completely local models via **Ollama**.
-- **🐦‍🔥 Hybrid Go + Python Engine:** The best of both worlds — Go handles blazing-fast CLI interactions, concurrent file walking, Git operations, and tool loops; a decoupled Python microservice handles deep RAG, embeddings, vector indexing, and local evaluation.
+- **🌀 Hybrid Go + Python Engine:** The best of both worlds — Go handles blazing-fast CLI interactions, concurrent file walking, Git operations, and tool loops; a decoupled Python microservice handles deep RAG, embeddings, vector indexing, and local evaluation.
 - **🏗️ Clean Architecture with Domain-Driven Modules:** Designed for longevity, extensibility, and maintainability. Every capability is encapsulated behind strict interfaces.
 - **🛠️ Autonomous Tool Ecosystem:** Built-in specialized tools for file reading/writing, shell command execution, semantic search, Git workflows, web browsing, testing, and linting.
 - **💾 Local First & Privacy Focused:** Uses localized **SQLite** (`~/.windmist/`) for persistent session history, agent state, and workspace memory without shipping your private code to third-party databases.
