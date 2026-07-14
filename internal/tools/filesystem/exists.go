@@ -43,17 +43,17 @@ func (t *ExistsTool) Run(ctx context.Context, call tools.Call) tools.Result {
 			entryType = "directory"
 		}
 		return tools.Result{
-			Output: map[string]any{
-				"exists": true,
-				"type":   entryType,
+			Output: ExistsResult{
+				Exists: true,
+				Type:   entryType,
 			},
 		}
 	}
 
 	if os.IsNotExist(err) {
 		return tools.Result{
-			Output: map[string]any{
-				"exists": false,
+			Output: ExistsResult{
+				Exists: false,
 			},
 		}
 	}

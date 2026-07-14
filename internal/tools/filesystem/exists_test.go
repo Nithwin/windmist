@@ -30,19 +30,17 @@ func TestExistsFile(t *testing.T) {
 		t.Fatalf("unexpected error: %v", result.Error)
 	}
 
-	output, ok := result.Output.(map[string]any)
+	output, ok := result.Output.(ExistsResult)
 	if !ok {
-		t.Fatalf("expected structured map output, got %T", result.Output)
+		t.Fatalf("expected ExistsResult output, got %T", result.Output)
 	}
 
-	exists, ok := output["exists"].(bool)
-	if !ok || !exists {
-		t.Errorf("expected exists to be true, got %v", output["exists"])
+	if !output.Exists {
+		t.Errorf("expected exists to be true, got %v", output.Exists)
 	}
 
-	entryType, ok := output["type"].(string)
-	if !ok || entryType != "file" {
-		t.Errorf("expected type to be 'file', got %v", output["type"])
+	if output.Type != "file" {
+		t.Errorf("expected type to be 'file', got %v", output.Type)
 	}
 }
 
@@ -67,19 +65,17 @@ func TestExistsDirectory(t *testing.T) {
 		t.Fatalf("unexpected error: %v", result.Error)
 	}
 
-	output, ok := result.Output.(map[string]any)
+	output, ok := result.Output.(ExistsResult)
 	if !ok {
-		t.Fatalf("expected structured map output, got %T", result.Output)
+		t.Fatalf("expected ExistsResult output, got %T", result.Output)
 	}
 
-	exists, ok := output["exists"].(bool)
-	if !ok || !exists {
-		t.Errorf("expected exists to be true, got %v", output["exists"])
+	if !output.Exists {
+		t.Errorf("expected exists to be true, got %v", output.Exists)
 	}
 
-	entryType, ok := output["type"].(string)
-	if !ok || entryType != "directory" {
-		t.Errorf("expected type to be 'directory', got %v", output["type"])
+	if output.Type != "directory" {
+		t.Errorf("expected type to be 'directory', got %v", output.Type)
 	}
 }
 
@@ -101,18 +97,17 @@ func TestDoesNotExist(t *testing.T) {
 		t.Fatalf("unexpected error: %v", result.Error)
 	}
 
-	output, ok := result.Output.(map[string]any)
+	output, ok := result.Output.(ExistsResult)
 	if !ok {
-		t.Fatalf("expected structured map output, got %T", result.Output)
+		t.Fatalf("expected ExistsResult output, got %T", result.Output)
 	}
 
-	exists, ok := output["exists"].(bool)
-	if !ok || exists {
-		t.Errorf("expected exists to be false, got %v", output["exists"])
+	if output.Exists {
+		t.Errorf("expected exists to be false, got %v", output.Exists)
 	}
 
-	if _, hasType := output["type"]; hasType {
-		t.Errorf("expected no 'type' key for non-existent path, got %v", output["type"])
+	if output.Type != "" {
+		t.Errorf("expected no 'type' key for non-existent path, got %v", output.Type)
 	}
 }
 
