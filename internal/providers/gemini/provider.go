@@ -91,3 +91,63 @@ func (p *Provider) Generate(
 		},
 	}, nil
 }
+
+
+// Stream streams a response from Gemini.
+func (p *Provider) Stream(
+	ctx context.Context,
+	req *ai.GenerateRequest,
+	onChunk func(string),
+) error {
+
+	geminiReq := &GenerateContentRequest{
+		Contents: make([]Content, 0, len(req.Messages)),
+	}
+
+	if req.System != "" {
+		geminiReq.SystemInstruction = &SystemInstruction{
+			Parts: []Part{
+				{
+					Text: req.System,
+				},
+			},
+		}
+	}
+
+	if req.Temperature != 0 || req.MaxTokens != 0 {
+		geminiReq.GenerationConfig = &GenerationConfig{
+			Temperature:     req.Temperature,
+			MaxOutputTokens: req.MaxTokens,
+		}
+	}
+
+	for _, msg := range req.Messages {
+		geminiReq.Contents = append(geminiReq.Contents, Content{
+			Role: string(msg.Role),
+			Parts: []Part{
+				{
+					Text: msg.Content,
+				},
+			},
+		})
+	}
+
+	return p.client.StreamContent(
+		ctx,
+		geminiReq,
+		func(resp *GenerateContentResponse) {
+
+			if len(resp.Candidates) == 0 {
+				return
+			}
+
+			candidate := resp.Candidates[0]
+
+			if len(candidate.Content.Parts) == 0 {
+				return
+			}
+
+			onChunk(candidate.Content.Parts[0].Text)
+		},
+	)
+}

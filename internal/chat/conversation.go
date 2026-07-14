@@ -28,6 +28,7 @@ func renderConversation(m Model) string {
 	divider := ui.DividerStyle.Render(strings.Repeat("─", 76))
 
 	for i, msg := range m.conversation.Messages {
+
 		switch msg.Role {
 
 		case "user":
@@ -52,6 +53,13 @@ func renderConversation(m Model) string {
 			b.WriteString(divider)
 			b.WriteString("\n")
 		}
+	}
+
+	if m.loading {
+		b.WriteString(ui.AssistantLabelStyle.Render("⚡ WindMist"))
+		b.WriteString("\n")
+		b.WriteString(ui.MutedStyle.Render("Thinking..."))
+		b.WriteString("\n\n")
 	}
 
 	b.WriteString("\n")
