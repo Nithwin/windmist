@@ -13,24 +13,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 
 	case tea.WindowSizeMsg:
-
 		m.width = msg.Width
 		m.height = msg.Height
-
-		// Leave space for:
-		// - Header
-		// - Input
-		// - Padding
-		headerHeight := 5
-		inputHeight := 3
-
-		m.viewport.Width = msg.Width
-		m.viewport.Height = msg.Height - headerHeight - inputHeight
-
-		if m.viewport.Height < 5 {
-			m.viewport.Height = 5
-		}
-
+		m.refreshViewport()
 		return m, nil
 
 	case tea.KeyMsg:
@@ -79,6 +64,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.input.CursorEnd()
 			}
 
+			m.refreshViewport()
 			return m, nil
 		}
 
@@ -93,6 +79,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.filteredCommands = nil
 			m.selectedCommand = 0
 		}
+		m.updateViewportSize()
 
 		// Navigate the command palette.
 		if m.showCommands {

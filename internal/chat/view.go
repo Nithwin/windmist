@@ -15,8 +15,7 @@ func (m Model) View() string {
 	} else {
 		b.WriteString(renderHeader(m))
 		b.WriteString(m.viewport.View())
-
-		b.WriteString(m.viewport.View())
+		b.WriteString("\n")
 
 		// Separator above input area
 		b.WriteString(ui.DividerStyle.Render(strings.Repeat("─", 80)))

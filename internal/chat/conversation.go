@@ -10,22 +10,25 @@ import (
 func renderConversation(m Model) string {
 	var b strings.Builder
 
+	// Always render the welcome state at the top of the conversation history
+	hint := lipgloss.JoinVertical(
+		lipgloss.Left,
+		ui.AssistantLabelStyle.Render("⚡ WindMist is ready"),
+		ui.MutedStyle.Render("Type a message below, or try:"),
+		"",
+		"  "+ui.LabelStyle.Render("/help")+"  "+ui.MutedLightStyle.Render("→  show all commands"),
+		"  "+ui.LabelStyle.Render("/exit")+"  "+ui.MutedLightStyle.Render("→  quit"),
+	)
+	b.WriteString(hint)
+	b.WriteString("\n\n")
+
 	if len(m.conversation.Messages) == 0 {
-		// ── empty state ───────────────────────────────────────────
-		hint := lipgloss.JoinVertical(
-			lipgloss.Left,
-			ui.AssistantLabelStyle.Render("⚡ WindMist is ready"),
-			ui.MutedStyle.Render("Type a message below, or try:"),
-			"",
-			"  "+ui.LabelStyle.Render("/help")+"  "+ui.MutedLightStyle.Render("→  show all commands"),
-			"  "+ui.LabelStyle.Render("/exit")+"  "+ui.MutedLightStyle.Render("→  quit"),
-		)
-		b.WriteString(hint)
-		b.WriteString("\n\n")
 		return b.String()
 	}
 
 	divider := ui.DividerStyle.Render(strings.Repeat("─", 76))
+	b.WriteString(divider)
+	b.WriteString("\n")
 
 	for i, msg := range m.conversation.Messages {
 
@@ -43,8 +46,13 @@ func renderConversation(m Model) string {
 			label := ui.AssistantLabelStyle.Render("⚡ WindMist")
 			b.WriteString(label)
 			b.WriteString("\n")
-			content := ui.AssistantBubbleStyle.Render(msg.Content)
-			b.WriteString(content)
+			contentStr := msg.Content
+			if contentStr == "" && m.loading && i == len(m.conversation.Messages)-1 {
+				contentStr = ui.MutedStyle.Render("Thinking...")
+			} else {
+				contentStr = ui.AssistantBubbleStyle.Render(contentStr)
+			}
+			b.WriteString(contentStr)
 			b.WriteString("\n")
 		}
 
@@ -53,13 +61,6 @@ func renderConversation(m Model) string {
 			b.WriteString(divider)
 			b.WriteString("\n")
 		}
-	}
-
-	if m.loading {
-		b.WriteString(ui.AssistantLabelStyle.Render("⚡ WindMist"))
-		b.WriteString("\n")
-		b.WriteString(ui.MutedStyle.Render("Thinking..."))
-		b.WriteString("\n\n")
 	}
 
 	b.WriteString("\n")
