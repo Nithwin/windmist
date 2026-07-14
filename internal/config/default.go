@@ -5,9 +5,15 @@ func DefaultConfig() *Config {
 	return &Config{
 		AI: AIConfig{
 			Provider: "gemini",
-			Model:    "gemini-2.5-flash",
-			APIKey:   "",
 		},
+
+		Providers: ProvidersConfig{
+			Gemini: CloudProviderConfig{
+				Model:  "gemini-2.5-flash",
+				APIKey: "",
+			},
+		},
+
 		UI: UIConfig{
 			Theme: "dark",
 		},
