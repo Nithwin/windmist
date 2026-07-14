@@ -6,21 +6,27 @@ import (
 	"github.com/Nithwin/WindMist/internal/config"
 )
 
-// New returns an AI provider based on the configured provider.
+// Factory creates an AI provider.
+type Factory func(config.ProviderConfig) Provider
+
+// factories maps provider names to their constructors.
+var factories = map[string]Factory{
+	"gemini": NewGemini,
+	// "groq":   NewGroq,
+	// "ollama": NewOllama,
+}
+
+// New creates the configured AI provider.
 func New(cfg *config.Config) (Provider, error) {
-
-	switch cfg.AI.Provider {
-
-	case "gemini":
-		return NewGemini(
-			config.APIKey(cfg),
-			cfg.Providers.Gemini.Model,
-		), nil
-
-	default:
-		return nil, fmt.Errorf(
-			"unsupported provider: %s",
-			cfg.AI.Provider,
-		)
+	providerCfg, err := cfg.ActiveProvider()
+	if err != nil {
+		return nil, err
 	}
+
+	factory, ok := factories[cfg.AI.Provider]
+	if !ok {
+		return nil, fmt.Errorf("unsupported provider: %s", cfg.AI.Provider)
+	}
+
+	return factory(providerCfg), nil
 }

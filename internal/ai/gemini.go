@@ -1,6 +1,10 @@
 package ai
 
-import "context"
+import (
+	"context"
+
+	"github.com/Nithwin/WindMist/internal/config"
+)
 
 // Gemini implements the Provider interface.
 type Gemini struct {
@@ -9,20 +13,16 @@ type Gemini struct {
 }
 
 // NewGemini creates a Gemini provider.
-func NewGemini(apiKey, model string) *Gemini {
+func NewGemini(cfg config.ProviderConfig) Provider {
 	return &Gemini{
-		apiKey: apiKey,
-		model:  model,
+		apiKey: cfg.APIKey,
+		model:  cfg.Model,
 	}
 }
 
 // Generate generates a response using Gemini.
-func (g *Gemini) Generate(
-	ctx context.Context,
-	req *GenerateRequest,
-) (*GenerateResponse, error) {
-
+func (g *Gemini) Generate(_ context.Context, req *GenerateRequest) (*GenerateResponse, error) {
 	return &GenerateResponse{
-		Text: "Gemini integration coming next...",
+		Text: "Gemini: " + req.Prompt,
 	}, nil
 }

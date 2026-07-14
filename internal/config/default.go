@@ -7,18 +7,14 @@ func DefaultConfig() *Config {
 			Provider: "gemini",
 		},
 
-		Providers: ProvidersConfig{
-			Gemini: ProviderConfig{
-				Model:  "gemini-2.5-flash",
-				APIKey: "",
+		Providers: map[string]ProviderConfig{
+			"gemini": {
+				Model: "gemini-2.5-flash",
 			},
-
-			Groq: ProviderConfig{
-				Model:  "llama-3.3-70b-versatile",
-				APIKey: "",
+			"groq": {
+				Model: "llama-3.3-70b-versatile",
 			},
-
-			Ollama: ProviderConfig{
+			"ollama": {
 				Model:   "qwen3:8b",
 				BaseURL: "http://localhost:11434",
 			},
