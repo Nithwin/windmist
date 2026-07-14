@@ -22,7 +22,7 @@ type Call struct {
 }
 
 type Result struct {
-	Output string
+	Output any
 	Error  error
 }
 
