@@ -12,7 +12,7 @@ func New(cfg *config.Config) (Provider, error) {
 	switch cfg.AI.Provider {
 
 	case "gemini":
-		return NewGemini(cfg.AI.APIKey, cfg.AI.Model), nil
+		return NewGemini(config.APIKey(cfg), cfg.AI.Model), nil
 
 	default:
 		return nil, fmt.Errorf("unsupported provider: %s", cfg.AI.Provider)
