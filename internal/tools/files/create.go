@@ -14,6 +14,7 @@ func NewCreateTool() *CreateTool {
 	return &CreateTool{}
 }
 
+// Definition returns the tool definition
 func (t *CreateTool) Definition() tools.Definition {
 	return tools.Definition{
 		Name:        "create_file",
@@ -29,6 +30,7 @@ func (t *CreateTool) Definition() tools.Definition {
 	}
 }
 
+// Run executes the create file tool
 func (t *CreateTool) Run(ctx context.Context, call tools.Call) tools.Result {
 	path, ok := call.Args["path"].(string)
 	if !ok || path == "" {
