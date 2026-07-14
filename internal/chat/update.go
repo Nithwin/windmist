@@ -15,6 +15,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
 		m.height = msg.Height
+		m.input.SetWidth(m.width - 12)
 		m.refreshViewport()
 		return m, nil
 
@@ -68,12 +69,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 		}
 
-		// Update slash command suggestions.
+		// Update slash command suggestions (check first line only).
 		value := m.input.Value()
+		firstLine := strings.SplitN(value, "\n", 2)[0]
 
-		if strings.HasPrefix(value, "/") {
+		if strings.HasPrefix(firstLine, "/") {
 			m.showCommands = true
-			m.filteredCommands = FilterCommands(value)
+			m.filteredCommands = FilterCommands(firstLine)
 		} else {
 			m.showCommands = false
 			m.filteredCommands = nil

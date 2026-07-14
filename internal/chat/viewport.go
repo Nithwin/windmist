@@ -12,9 +12,9 @@ func (m *Model) updateViewportSize() {
 	// - renderHeader(m): 5 lines (box + 2 newlines)
 	// - viewport trailing newline: 1 line
 	// - divider above input: 3 lines (line + 2 newlines)
-	// - inputLine + trailing newline: 2 lines
-	// Total fixed lines = 11
-	fixedLines := 11
+	// - input row (label + textarea height=3) + trailing newline: 4 lines
+	// Total fixed lines = 13
+	fixedLines := 13
 
 	if m.showCommands && len(m.filteredCommands) > 0 {
 		// command palette box (len + 4) + trailing newline (1) = len + 5 lines

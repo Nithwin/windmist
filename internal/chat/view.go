@@ -28,19 +28,20 @@ func (m Model) View() string {
 		}
 	}
 
-	// Input row
-	prompt := ui.PromptStyle.Render(" user")
-
-	inputLine := lipgloss.JoinHorizontal(
+	// Input row (label and textarea joined horizontally at Top so cursor is next to user ›)
+	promptLabel := lipgloss.JoinHorizontal(
 		lipgloss.Center,
-		prompt,
-		lipgloss.NewStyle().
-			Foreground(ui.Muted).
-			Render("  ›  "),
+		ui.PromptStyle.Render(" user"),
+		lipgloss.NewStyle().Foreground(ui.Muted).Render("  ›  "),
+	)
+
+	inputRow := lipgloss.JoinHorizontal(
+		lipgloss.Top,
+		promptLabel,
 		m.input.View(),
 	)
 
-	b.WriteString(inputLine)
+	b.WriteString(inputRow)
 	b.WriteString("\n")
 
 	return b.String()

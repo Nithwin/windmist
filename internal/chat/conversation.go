@@ -55,11 +55,9 @@ func renderConversation(m Model) string {
 			if contentStr == "" && m.loading && i == len(m.conversation.Messages)-1 {
 				contentStr = ui.MutedStyle.Render("Thinking...")
 			} else {
-				rendered := m.markdown.Render(contentStr)
+				rendered := m.markdown.RenderWithWidth(contentStr, maxWidth)
 
-				contentStr = ui.AssistantBubbleStyle.
-					Width(maxWidth).
-					Render(rendered)
+				contentStr = ui.AssistantBubbleStyle.Render(rendered)
 			}
 			b.WriteString(contentStr)
 			b.WriteString("\n")
