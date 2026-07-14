@@ -1,8 +1,11 @@
 package chat
 
 import (
+	"github.com/Nithwin/WindMist/internal/agent"
 	"github.com/Nithwin/WindMist/internal/ai"
 	"github.com/Nithwin/WindMist/internal/config"
+	"github.com/Nithwin/WindMist/internal/tools"
+	"github.com/Nithwin/WindMist/internal/tools/defaults"
 	"github.com/Nithwin/WindMist/internal/ui"
 	"github.com/charmbracelet/bubbles/textarea"
 	"github.com/charmbracelet/bubbles/viewport"
@@ -15,6 +18,7 @@ type Model struct {
 	cfg *config.Config
 
 	provider ai.Provider
+	agent    *agent.Agent
 
 	conversation Conversation
 
@@ -49,6 +53,10 @@ func New() Model {
 		panic(err)
 	}
 
+	manager := tools.NewManager()
+	defaults.RegisterAll(manager)
+	ag := agent.New(provider, manager, agent.Config{})
+
 	renderer, err := ui.NewMarkdownRenderer()
 	if err != nil {
 		panic(err)
@@ -78,6 +86,7 @@ func New() Model {
 	return Model{
 		cfg:          cfg,
 		provider:     provider,
+		agent:        ag,
 		conversation: Conversation{},
 		input:        ta,
 

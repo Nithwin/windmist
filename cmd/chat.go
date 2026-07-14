@@ -5,8 +5,11 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/Nithwin/WindMist/internal/agent"
 	"github.com/Nithwin/WindMist/internal/ai"
 	"github.com/Nithwin/WindMist/internal/config"
+	"github.com/Nithwin/WindMist/internal/tools"
+	"github.com/Nithwin/WindMist/internal/tools/defaults"
 	"github.com/spf13/cobra"
 )
 
@@ -26,21 +29,17 @@ var chatCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		req := &ai.GenerateRequest{
-			Messages: []ai.Message{
-				{
-					Role:    ai.RoleUser,
-					Content: args[0],
-				},
-			},
-		}
+		manager := tools.NewManager()
+		defaults.RegisterAll(manager)
 
-		resp, err := provider.Generate(context.Background(), req)
+		ag := agent.New(provider, manager, agent.Config{})
+
+		res, err := ag.Run(context.Background(), args[0])
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		fmt.Println(resp.Text)
+		fmt.Println(res.Content)
 	},
 }
 

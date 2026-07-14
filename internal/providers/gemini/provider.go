@@ -33,7 +33,8 @@ func (p *Provider) Generate(
 ) (*ai.GenerateResponse, error) {
 
 	geminiReq := &GenerateContentRequest{
-		Contents: make([]Content, 0, len(req.Messages)),
+		Contents: translateMessages(req.Messages),
+		Tools:    translateTools(req.Tools),
 	}
 
 	if req.System != "" {
@@ -51,17 +52,6 @@ func (p *Provider) Generate(
 			Temperature:     req.Temperature,
 			MaxOutputTokens: req.MaxTokens,
 		}
-	}
-
-	for _, msg := range req.Messages {
-		geminiReq.Contents = append(geminiReq.Contents, Content{
-			Role: string(msg.Role),
-			Parts: []Part{
-				{
-					Text: msg.Content,
-				},
-			},
-		})
 	}
 
 	geminiResp, err := p.client.GenerateContent(ctx, geminiReq)
@@ -79,16 +69,7 @@ func (p *Provider) Generate(
 		return nil, fmt.Errorf("gemini returned empty response")
 	}
 
-	return &ai.GenerateResponse{
-		Text:   candidate.Content.Parts[0].Text,
-		Model:  p.model,
-		Finish: candidate.FinishReason,
-		Usage: ai.Usage{
-			InputTokens:  geminiResp.Usage.PromptTokenCount,
-			OutputTokens: geminiResp.Usage.CandidatesTokenCount,
-			TotalTokens:  geminiResp.Usage.TotalTokenCount,
-		},
-	}, nil
+	return translateResponse(candidate, p.model, geminiResp), nil
 }
 
 // Stream streams a response from Gemini.
@@ -99,7 +80,8 @@ func (p *Provider) Stream(
 ) error {
 
 	geminiReq := &GenerateContentRequest{
-		Contents: make([]Content, 0, len(req.Messages)),
+		Contents: translateMessages(req.Messages),
+		Tools:    translateTools(req.Tools),
 	}
 
 	if req.System != "" {
@@ -117,17 +99,6 @@ func (p *Provider) Stream(
 			Temperature:     req.Temperature,
 			MaxOutputTokens: req.MaxTokens,
 		}
-	}
-
-	for _, msg := range req.Messages {
-		geminiReq.Contents = append(geminiReq.Contents, Content{
-			Role: string(msg.Role),
-			Parts: []Part{
-				{
-					Text: msg.Content,
-				},
-			},
-		})
 	}
 
 	return p.client.StreamContent(

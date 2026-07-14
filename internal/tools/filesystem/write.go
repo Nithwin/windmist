@@ -17,7 +17,7 @@ func NewWriteTool() *WriteTool {
 func (t *WriteTool) Definition() tools.Definition {
 	return tools.Definition{
 		Name:        "write",
-		Description: "Writes content to an existing file.",
+		Description: "Overwrites the entire contents of an existing file with new content. WARNING: This replaces all existing code in the file. Prefer using replace_text or replace_range when making targeted edits or modifying existing code.",
 		Parameters: []tools.Parameter{
 			{
 				Name:        "path",

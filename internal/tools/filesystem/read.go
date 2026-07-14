@@ -19,7 +19,7 @@ func NewReadTool() *ReadTool {
 func (t *ReadTool) Definition() tools.Definition {
 	return tools.Definition{
 		Name:        "read",
-		Description: "Reads the contents of a file",
+		Description: "Reads the entire contents of a file from disk. Use this when you need to inspect or verify a small file or an entire file from start to finish. For large files when you only need a specific section around a line number, prefer read_context.",
 		Parameters: []tools.Parameter{
 			{
 				Name:        "path",
