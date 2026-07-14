@@ -34,7 +34,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 
 		case "enter":
-			// We'll send the message to Gemini later.
+			if err := m.sendMessage(); err != nil {
+				m.conversation.AddAssistant("Error: " + err.Error())
+			}
 			m.input.SetValue("")
 		}
 	}
