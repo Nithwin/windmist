@@ -8,21 +8,21 @@ type Config struct {
 	Cache     CacheConfig     `yaml:"cache"`
 }
 
+type ProviderConfig struct {
+	Model   string `yaml:"model"`
+	APIKey  string `yaml:"api_key,omitempty"`
+	BaseURL string `yaml:"base_url,omitempty"`
+}
+
 // AIConfig stores settings for AI providers and models.
 type AIConfig struct {
 	Provider string `yaml:"provider"`
 }
 
-// CloudProviderConfig stores configuration for cloud AI providers.
-type CloudProviderConfig struct {
-	Model  string `yaml:"model"`
-	APIKey string `yaml:"api_key"`
-}
-
-// OllamaConfig stores Ollama settings.
-type OllamaConfig struct {
-	Model   string `yaml:"model"`
-	BaseURL string `yaml:"base_url"`
+type ProvidersConfig struct {
+	Gemini ProviderConfig `yaml:"gemini"`
+	Groq   ProviderConfig `yaml:"groq"`
+	Ollama ProviderConfig `yaml:"ollama"`
 }
 
 // UIConfig stores user interface preferences.
@@ -33,11 +33,4 @@ type UIConfig struct {
 // CacheConfig stores cache-related settings.
 type CacheConfig struct {
 	Enabled bool `yaml:"enabled"`
-}
-
-// ProvidersConfig stores configuration for all supported providers.
-type ProvidersConfig struct {
-	Gemini CloudProviderConfig `yaml:"gemini"`
-	Groq   CloudProviderConfig `yaml:"groq"`
-	Ollama OllamaConfig        `yaml:"ollama"`
 }

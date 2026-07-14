@@ -19,10 +19,16 @@ var showCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
+		model, err := cfg.ActiveModel()
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		fmt.Println("WindMist Configuration")
 		fmt.Println("----------------------")
 		fmt.Printf("Provider : %s\n", cfg.AI.Provider)
-		fmt.Printf("Model    : %s\n", cfg.AI.Model)
+		fmt.Printf("Model    : %s\n", model)
 		fmt.Printf("Theme    : %s\n", cfg.UI.Theme)
 		fmt.Printf("Cache    : %t\n", cfg.Cache.Enabled)
 	},
