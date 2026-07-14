@@ -1,4 +1,4 @@
-package files
+package filesystem
 
 import (
 	"context"
@@ -21,7 +21,7 @@ func TestWriteFile(t *testing.T) {
 	}
 
 	call := tools.Call{
-		Name: "write_file",
+		Name: "write",
 		Args: map[string]any{
 			"path":    path,
 			"content": "hello",
@@ -56,7 +56,7 @@ func TestWriteFileEmptyContent(t *testing.T) {
 	}
 
 	call := tools.Call{
-		Name: "write_file",
+		Name: "write",
 		Args: map[string]any{
 			"path":    path,
 			"content": "",
@@ -84,7 +84,7 @@ func TestWriteFileEmptyPath(t *testing.T) {
 	tool := NewWriteTool()
 
 	call := tools.Call{
-		Name: "write_file",
+		Name: "write",
 		Args: map[string]any{
 			"path": "",
 			"content": "hello",
@@ -103,7 +103,7 @@ func TestWriteFileInvalidPath(t *testing.T) {
 	tool := NewWriteTool()
 
 	call := tools.Call{
-		Name: "write_file",
+		Name: "write",
 		Args: map[string]any{
 			"path": "/invalid/directory/test.txt",
 			"content": "hello",

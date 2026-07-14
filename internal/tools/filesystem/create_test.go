@@ -1,4 +1,4 @@
-package files
+package filesystem
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 	"github.com/Nithwin/WindMist/internal/tools"
 )
 
-// TestCreateFile - check the wether it is creating the file properly
+// TestCreateFile - check whether it creates the file properly
 func TestCreateFile(t *testing.T) {
 	tool := NewCreateTool()
 
@@ -17,7 +17,7 @@ func TestCreateFile(t *testing.T) {
 	path := filepath.Join(tempDir, "test.txt")
 
 	call := tools.Call{
-		Name: "create_file",
+		Name: "create",
 		Args: map[string]any{
 			"path": path,
 		},
@@ -34,7 +34,37 @@ func TestCreateFile(t *testing.T) {
 	}
 }
 
-// TestCreateExistingFile - check wether File Already Exists functions works properly
+// TestCreateDirectory - check whether it creates a directory properly
+func TestCreateDirectory(t *testing.T) {
+	tool := NewCreateTool()
+
+	tempDir := t.TempDir()
+	path := filepath.Join(tempDir, "testdir")
+
+	call := tools.Call{
+		Name: "create",
+		Args: map[string]any{
+			"path": path,
+			"type": "directory",
+		},
+	}
+
+	result := tool.Run(context.Background(), call)
+
+	if result.Error != nil {
+		t.Fatalf("expected no error, got %v", result.Error)
+	}
+
+	info, err := os.Stat(path)
+	if err != nil {
+		t.Fatalf("expected directory to exist: %v", err)
+	}
+	if !info.IsDir() {
+		t.Fatalf("expected path to be a directory")
+	}
+}
+
+// TestCreateExistingFile - check whether File Already Exists check works properly
 func TestCreateExistingFile(t *testing.T) {
 	tool := NewCreateTool()
 
@@ -46,7 +76,7 @@ func TestCreateExistingFile(t *testing.T) {
 	}
 
 	call := tools.Call{
-		Name: "create_file",
+		Name: "create",
 		Args: map[string]any{
 			"path": path,
 		},
@@ -59,12 +89,38 @@ func TestCreateExistingFile(t *testing.T) {
 	}
 }
 
-// TestCreateFileInvalidPath - check wether function properly handles Invalid Path
+// TestCreateExistingDirectory - check whether Directory Already Exists check works properly
+func TestCreateExistingDirectory(t *testing.T) {
+	tool := NewCreateTool()
+
+	tempDir := t.TempDir()
+	path := filepath.Join(tempDir, "testdir")
+
+	if err := os.Mkdir(path, 0755); err != nil {
+		t.Fatal(err)
+	}
+
+	call := tools.Call{
+		Name: "create",
+		Args: map[string]any{
+			"path": path,
+			"type": "directory",
+		},
+	}
+
+	result := tool.Run(context.Background(), call)
+
+	if result.Error == nil {
+		t.Fatal("expected error when directory already exists")
+	}
+}
+
+// TestCreateFileInvalidPath - check whether function properly handles Invalid Path
 func TestCreateFileInvalidPath(t *testing.T) {
 	tool := NewCreateTool()
 
 	call := tools.Call{
-		Name: "create_file",
+		Name: "create",
 		Args: map[string]any{
 			"path": "",
 		},
@@ -84,7 +140,7 @@ func TestCreateFileMissingDirectory(t *testing.T) {
 	path := filepath.Join(tempDir, "missing-folder", "test.txt")
 
 	call := tools.Call{
-		Name: "create_file",
+		Name: "create",
 		Args: map[string]any{
 			"path": path,
 		},

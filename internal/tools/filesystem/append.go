@@ -1,4 +1,4 @@
-package files
+package filesystem
 
 import (
 	"context"
@@ -16,7 +16,7 @@ func NewAppendTool() *AppendTool {
 
 func (t *AppendTool) Definition() tools.Definition {
 	return tools.Definition{
-		Name:        "append_file",
+		Name:        "append",
 		Description: "Appends content to an existing file.",
 		Parameters: []tools.Parameter{
 			{

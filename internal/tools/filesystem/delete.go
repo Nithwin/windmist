@@ -1,4 +1,4 @@
-package files
+package filesystem
 
 import (
 	"context"
@@ -16,7 +16,7 @@ func NewDeleteTool() *DeleteTool {
 
 func (t *DeleteTool) Definition() tools.Definition {
 	return tools.Definition{
-		Name:        "delete_file",
+		Name:        "delete",
 		Description: "Deletes a file or directory.",
 		Parameters: []tools.Parameter{
 			{

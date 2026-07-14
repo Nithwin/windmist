@@ -1,4 +1,4 @@
-package files
+package filesystem
 
 import (
 	"context"
@@ -18,7 +18,7 @@ func NewReadTool() *ReadTool {
 // Definition returns the tool definition
 func (t *ReadTool) Definition() tools.Definition {
 	return tools.Definition{
-		Name:        "read_file",
+		Name:        "read",
 		Description: "Reads the contents of a file",
 		Parameters: []tools.Parameter{
 			{

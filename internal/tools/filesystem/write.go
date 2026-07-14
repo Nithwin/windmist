@@ -1,4 +1,4 @@
-package files
+package filesystem
 
 import (
 	"context"
@@ -16,7 +16,7 @@ func NewWriteTool() *WriteTool {
 
 func (t *WriteTool) Definition() tools.Definition {
 	return tools.Definition{
-		Name:        "write_file",
+		Name:        "write",
 		Description: "Writes content to an existing file.",
 		Parameters: []tools.Parameter{
 			{

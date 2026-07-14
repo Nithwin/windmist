@@ -1,4 +1,4 @@
-package files
+package filesystem
 
 import (
 	"context"
@@ -16,7 +16,7 @@ func NewRenameTool() *RenameTool {
 
 func (t *RenameTool) Definition() tools.Definition {
 	return tools.Definition{
-		Name:        "rename_file",
+		Name:        "rename",
 		Description: "Renames or moves a file or directory.",
 		Parameters: []tools.Parameter{
 			{

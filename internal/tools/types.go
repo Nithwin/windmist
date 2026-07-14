@@ -7,6 +7,7 @@ type Parameter struct {
 	Type        string
 	Description string
 	Required    bool
+	Enum        []string
 }
 
 type Definition struct {

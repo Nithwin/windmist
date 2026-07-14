@@ -1,4 +1,4 @@
-package files
+package filesystem
 
 import (
 	"context"
@@ -22,7 +22,7 @@ func TestRenameFile(t *testing.T) {
 	}
 
 	call := tools.Call{
-		Name: "rename_file",
+		Name: "rename",
 		Args: map[string]any{
 			"old_path": oldPath,
 			"new_path": newPath,
@@ -49,7 +49,7 @@ func TestRenameFileInvalidOldPath(t *testing.T) {
 	tool := NewRenameTool()
 
 	call := tools.Call{
-		Name: "rename_file",
+		Name: "rename",
 		Args: map[string]any{
 			"old_path": "",
 			"new_path": "new.txt",
@@ -66,7 +66,7 @@ func TestRenameFileInvalidNewPath(t *testing.T) {
 	tool := NewRenameTool()
 
 	call := tools.Call{
-		Name: "rename_file",
+		Name: "rename",
 		Args: map[string]any{
 			"old_path": "old.txt",
 			"new_path": "",
@@ -87,7 +87,7 @@ func TestRenameNonExistentFile(t *testing.T) {
 	newPath := filepath.Join(tempDir, "new.txt")
 
 	call := tools.Call{
-		Name: "rename_file",
+		Name: "rename",
 		Args: map[string]any{
 			"old_path": oldPath,
 			"new_path": newPath,

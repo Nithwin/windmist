@@ -1,4 +1,4 @@
-package files
+package filesystem
 
 import (
 	"context"
@@ -21,7 +21,7 @@ func TestDeleteFile(t *testing.T) {
 	}
 
 	call := tools.Call{
-		Name: "delete_file",
+		Name: "delete",
 		Args: map[string]any{
 			"path": path,
 		},
@@ -50,7 +50,7 @@ func TestDeleteDirectory(t *testing.T) {
 	}
 
 	call := tools.Call{
-		Name: "delete_file",
+		Name: "delete",
 		Args: map[string]any{
 			"path": dirPath,
 		},
@@ -74,7 +74,7 @@ func TestDeleteNonExistentFile(t *testing.T) {
 	path := filepath.Join(tempDir, "non_existent.txt")
 
 	call := tools.Call{
-		Name: "delete_file",
+		Name: "delete",
 		Args: map[string]any{
 			"path": path,
 		},
@@ -90,7 +90,7 @@ func TestDeleteEmptyPath(t *testing.T) {
 	tool := NewDeleteTool()
 
 	call := tools.Call{
-		Name: "delete_file",
+		Name: "delete",
 		Args: map[string]any{
 			"path": "",
 		},

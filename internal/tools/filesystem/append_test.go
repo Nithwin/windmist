@@ -1,4 +1,4 @@
-package files
+package filesystem
 
 import (
 	"context"
@@ -21,7 +21,7 @@ func TestAppendFile(t *testing.T) {
 	}
 
 	call := tools.Call{
-		Name: "append_file",
+		Name: "append",
 		Args: map[string]any{
 			"path":    path,
 			"content": "more content\n",
@@ -56,7 +56,7 @@ func TestAppendFileEmptyContent(t *testing.T) {
 	}
 
 	call := tools.Call{
-		Name: "append_file",
+		Name: "append",
 		Args: map[string]any{
 			"path":    path,
 			"content": "",
@@ -87,7 +87,7 @@ func TestAppendFileMissingFile(t *testing.T) {
 	path := filepath.Join(tempDir, "nonexistent.txt")
 
 	call := tools.Call{
-		Name: "append_file",
+		Name: "append",
 		Args: map[string]any{
 			"path":    path,
 			"content": "hello\n",
@@ -105,7 +105,7 @@ func TestAppendFileInvalidPath(t *testing.T) {
 	tool := NewAppendTool()
 
 	call := tools.Call{
-		Name: "append_file",
+		Name: "append",
 		Args: map[string]any{
 			"path":    "",
 			"content": "hello\n",

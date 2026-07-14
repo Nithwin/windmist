@@ -1,4 +1,4 @@
-package files
+package filesystem
 
 import (
 	"context"
@@ -21,7 +21,7 @@ func TestReadFile(t *testing.T) {
 	}
 
 	call := tools.Call{
-		Name: "read_file",
+		Name: "read",
 		Args: map[string]any{
 			"path": path,
 		},
@@ -46,7 +46,7 @@ func TestReadFileNonExistent(t *testing.T) {
 	path := filepath.Join(tempDir, "nonexistent.txt")
 
 	call := tools.Call{
-		Name: "read_file",
+		Name: "read",
 		Args: map[string]any{
 			"path": path,
 		},
@@ -65,7 +65,7 @@ func TestReadFileInvalidPath(t *testing.T) {
 
 
 	call := tools.Call{
-		Name: "read_file",
+		Name: "read",
 		Args: map[string]any{
 			"path": "",
 		},
