@@ -63,20 +63,66 @@ func (c *Client) GenerateContent(
 
 	httpReq.Header.Set("Content-Type", "application/json")
 
-	resp, err := c.client.Do(httpReq)
-	if err != nil {
-		return nil, fmt.Errorf("send request: %w", err)
-	}
-	defer resp.Body.Close()
+	maxRetries := 3
+	baseDelay := 2 * time.Second
 
-	data, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("read response: %w", err)
-	}
+	var resp *http.Response
+	var data []byte
 
-	if resp.StatusCode != http.StatusOK {
+	for attempt := 0; attempt < maxRetries; attempt++ {
+		// Reset the request body since it gets consumed on each call
+		httpReq.Body = io.NopCloser(bytes.NewReader(body))
+
+		resp, err = c.client.Do(httpReq)
+		if err != nil {
+			if attempt == maxRetries-1 {
+				return nil, fmt.Errorf("send request: %w", err)
+			}
+			// Wait and retry
+			delay := baseDelay * time.Duration(1<<attempt)
+			select {
+			case <-ctx.Done():
+				return nil, ctx.Err()
+			case <-time.After(delay):
+			}
+			continue
+		}
+
+		data, err = io.ReadAll(resp.Body)
+		resp.Body.Close()
+		if err != nil {
+			return nil, fmt.Errorf("read response: %w", err)
+		}
+
+		if resp.StatusCode == http.StatusOK {
+			break
+		}
+
+		// Handle retryable status codes: 429 (Too Many Requests), 503 (Service Unavailable)
+		if resp.StatusCode == http.StatusTooManyRequests || resp.StatusCode == http.StatusServiceUnavailable {
+			if attempt == maxRetries-1 {
+				var apiErr ErrorResponse
+				if err := json.Unmarshal(data, &apiErr); err == nil {
+					return nil, fmt.Errorf(
+						"gemini api (%d): %s (after retries)",
+						apiErr.Error.Code,
+						apiErr.Error.Message,
+					)
+				}
+				return nil, fmt.Errorf("gemini api returned status %d after retries: %s", resp.StatusCode, string(data))
+			}
+
+			delay := baseDelay * time.Duration(1<<attempt)
+			select {
+			case <-ctx.Done():
+				return nil, ctx.Err()
+			case <-time.After(delay):
+			}
+			continue
+		}
+
+		// Non-retryable error
 		var apiErr ErrorResponse
-
 		if err := json.Unmarshal(data, &apiErr); err == nil {
 			return nil, fmt.Errorf(
 				"gemini api (%d): %s",
@@ -84,12 +130,7 @@ func (c *Client) GenerateContent(
 				apiErr.Error.Message,
 			)
 		}
-
-		return nil, fmt.Errorf(
-			"gemini api returned status %d: %s",
-			resp.StatusCode,
-			string(data),
-		)
+		return nil, fmt.Errorf("gemini api returned status %d: %s", resp.StatusCode, string(data))
 	}
 
 	var result GenerateContentResponse
