@@ -1,0 +1,67 @@
+[
+  {
+    "name": "bug",
+    "color": "d73a4a",
+    "description": "Something isn't working as expected or crashes"
+  },
+  {
+    "name": "enhancement",
+    "color": "a2eeef",
+    "description": "New feature, capability, or CLI request"
+  },
+  {
+    "name": "documentation",
+    "color": "0075ca",
+    "description": "Improvements or additions to documentation and help text"
+  },
+  {
+    "name": "good first issue",
+    "color": "7057ff",
+    "description": "Good for newcomers diving into the WindMist codebase"
+  },
+  {
+    "name": "help wanted",
+    "color": "008672",
+    "description": "Extra attention or community assistance is requested"
+  },
+  {
+    "name": "question",
+    "color": "d876e3",
+    "description": "Further information is requested or general inquiry"
+  },
+  {
+    "name": "performance",
+    "color": "ff9f1c",
+    "description": "Optimizing execution speed, memory footprint, or token latency"
+  },
+  {
+    "name": "security",
+    "color": "e11d48",
+    "description": "Security vulnerability, secret handling, or safety check"
+  },
+  {
+    "name": "provider",
+    "color": "3b82f6",
+    "description": "Relates to AI model providers (Gemini, OpenAI, Anthropic, Ollama)"
+  },
+  {
+    "name": "tooling",
+    "color": "10b981",
+    "description": "Relates to CLI flags, Glamour/Lip Gloss TUI, or build tools"
+  },
+  {
+    "name": "testing",
+    "color": "fbbf24",
+    "description": "Adding or improving unit tests, golden tests, or CI checks"
+  },
+  {
+    "name": "refactor",
+    "color": "8b5cf6",
+    "description": "Code cleanup or architectural restructuring without changing behavior"
+  },
+  {
+    "name": "dependencies",
+    "color": "0366d6",
+    "description": "Pull requests that update go.mod packages or external dependencies"
+  }
+]
