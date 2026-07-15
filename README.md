@@ -16,7 +16,7 @@
 **A modern open-source AI coding assistant running right inside your terminal.**  
 WindMist (`v1.0.0`) is built in high-performance Go to inspect code, edit files atomically across your workspace, and engage in multi-turn reasoning loops with local tools.
 
-[Demo](#-demo) • [Installation](#-installation) • [Quick Start](#-quick-start) • [Features](#-features--capabilities) • [Commands](#-core-commands) • [Architecture](#-architecture-overview) • [Contributing](CONTRIBUTING.md)
+[Demo](#-demo) • [Installation](#-installation) • [Quick Start](#-quick-start) • [Features](#-features--capabilities) • [Commands](#-core-commands) • [Architecture](docs/architecture.md) • [Contributing](CONTRIBUTING.md)
 
 </div>
 
@@ -102,62 +102,7 @@ Most AI CLI tools struggle with sluggish startup times or cumbersome configurati
 
 ## 📐 Architecture Overview
 
-WindMist strictly follows **Clean Architecture with Domain-Driven Modules**. Every capability is isolated behind Go interfaces (`ai.Provider`, `tools.Tool`) inside the `internal/` boundary:
-
-```text
-┌─────────────────────────────────────────────────────────────────┐
-│                       USER TERMINAL (CLI)                       │
-└────────────────────────────────┬────────────────────────────────┘
-                                 │
-                                 ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                       GO ENGINE (internal/)                     │
-│                                                                 │
-│   ┌──────────────────┐    ┌──────────────────┐                  │
-│   │    Cobra CLI     │    │  Bubble Tea TUI  │  cmd/windmist    │
-│   └────────┬─────────┘    └────────┬─────────┘                  │
-│            │                       │                            │
-│            └───────────┬───────────┘                            │
-│                        ▼                                        │
-│               ┌─────────────────┐                               │
-│               │   Agent Loop    │  internal/agent               │
-│               └────────┬────────┘                               │
-│                        │                                        │
-│         ┌──────────────┴──────────────┐                         │
-│         ▼                             ▼                         │
-│  ┌─────────────┐               ┌─────────────┐                  │
-│  │ Tool Engine │               │   Gemini    │  internal/tools  │
-│  │ (15 tools)  │               │  Provider   │  internal/prov...│
-│  └─────────────┘               └─────────────┘                  │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-### Directory Structure (`v1.0.0`)
-
-```text
-windmist/
-├── cmd/
-│   └── windmist/             # Main application entry point (main.go)
-├── internal/                 # Private domain-driven Go engine modules
-│   ├── agent/                # Stateless multi-turn reasoning and loop execution
-│   ├── chat/                 # Bubble Tea terminal controllers and viewports
-│   ├── config/               # Configuration loading (~/.windmist/config.yaml)
-│   ├── providers/
-│   │   ├── ai/               # Provider-agnostic interfaces (Provider, Message, ToolDefinition)
-│   │   └── gemini/           # Native Gemini v1beta schema and tool calling adapter
-│   ├── tools/
-│   │   ├── defaults/         # Tool registry (RegisterAll)
-│   │   ├── editing/          # Precision code editing tools (replace, insert, search)
-│   │   └── filesystem/       # Atomic filesystem operations (read, write, list)
-│   └── ui/                   # Lip Gloss and Glamour markdown styling helpers
-├── docs/                     # Architectural deep-dives and developer guides
-├── README.md                 # Project overview & installation
-├── CONTRIBUTING.md           # Workflow & coding standards
-└── SECURITY.md               # Threat models & vulnerability reporting
-```
-
-> [!NOTE]
-> For deep engineering documentation and full multi-step loop specifications, please read **[`docs/architecture.md`](docs/architecture.md)**.
+For a comprehensive breakdown of our system architecture, domain-driven Go modules (`internal/`), and multi-turn execution loop, please read **[`docs/architecture.md`](docs/architecture.md)**.
 
 ---
 
