@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Automated CI**: Fast, single-purpose PR validation workflow ([`ci.yml`](.github/workflows/ci.yml)) executing `gofmt`, `go vet`, `go test -race -timeout 10m`, and binary compilation checks on Ubuntu Linux.
 - **Release Automation**: Multi-platform cross-compilation (`linux`, `macOS`, `windows` across `amd64` and `arm64`), `tar.gz`/`zip` packaging, and SHA256 checksum generation (`checksums.txt`) using GoReleaser ([`.goreleaser.yaml`](.goreleaser.yaml) and [`release.yml`](.github/workflows/release.yml)).
 - **Dynamic Build Metadata**: Enabled `-X` linker flag injection for `Version`, `Commit`, and `Date` in `cmd/version.go`.
+- **Self-Uninstallation Command**: Added built-in `windmist uninstall` (`cmd/uninstall.go`) with flags `-y/--yes` and `-p/--purge` to allow the CLI binary to self-remove from disk cleanly.
+- **Universal Installer Script**: Created `scripts/install.sh` for 1-line `curl | bash` installation across Linux and macOS.
 
 ### Changed
 - Normalized formatting across all 38 Go packages (`cmd/` and `internal/`) to adhere to `gofmt`.
