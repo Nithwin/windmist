@@ -13,194 +13,166 @@
 [![Python Version](https://img.shields.io/badge/Python-3.13+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-10B981?style=for-the-badge)](CONTRIBUTING.md)
 
-**Not just another ChatGPT wrapper.**  
-WindMist is an autonomous, lightning-fast AI Software Engineer running directly inside your terminal, engineered from the ground up for speed, deep repository awareness, and multi-step reasoning.
+**A modern open-source AI coding assistant running right inside your terminal.**  
+WindMist (`v1.0.0`) is built in high-performance Go to inspect code, edit files atomically across your workspace, and engage in multi-turn reasoning loops with local tools.
 
-[Key Features](#-key-features) • [Why WindMist?](#-why-go--python) • [Architecture](#-high-level-architecture) • [Getting Started](#-getting-started) • [Roadmap](ROADMAP.md) • [Contributing](CONTRIBUTING.md)
+[Demo](#-demo) • [Installation](#-installation) • [Quick Start](#-quick-start) • [Features](#-features--capabilities) • [Commands](#-core-commands) • [Architecture](#-architecture-overview) • [Contributing](CONTRIBUTING.md)
 
 </div>
 
 ---
 
-## 🌀 The Vision
+## 📺 Demo
 
-When you type:
+Experience an interactive AI pair programming session directly in your terminal:
+
+<div align="center">
+  <img src="images/image.png" alt="WindMist Terminal UI Screenshot" width="860" />
+</div>
+
+---
+
+## ⚙️ Installation
+
+To install `windmist` (`v1.0.0`) using the Go toolchain (`Go 1.25+` required):
 
 ```bash
-windmist build authentication
+go install github.com/your-username/windmist/cmd/windmist@latest
 ```
 
-WindMist doesn't just output a snippet of code and leave you to copy-paste it. **It acts as a true engineering partner:**
+Or clone and build directly from source:
 
-1. **Understands your repository** by indexing local code structures, ASTs, symbols, and dependencies.
-2. **Plans the implementation** step-by-step through an autonomous planning loop.
-3. **Edits multiple files** safely across your workspace.
-4. **Runs tests and linters** to verify its own work.
-5. **Fixes errors automatically** if tests fail or compiler bugs arise.
-6. **Commits atomic changes** with clear, descriptive Git commit messages.
-7. **Asks for confirmation** whenever sensitive or high-impact actions are proposed.
-
-Our mission is to build the premier open-source terminal AI engineer to compete directly with tools like *Claude Code*, *Gemini CLI*, and *OpenAI Codex CLI* — while giving developers complete sovereignty over their models and infrastructure.
-
----
-
-## 🚀 Key Features
-
-- **🧠 Multi-Model & Provider Agnostic:** Plug in your choice of **Gemini 2.5 / 3.0**, **OpenAI (GPT-4o)**, **Anthropic (Claude 3.5/3.7 Sonnet)**, **Groq**, **Azure OpenAI**, or completely local models via **Ollama**.
-- **🌀 Hybrid Go + Python Engine:** The best of both worlds — Go handles blazing-fast CLI interactions, concurrent file walking, Git operations, and tool loops; a decoupled Python microservice handles deep RAG, embeddings, vector indexing, and local evaluation.
-- **🏗️ Clean Architecture with Domain-Driven Modules:** Designed for longevity, extensibility, and maintainability. Every capability is encapsulated behind strict interfaces.
-- **🛠️ Autonomous Tool Ecosystem:** Built-in specialized tools for file reading/writing, shell command execution, semantic search, Git workflows, web browsing, testing, and linting.
-- **💾 Local First & Privacy Focused:** Uses localized **SQLite** (`~/.windmist/`) for persistent session history, agent state, and workspace memory without shipping your private code to third-party databases.
-
----
-
-## 📐 High-Level Architecture
-
-```text
-                                  User
-                                   │
-                                   ▼
-                            WindMist CLI (Go)
-                                   │
-                     ┌─────────────┼──────────────┐
-                     │             │              │
-                     ▼             ▼              ▼
-                 Commands      AI Engine      Config
-                     │             │              │
-                     └──────┬──────┴──────┬───────┘
-                            │
-                            ▼
-                      Repository Engine
-                            │
-                     ┌──────┼────────┐
-                     ▼      ▼        ▼
-              File System Git    Memory
-                            │
-                            ▼
-                      Tool Execution
-                            │
-                            ▼
-                      AI Providers
-            (Gemini / OpenAI / Anthropic / Groq / Ollama)
-                            │
-                            ▼ [Decoupled via HTTP/JSON]
-                      Python AI Service
-                 (Embeddings / RAG / Evaluation)
+```bash
+git clone https://github.com/your-username/windmist.git
+cd windmist
+go build -o windmist ./cmd/windmist
 ```
 
 ---
 
-## 💡 Why Go + Python?
+## 🚀 Quick Start
 
-Most AI tools force a compromise: pure Python tools suffer from slow startup times, heavy dependency footprints, and sluggish terminal UX, while pure Go tools struggle to tap into the cutting-edge ecosystem of machine learning and vector indexing libraries. 
-
-**WindMist eliminates this compromise through strict separation of responsibilities:**
-
-### Go Owns Core Performance & UX
-Everything that must be instantaneous, concurrent, and close to the operating system lives in Go (`internal/`):
-- CLI parsing (**Cobra**) & Rich Terminal UI (**Bubble Tea + Lip Gloss**)
-- Concurrent file walking, symbol extraction, and AST inspection
-- Autonomous agent loop, prompt building, and tool execution
-- Git integration and local workspace mutation
-- Multi-provider HTTP/streaming integration
-
-### Python Owns Deep AI Workloads
-Complex machine learning workloads are isolated in a lightweight, decoupled **FastAPI** service (`python/`):
-- Local & remote text embeddings (**Sentence Transformers**)
-- Advanced RAG & semantic code retrieval
-- Local vector storage indexing (**ChromaDB / Qdrant**)
-- Future model fine-tuning, training, and automated evaluation pipelines
-
-### Clean Decoupling
-Go and Python communicate exclusively over clean HTTP/gRPC interfaces or structured IPC. This ensures that WindMist starts in milliseconds, works reliably without heavy Python environments for core tasks, and scales cleanly when advanced AI features are engaged.
+1. **Set your Gemini API Key** (or export it in your environment):
+   ```bash
+   export GEMINI_API_KEY="your-gemini-api-key"
+   ```
+2. **Launch the interactive Terminal UI:**
+   ```bash
+   ./windmist
+   ```
+3. **Or run a single-turn prompt directly against your repository:**
+   ```bash
+   ./windmist chat "Examine internal/agent and summarize the tool loop"
+   ```
 
 ---
 
-## 🛠️ Core Commands (Planned)
+## ✨ Features & Capabilities
+
+WindMist (`v1.0.0`) provides a robust, native engineering environment inside your terminal:
+
+* ✅ **Interactive AI Chat & TUI:** Rich Bubble Tea and Lip Gloss interface with real-time streaming, markdown rendering, and syntax coloring.
+* ✅ **Native Gemini Provider (`internal/providers/gemini`):** Full multi-turn conversation support with native `OBJECT` schema translation and function calling (`v1beta`).
+* ✅ **15 Atomic Filesystem & Editing Tools (`internal/tools/...`):**
+  * **Filesystem Operations:** `read`, `write`, `append`, `delete`, `rename`, `list`, `create`, `info`, `exists`.
+  * **Precision Editing:** `replace_text`, `replace_range`, `delete_range`, `read_context`, `insert_text`, `search_text`.
+* ✅ **Autonomous Agent Loop (`internal/agent`):** Stateless multi-turn reasoning loop with automated tool execution, context tracking, and self-correction.
+
+---
+
+## 🛠️ Core Commands
 
 | Command | Description |
 | :--- | :--- |
-| `windmist chat` | Start an interactive, context-aware AI pairing session in your terminal. |
-| `windmist build <prompt>` | Give high-level instructions and let WindMist autonomously plan, code, and test. |
-| `windmist review [PR/Branch]` | Perform a comprehensive architectural and code quality review of recent changes. |
-| `windmist fix` | Automatically diagnose and resolve failing compiler errors or unit tests. |
-| `windmist doctor` | Verify system health, API provider connectivity, SQLite state, and local dependencies. |
-| `windmist auth` | Securely configure and store API keys for AI providers. |
+| `windmist` | Launch the rich interactive Bubble Tea Terminal UI session. |
+| `windmist chat <prompt>` | Run a single-turn or multi-turn agent instruction directly from the command line. |
+| `windmist set <key> <val>` | Configure local environment and provider settings (`~/.windmist/config.yaml`). |
+| `windmist show` | Display current local configuration settings. |
+| `windmist version` | Print current semantic release build version (`v1.0.0`). |
 
 ---
 
-## 🗂️ Project Directory Structure (Planned)
+## 💡 Why WindMist?
 
-We strictly adhere to Go's `internal/` package conventions to guarantee encapsulation and maintain a clean boundary between private engine mechanics and external SDKs.
+Our mission is to provide an open-source AI coding assistant that operates with native execution speed, deep workspace awareness, and complete local sovereignty over your development workflows.
+
+Most AI CLI tools struggle with sluggish startup times or cumbersome configuration requirements. WindMist eliminates this overhead by isolating everything close to your terminal—CLI parsing, interactive Bubble Tea UX, concurrent file walking, and the autonomous tool execution loop—strictly inside a high-performance Go core (`internal/`).
+
+---
+
+## 📐 Architecture Overview
+
+WindMist strictly follows **Clean Architecture with Domain-Driven Modules**. Every capability is isolated behind Go interfaces (`ai.Provider`, `tools.Tool`) inside the `internal/` boundary:
+
+```text
+┌─────────────────────────────────────────────────────────────────┐
+│                       USER TERMINAL (CLI)                       │
+└────────────────────────────────┬────────────────────────────────┘
+                                 │
+                                 ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                       GO ENGINE (internal/)                     │
+│                                                                 │
+│   ┌──────────────────┐    ┌──────────────────┐                  │
+│   │    Cobra CLI     │    │  Bubble Tea TUI  │  cmd/windmist    │
+│   └────────┬─────────┘    └────────┬─────────┘                  │
+│            │                       │                            │
+│            └───────────┬───────────┘                            │
+│                        ▼                                        │
+│               ┌─────────────────┐                               │
+│               │   Agent Loop    │  internal/agent               │
+│               └────────┬────────┘                               │
+│                        │                                        │
+│         ┌──────────────┴──────────────┐                         │
+│         ▼                             ▼                         │
+│  ┌─────────────┐               ┌─────────────┐                  │
+│  │ Tool Engine │               │   Gemini    │  internal/tools  │
+│  │ (15 tools)  │               │  Provider   │  internal/prov...│
+│  └─────────────┘               └─────────────┘                  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Directory Structure (`v1.0.0`)
 
 ```text
 windmist/
 ├── cmd/
-│   └── windmist/          # Main application entry point (main.go)
-├── internal/              # Private domain-driven modules
-│   ├── cli/               # Cobra commands and interactive terminal controllers
-│   ├── commands/          # Subcommand handlers (chat, review, fix, etc.)
-│   ├── config/            # Viper configuration and environment management
-│   ├── agent/             # Core autonomous reasoning and state recovery loop
-│   ├── planner/           # Multi-step task decomposition and graph planning
-│   ├── tools/             # Atomic tool implementations (File, Git, Shell, Search)
-│   ├── providers/         # Unified LLM interfaces (Gemini, OpenAI, Anthropic, Groq)
-│   ├── git/               # Git repository inspection and mutation utilities
-│   ├── repository/        # AST parsing, file walking, and symbol indexing
-│   ├── memory/            # SQLite storage interface for sessions and long-term memory
-│   ├── session/           # Active workspace state and multi-turn context manager
-│   ├── executor/          # Safe shell execution and sandboxing controls
-│   ├── parser/            # Code parsing and response formatting tools
-│   ├── prompt/            # System instructions and dynamic prompt builders
-│   ├── streaming/         # Server-Sent Events (SSE) and terminal streaming helpers
-│   ├── telemetry/         # Optional, privacy-first diagnostic metrics
-│   └── util/              # Shared concurrent primitives and helpers
-├── sdk/                   # Public Go SDK for extending WindMist programmatically
-├── plugins/               # External tool and Model Context Protocol (MCP) integrations
-├── api/                   # Interface definitions and OpenAPI/proto specs
-├── python/                # Decoupled AI microservice
-│   ├── embeddings/        # Sentence transformer embedding generators
-│   ├── rag/               # Retrieval-Augmented Generation retrieval engines
-│   ├── evaluation/        # Benchmark and quality evaluation suites
-│   └── server/            # FastAPI server entry point
-├── examples/              # Sample workflows and configuration templates
-├── docs/                  # Architectural deep-dives and user guides
-├── scripts/               # Build, installation, and setup automation scripts
-├── tests/                 # End-to-end integration and system test suites
-├── .github/               # CI/CD workflows and community templates
-├── Makefile               # Universal build and development automation
-├── go.mod                 # Go module definition
-└── README.md              # Project overview
+│   └── windmist/             # Main application entry point (main.go)
+├── internal/                 # Private domain-driven Go engine modules
+│   ├── agent/                # Stateless multi-turn reasoning and loop execution
+│   ├── chat/                 # Bubble Tea terminal controllers and viewports
+│   ├── config/               # Configuration loading (~/.windmist/config.yaml)
+│   ├── providers/
+│   │   ├── ai/               # Provider-agnostic interfaces (Provider, Message, ToolDefinition)
+│   │   └── gemini/           # Native Gemini v1beta schema and tool calling adapter
+│   ├── tools/
+│   │   ├── defaults/         # Tool registry (RegisterAll)
+│   │   ├── editing/          # Precision code editing tools (replace, insert, search)
+│   │   └── filesystem/       # Atomic filesystem operations (read, write, list)
+│   └── ui/                   # Lip Gloss and Glamour markdown styling helpers
+├── docs/                     # Architectural deep-dives and developer guides
+├── README.md                 # Project overview & installation
+├── CONTRIBUTING.md           # Workflow & coding standards
+└── SECURITY.md               # Threat models & vulnerability reporting
 ```
 
----
-
-## 🗺️ Roadmap & Phases
-
-We are currently in **Phase 4: Autonomous Agent & Native Tool Calling (`v1.0.0 Live`)**. Check out [ROADMAP.md](ROADMAP.md) for full phase breakdowns:
-
-- [x] **Phase 0:** Product Vision, Architecture Design & Planning
-- [x] **Phase 1:** Foundation (CLI setup, Config, Provider Interfaces, Logging)
-- [x] **Phase 2:** Interactive Chat (Terminal UI, Streaming, Markdown/Syntax Rendering)
-- [x] **Phase 3:** Repository Awareness & Filesystem Engine (All 15 atomic tools, Ignore Patterns)
-- [x] **Phase 4:** Autonomous Agent (Stateless Loop, Native Gemini Tool Calling, Multi-Step Reasoning) (`v1.0.0 Completed`)
-- [ ] **Phase 5:** Advanced AI Service (Python RAG, Embeddings, Semantic Search, SQLite Memory)
-- [ ] **Phase 6:** Production & Ecosystem (MCP Support, Plugin Engine, Telemetry, Cross-Platform Packaging)
+> [!NOTE]
+> For deep engineering documentation and full multi-step loop specifications, please read **[`docs/architecture.md`](docs/architecture.md)**.
 
 ---
 
-## 🤝 Contributing & Code of Conduct
+## 🤝 Contributing
 
-We are designing WindMist like a high-growth startup engineering team: high standards, clean architecture, thorough documentation, and rigorous testing.
-
-- **Contributing Guide:** Please read our [CONTRIBUTING.md](CONTRIBUTING.md) to understand our architectural principles, Go/Python integration guidelines, and pull request workflow.
-- **Code of Conduct:** We are committed to fostering an inclusive and professional community. Read our [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
+Whether you are fixing bugs, improving documentation, or designing new tools, we treat this project with the engineering rigor of a top-tier open-source product:
+* **Users & Newcomers:** Check out our [Quick Start](#-quick-start) to begin pairing with WindMist.
+* **Contributors:** Please review **[`CONTRIBUTING.md`](CONTRIBUTING.md)** for local setup, branch conventions (`feat/`, `fix/`), and our testing rules (`go test ./...`).
+* **Security:** Review **[`SECURITY.md`](SECURITY.md)** for our threat models (`Workspace boundaries`, `Tool permissions`, `Unsafe commands`).
 
 ---
 
 ## 📄 License
 
-This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
+This project is licensed under the **MIT License** — see the [`LICENSE`](LICENSE) file for details.
 
 ---
 

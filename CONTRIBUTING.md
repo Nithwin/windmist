@@ -2,69 +2,40 @@
 
 First off, thank you for considering contributing to **WindMist**! 🎉
 
-We are building an autonomous, high-performance AI Software Engineer right inside the terminal. We treat this project with the rigor and design standards of a top-tier startup product. Whether you are fixing bugs, improving documentation, adding new AI providers, or designing new tools, your contributions are invaluable.
+We are building a modern open-source AI coding assistant right inside the terminal. We treat this project with the rigor and design standards of a top-tier product. Whether you are fixing bugs, improving documentation, adding new AI providers, or designing new tools, your contributions are invaluable.
 
-This guide details our engineering philosophy, architecture rules, and workflow so you can jump right in.
-
----
-
-## 🏛️ Core Architectural Principles
-
-Before writing any code, it is critical to understand our fundamental design decision:
-
-> **We follow Clean Architecture with Domain-Driven Modules, NOT a traditional layered MVC approach.**
-
-Every feature must encapsulate its own logic, state, and dependencies behind clean, well-defined interfaces. This ensures WindMist can scale to support dozens of AI providers, custom tools, and complex plugins without spaghetti dependencies or architectural rot.
-
-### 1. High-Performance Go Core (`internal/`)
-
-WindMist `v1.0.0` is engineered completely in **Go 1.25+** to provide instantaneous startup times, high concurrency, low memory overhead, and native cross-platform binaries:
-
-| Package | Responsibilities |
-| :--- | :--- |
-| **`internal/agent`** | Stateless multi-turn reasoning loop, token usage tracking, and tool execution orchestration. |
-| **`internal/tools/...`** | Atomic filesystem (`read`, `write`, `list`, `info`, etc.) and precision editing (`replace_text`, `replace_range`, `read_context`, etc.) tools. |
-| **`internal/providers/gemini`** | Native Gemini `v1beta` function declaration schema translation (`OBJECT` schema) and multi-turn message handling. |
-| **`internal/chat` & `internal/ui`** | Rich Bubble Tea and Lip Gloss terminal user interface with streaming Server-Sent Events (SSE) and dynamic Markdown/syntax coloring. |
-
-### 2. The `internal/` Boundary
-In Go, packages inside `internal/` cannot be imported by external applications.
-- **Always put WindMist engine modules inside `internal/`** (`internal/agent`, `internal/tools`, `internal/providers`, `internal/chat`, etc.).
-
-### 3. Interface-Driven Providers & Tools
-When adding a new AI provider (e.g., Azure, Ollama) or a new tool (e.g., `LintTool`, `DockerTool`):
-- Implement our common `Provider` interface inside `internal/providers/`.
-- Implement our common `Tool` interface inside `internal/tools/`.
-- **Never** hardcode vendor-specific logic into the `internal/agent/` reasoning loop.
+This guide details our workflow, coding standards, and high-level structure so you can jump right in.
 
 ---
 
-## 🛠️ Development Environment Setup
+## 🚀 Quick Start
 
-### Prerequisites
-- **Go:** `1.25` or higher
-- **Python:** `3.13` or higher
-- **Git:** `2.40+`
-- **SQLite:** `3.40+` (included via CGO or modern pure-Go drivers)
+To get up and running quickly with WindMist development:
 
-### Initial Setup (Planning Stage Preview)
-While we are currently in Phase 1 setup, our standard workspace initialization will follow these steps once code scaffolding begins:
-
-```bash
-# Clone the repository
-git clone https://github.com/your-username/windmist.git
-cd windmist
-
-# Verify Go setup
-go version
-
-# Verify Python setup
-python3 --version
-```
+1. **Clone your fork** of the repository:
+   ```bash
+   git clone https://github.com/your-username/windmist.git
+   cd windmist
+   ```
+2. **Review prerequisites and installation steps** in our [`README.md`](README.md).
+3. **Run existing tests** to verify your local setup before making modifications:
+   ```bash
+   go test ./...
+   ```
 
 ---
 
-## 🌿 Branching & Workflow
+## 🛠️ Development Setup
+
+For full details on local environment prerequisites, dependency management, and configuration, please refer to:
+* **[`README.md`](README.md)** for general system requirements and installation.
+* **`docs/development.md`** for detailed local setup instructions, environment variables, and debugging guides.
+
+Contributing shouldn't duplicate setup documentation—always keep your local environment synchronized with our core setup guides.
+
+---
+
+## 🌿 Workflow
 
 We follow a clean feature-branching workflow:
 
@@ -75,20 +46,26 @@ We follow a clean feature-branching workflow:
    # or
    git checkout -b fix/ast-parser-memory-leak
    ```
-3. **Write clean, documented code** adhering to Clean Architecture principles.
+3. **Write clean, documented code** adhering to our engineering standards.
 4. **Run tests & linters** locally before committing.
 
 ### Branch Naming Conventions
-- `feat/`<brief-description> (New features or providers)
-- `fix/`<brief-description> (Bug fixes)
-- `docs/`<brief-description> (Documentation improvements)
-- `refactor/`<brief-description> (Code restructuring without behavior changes)
-- `test/`<brief-description> (Adding or updating test suites)
+* `feat/`<brief-description> (New features or providers)
+* `fix/`<brief-description> (Bug fixes)
+* `docs/`<brief-description> (Documentation improvements)
+* `refactor/`<brief-description> (Code restructuring without behavior changes)
+* `test/`<brief-description> (Adding or updating test suites)
 
 ---
 
-## 💬 Conventional Commits
+## 💬 Coding Standards
 
+We prioritize code clarity, reliability, and long-term maintainability. When writing code for WindMist:
+* Ensure all exported functions, types, and interfaces have clear docstrings.
+* Write unit tests alongside your implementation.
+* Avoid hardcoding vendor-specific logic into core loops; rely on clean interfaces.
+
+### Conventional Commits
 Please format your commit messages using the [Conventional Commits](https://www.conventionalcommits.org/) specification:
 
 ```text
@@ -96,48 +73,56 @@ Please format your commit messages using the [Conventional Commits](https://www.
 ```
 
 **Examples:**
-- `feat(providers): implement Groq streaming provider interface`
-- `fix(tools): resolve path traversal bug in WriteFileTool`
-- `docs(readme): add detailed clean architecture breakdown`
-- `refactor(agent): separate tool execution loop from planner graph`
+* `feat(providers): implement Groq streaming provider interface`
+* `fix(tools): resolve path traversal bug in write tool`
+* `docs(readme): add detailed architecture breakdown`
+* `refactor(agent): separate tool execution loop from planner`
 
 ---
 
-## 🧪 Testing Guidelines
+## 🏛️ Architecture Overview
+
+WindMist is structured around stable concepts designed for modularity and high performance:
+
+| Component | Responsibility |
+| :--- | :--- |
+| **Agent** | Stateless multi-turn reasoning loop, token usage tracking, and tool execution orchestration. |
+| **Tools** | Atomic filesystem and precision text-editing operations. |
+| **Providers** | Interface-driven AI model integrations and schema translations. |
+| **UI** | Terminal user interface, streaming display, and interactive components. |
+
+Please read **`docs/architecture.md`** before making major architectural changes.
+
+---
+
+## 🧪 Testing
 
 We value reliability above all else. Every new tool, command, or provider must include comprehensive automated tests.
 
-### Go Tests
-All domain modules must have corresponding `_test.go` files:
+Run:
 ```bash
-# Run unit tests across all internal packages
-go test -v ./internal/...
+go test ./...
+```
+before opening a PR, because that's what CI will execute.
 
-# Run tests with race condition detection
-go test -race ./internal/...
+You can also run tests across all internal domain modules with race detection enabled during local development:
+```bash
+go test -race ./...
 ```
 
-### Python Tests
-Python microservice modules must be tested via `pytest`:
-```bash
-cd python
-python3 -m pytest tests/ -v
-```
+For detailed testing guides and verification strategies, check **`docs/testing.md`**.
 
 ---
 
-## 🔍 Code Review Expectations
+## 🔍 Submitting PRs
 
 When you submit a Pull Request:
 1. Ensure your PR description clearly explains **what** the change does, **why** it was implemented that way, and **how** it was tested.
-2. Link any related GitHub issues.
-3. Keep PRs atomic and focused on a single responsibility or domain module.
-4. Be responsive to review feedback — we aim to review all PRs constructively and promptly!
+2. Link any related GitHub issues or discussions.
+3. Keep PRs atomic and focused on a single responsibility or stable component.
+4. Verify all tests pass by executing `go test ./...` locally before submitting.
+5. Be responsive to review feedback — we aim to review all PRs constructively and promptly!
 
----
+If you have questions or ideas for a major architectural change or a new core module, please open a GitHub Discussion or Issue first to discuss it with the maintainers before writing extensive code.
 
-## ❓ Questions or Ideas?
-
-If you have an idea for a major architectural change or a new core module, please open a GitHub Discussion or Issue first to discuss it with the maintainers before writing extensive code.
-
-Thank you for helping shape **WindMist** into the ultimate terminal AI engineer! 🚀
+Thank you for helping shape **WindMist** into a top-tier open-source project! 🚀

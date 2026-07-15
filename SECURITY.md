@@ -1,6 +1,6 @@
 # Security Policy for WindMist 🌪️
 
-We take the security and integrity of **WindMist** seriously. Because WindMist is an autonomous, high-performance AI Software Engineer that operates inside your terminal—with capabilities to read/write files, execute system commands, and communicate with remote AI models—maintaining robust security boundaries is a top priority.
+We take the security and integrity of **WindMist** seriously. Because WindMist is an autonomous terminal AI coding assistant—with capabilities to read/write files, execute system commands, and communicate with remote AI models—maintaining robust security boundaries is a top priority.
 
 ---
 
@@ -28,15 +28,15 @@ If you discover a potential security vulnerability, please report it privately u
 3. Click **Report a vulnerability** to open a confidential security advisory.
 
 ### 2. Direct Contact
-If you are unable to use GitHub Security Advisories, send an email directly to the maintainers at **`security@windmist.dev`** (or the primary repository owner's email). Please include `[SECURITY]` in the subject line.
+If you are unable to use GitHub Security Advisories, please contact the repository owner directly through GitHub or open a private security/moderation report. Please include `[SECURITY]` in the subject line or message prefix.
 
 ### What to Include in Your Report
 To help us triage and resolve the issue quickly, please provide:
-- **Type of Vulnerability:** (e.g., Path Traversal, Arbitrary Command Execution, API Key Leakage, Local Service Exposure).
-- **Affected Module/Layer:** Specify whether it occurs in the Go engine (`internal/`), the Python microservice (`python/`), or the IPC layer.
+- **Type of Vulnerability:** (e.g., Path Traversal, Arbitrary Command Execution, API Key Leakage).
+- **Affected Layer/Component:** Specify whether it occurs in the agent loop, tool execution, provider integration, or terminal UI.
 - **Steps to Reproduce:** A step-by-step reproduction guide or minimal Proof-of-Concept (PoC) script/prompt.
 - **Impact Assessment:** How an attacker could exploit this bug and what system access or data would be compromised.
-- **Environment Details:** Go version (`go version`), Python version, and operating system (Linux/macOS/Windows).
+- **Environment Details:** Go version (`go version`) and operating system (Linux/macOS/Windows).
 
 ---
 
@@ -53,26 +53,22 @@ We are committed to being responsive and transparent with security researchers:
 
 ## 🔒 Key Threat Models & Security Considerations
 
-Because WindMist combines a high-concurrency **Go core (`internal/`)** with an AI/RAG **Python microservice (`python/`)**, we pay special attention to the following attack vectors:
+Because WindMist is an autonomous terminal AI coding assistant with direct access to filesystem operations, command execution, and remote model providers, we pay special attention to the following attack vectors:
 
-### 1. File System Path Traversal (`internal/tools/files`)
-WindMist file operations (`CreateTool`, `ReadTool`, `WriteTool`) must strictly confine themselves to the target project workspace. Vulnerabilities allowing relative path escape (e.g., `../../etc/passwd` or overwriting `~/.bashrc` without explicit user override) are classified as **High/Critical severity**.
+### 1. Workspace Boundaries (`Workspace boundaries`)
+File operations (`create`, `read`, `write`, `edit`) must strictly confine themselves to the target project workspace. Vulnerabilities allowing relative path escape (e.g., `../../etc/passwd` or overwriting `~/.bashrc` without explicit user override) are classified as **High/Critical severity**.
 
-### 2. Command Execution & Confirmation Sandbox (`internal/tools/cmd`)
-WindMist executes bash/shell commands (`RunCommandTool`). 
-- Commands flagged as potentially destructive (`SafeToAutoRun = false`) **must** require explicit user approval via the terminal UI before running.
-- Any bug that allows untrusted model output or external prompts to bypass user confirmation for unsafe commands is treated as a **Critical vulnerability**.
+### 2. Tool Permissions (`Tool permissions`)
+Tools that interact with the system or filesystem must operate strictly within their granted capabilities and validation rules. Any flaw allowing a tool to exceed its intended scope, manipulate unauthorized files, or bypass access boundaries is treated as a high-priority vulnerability.
 
-### 3. API Key & Secret Protection (`internal/providers`)
-WindMist handles sensitive API keys (e.g., `GEMINI_API_KEY`, `OPENAI_API_KEY`, `GROQ_API_KEY`).
-- API keys must **never** be logged to stdout/stderr or saved to local SQLite logs (`internal/storage/`).
-- Provider HTTP payloads must strip or mask authorization headers during debug logging.
+### 3. Unsafe Commands (`Unsafe commands`)
+WindMist can execute terminal commands on behalf of the user. Commands flagged as potentially destructive (`SafeToAutoRun = false`) **must** require explicit user approval via the terminal UI before executing. Any vulnerability that allows untrusted model output or external prompts to bypass user confirmation for unsafe commands is classified as a **Critical vulnerability**.
 
-### 4. Local IPC Boundary (`Go <-> Python Service`)
-The Python AI/RAG service (`FastAPI`/`gRPC`) must strictly bind to loopback interfaces (`127.0.0.1` or `localhost` or Unix domain sockets). It must **never** expose unauthenticated ports to public LAN/WAN interfaces.
+### 4. API Keys & Secret Protection (`API keys`)
+WindMist handles sensitive API keys for external providers (e.g., `GEMINI_API_KEY`, `OPENAI_API_KEY`). API keys must **never** be logged to stdout/stderr, written to disk in plain text logs, or exposed in debug traces. HTTP authorization headers must be stripped or masked during logging.
 
-### 5. Prompt Injection vs. System Safeguards
-While Large Language Models (LLMs) are inherently susceptible to indirect prompt injection from untrusted repository files, **WindMist's deterministic Go engine must act as a non-bypassable guardrail**. If a prompt injection successfully tricks the model, the Go engine must still enforce strict boundary checks and user approvals before executing high-risk system actions.
+### 5. Prompt Injection (`Prompt injection`)
+While Large Language Models (LLMs) are inherently susceptible to indirect prompt injection from untrusted repository files, WindMist's deterministic engine acts as a non-bypassable guardrail. Even if a model is manipulated via prompt injection, the engine must enforce strict boundary checks and user confirmation workflows before executing high-risk system actions.
 
 ---
 
