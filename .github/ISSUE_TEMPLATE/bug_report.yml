@@ -1,0 +1,93 @@
+name: Bug Report
+description: Report an unexpected behavior, error, or crash in WindMist
+title: "[BUG]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report!
+        Please make sure to search [existing issues](https://github.com/Nithwin/windmist/issues) before opening a new one.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear and concise description of the bug or error you encountered.
+      placeholder: Describe what happened when running WindMist...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: What did you expect to happen?
+      description: What was the expected output or behavior?
+      placeholder: Describe what should have happened instead...
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction-steps
+    attributes:
+      label: Steps to Reproduce
+      description: Provide exact steps or commands to reproduce the issue.
+      placeholder: |
+        1. Run command 'windmist ...'
+        2. Enter prompt '...'
+        3. See error
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating System
+      description: What OS are you running WindMist on?
+      options:
+        - Linux
+        - macOS
+        - Windows
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: windmist-version
+    attributes:
+      label: WindMist Version
+      description: Provide the output of `windmist --version` or the git commit hash.
+      placeholder: e.g., v1.0.0 or 3a2c1f9
+    validations:
+      required: true
+
+  - type: dropdown
+    id: provider
+    attributes:
+      label: LLM Provider
+      description: Which AI provider was active when the bug occurred?
+      options:
+        - Gemini
+        - OpenAI
+        - Anthropic
+        - Ollama / Local
+        - None / Not Applicable
+    validations:
+      required: false
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant Logs or Terminal Output
+      description: Paste any stack traces, Glamour/Lip Gloss rendering artifacts, or terminal errors. Please wrap inside code blocks (` ``` `).
+      render: shell
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Any other information, screenshots, or configuration (`~/.config/windmist/config.yaml`) details that might help us debug.
+    validations:
+      required: false

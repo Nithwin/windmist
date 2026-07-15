@@ -1,0 +1,36 @@
+name: Documentation Improvement
+description: Report missing, unclear, or inaccurate documentation
+title: "[DOCS]: "
+labels: ["documentation"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping us keep WindMist's documentation accurate and helpful!
+
+  - type: input
+    id: target
+    attributes:
+      label: Target Document or Section
+      description: Which document, guide, or CLI help text needs attention?
+      placeholder: e.g., README.md, docs/architecture.md, or `windmist --help`
+    validations:
+      required: true
+
+  - type: textarea
+    id: issue
+    attributes:
+      label: What is inaccurate, unclear, or missing?
+      description: Describe the documentation gap or confusion.
+      placeholder: e.g., The architecture guide mentions future diagrams that were moved, or the command usage flag is missing...
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Suggested Improvement
+      description: If you have a specific suggestion or wording clarification, please share it!
+      placeholder: e.g., Update the example snippet to show `windmist --provider=gemini`...
+    validations:
+      required: false

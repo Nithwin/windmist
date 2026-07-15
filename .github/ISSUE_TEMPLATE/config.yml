@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Community Discussions & Q&A
+    url: https://github.com/Nithwin/windmist/discussions
+    about: Ask questions, share ideas, and discuss WindMist with the community here instead of opening an issue.
+  - name: Security Vulnerability Reports
+    url: https://github.com/Nithwin/windmist/security/advisories/new
+    about: Please report sensitive security issues directly via private vulnerability reporting.
