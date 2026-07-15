@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  ci:
+    name: CI
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+          cache: true
+
+      - name: Download Dependencies (`go mod download`)
+        run: |
+          go mod download
+          go mod verify
+
+      - name: Verify Formatting (`gofmt`)
+        run: |
+          unformatted=$(gofmt -l .)
+          if [ -n "$unformatted" ]; then
+            echo "❌ The following Go files are not properly formatted with gofmt:"
+            echo "$unformatted"
+            exit 1
+          fi
+
+      - name: Run Static Analysis (`go vet`)
+        run: go vet ./...
+
+      - name: Run Unit & Golden Tests (`go test -race`)
+        run: go test -v -race ./...
+
+      - name: Build CLI Binary (`go build`)
+        run: go build -v -o /tmp/windmist .
