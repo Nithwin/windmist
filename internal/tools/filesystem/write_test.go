@@ -86,7 +86,7 @@ func TestWriteFileEmptyPath(t *testing.T) {
 	call := tools.Call{
 		Name: "write",
 		Args: map[string]any{
-			"path": "",
+			"path":    "",
 			"content": "hello",
 		},
 	}
@@ -105,7 +105,7 @@ func TestWriteFileInvalidPath(t *testing.T) {
 	call := tools.Call{
 		Name: "write",
 		Args: map[string]any{
-			"path": "/invalid/directory/test.txt",
+			"path":    "/invalid/directory/test.txt",
 			"content": "hello",
 		},
 	}

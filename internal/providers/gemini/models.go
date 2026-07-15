@@ -68,7 +68,7 @@ type GenerationConfig struct {
 // GenerateContentResponse represents Gemini's response.
 type GenerateContentResponse struct {
 	Candidates []Candidate `json:"candidates"`
-	Usage       Usage       `json:"usageMetadata,omitempty"`
+	Usage      Usage       `json:"usageMetadata,omitempty"`
 }
 
 // Candidate represents a generated candidate.

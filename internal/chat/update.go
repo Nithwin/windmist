@@ -164,7 +164,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if len(m.conversation.Messages) > 0 {
 				m.conversation.Messages[len(m.conversation.Messages)-1].Content =
 					"Error: " + msg.Err.Error()
-					
+
 				m.refreshViewport()
 			}
 

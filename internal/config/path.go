@@ -7,7 +7,7 @@ import (
 )
 
 // ConfigDir returns the directory used to store WindMist configuration.
-func ConfigDir() (string, error){
+func ConfigDir() (string, error) {
 	configDir, err := os.UserConfigDir()
 	if err != nil {
 		return "", fmt.Errorf("failed to get config directory: %w", err)

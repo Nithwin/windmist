@@ -77,5 +77,3 @@ func ReadRange(ctx context.Context, path string, startLine int, endLine int) (st
 
 	return builder.String(), nil
 }
-
-

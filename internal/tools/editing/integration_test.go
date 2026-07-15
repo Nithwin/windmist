@@ -224,4 +224,3 @@ const Version = "v1.0.0"`
 		t.Errorf("expected original code after rollback, got %s", string(restoredData))
 	}
 }
-

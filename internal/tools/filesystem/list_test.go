@@ -113,10 +113,10 @@ func TestListDirectoryRecursive(t *testing.T) {
 	}
 
 	expectedPaths := map[string]string{
-		filepath.Join(tempDir, "a.txt"):                "file",
-		filepath.Join(tempDir, "subdir"):               "directory",
-		filepath.Join(tempDir, "subdir", "b.txt"):      "file",
-		filepath.Join(tempDir, "subdir", "nested"):     "directory",
+		filepath.Join(tempDir, "a.txt"):                     "file",
+		filepath.Join(tempDir, "subdir"):                    "directory",
+		filepath.Join(tempDir, "subdir", "b.txt"):           "file",
+		filepath.Join(tempDir, "subdir", "nested"):          "directory",
 		filepath.Join(tempDir, "subdir", "nested", "c.txt"): "file",
 	}
 

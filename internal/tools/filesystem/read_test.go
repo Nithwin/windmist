@@ -63,7 +63,6 @@ func TestReadFileNonExistent(t *testing.T) {
 func TestReadFileInvalidPath(t *testing.T) {
 	tool := NewReadTool()
 
-
 	call := tools.Call{
 		Name: "read",
 		Args: map[string]any{

@@ -46,4 +46,4 @@ func (t *DeleteTool) Run(ctx context.Context, call tools.Call) tools.Result {
 	return tools.Result{
 		Output: fmt.Sprintf("Deleted %q", path),
 	}
-}	
+}
