@@ -2,7 +2,6 @@ package ollama
 
 import (
 	"context"
-	"strings"
 
 	"github.com/Nithwin/WindMist/internal/ai"
 	"github.com/Nithwin/WindMist/internal/config"
@@ -20,13 +19,7 @@ type Provider struct {
 
 // New creates a new Ollama provider instance.
 func New(cfg config.ProviderConfig) ai.Provider {
-	baseURL := strings.TrimRight(cfg.BaseURL, "/")
-	if baseURL == "" {
-		baseURL = "http://localhost:11434"
-	}
-	if !strings.HasSuffix(baseURL, "/v1") {
-		baseURL = baseURL + "/v1"
-	}
+	baseURL := "http://localhost:11434/v1"
 
 	model := cfg.Model
 	if model == "" {

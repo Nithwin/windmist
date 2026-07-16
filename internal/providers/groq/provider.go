@@ -2,7 +2,6 @@ package groq
 
 import (
 	"context"
-	"strings"
 
 	"github.com/Nithwin/WindMist/internal/ai"
 	"github.com/Nithwin/WindMist/internal/config"
@@ -20,13 +19,7 @@ type Provider struct {
 
 // New creates a new Groq provider instance.
 func New(cfg config.ProviderConfig) ai.Provider {
-	baseURL := strings.TrimRight(cfg.BaseURL, "/")
-	if baseURL == "" {
-		baseURL = "https://api.groq.com/openai/v1"
-	}
-	if !strings.HasSuffix(baseURL, "/v1") && !strings.HasSuffix(baseURL, "/openai/v1") {
-		baseURL = baseURL + "/openai/v1"
-	}
+	baseURL := "https://api.groq.com/openai/v1"
 
 	model := cfg.Model
 	if model == "" {
