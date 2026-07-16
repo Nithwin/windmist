@@ -1,0 +1,31 @@
+{
+  "gemini": [
+    { "label": "gemini-3.5-flash", "description": "Latest high-speed Gemini 3.5 Flash model (Default)", "value": "gemini-3.5-flash" },
+    { "label": "gemini-3.1-pro", "description": "Latest advanced reasoning Gemini 3.1 Pro model", "value": "gemini-3.1-pro" },
+    { "label": "gemini-2.5-flash", "description": "High-speed multimodal model", "value": "gemini-2.5-flash" },
+    { "label": "gemini-2.5-pro", "description": "Advanced reasoning model", "value": "gemini-2.5-pro" }
+  ],
+  "openai": [
+    { "label": "gpt-5.5-pro", "description": "Latest frontier GPT-5.5 Pro model for professional coding (Default)", "value": "gpt-5.5-pro" },
+    { "label": "gpt-5.4-pro", "description": "Flagship GPT-5.4 Pro balanced intelligence model", "value": "gpt-5.4-pro" },
+    { "label": "gpt-5.4", "description": "Fast, high-performance general purpose model", "value": "gpt-5.4" },
+    { "label": "o3-pro", "description": "Latest deep multi-step reasoning model", "value": "o3-pro" },
+    { "label": "o3", "description": "High-performance reasoning model", "value": "o3" },
+    { "label": "o4-mini", "description": "Ultra-fast, cost-efficient reasoning model", "value": "o4-mini" },
+    { "label": "gpt-4.5-pro", "description": "GPT-4.5 Pro model", "value": "gpt-4.5-pro" },
+    { "label": "gpt-4o", "description": "Legacy multimodal intelligence model", "value": "gpt-4o" }
+  ],
+  "anthropic": [
+    { "label": "claude-fable-5", "description": "Anthropic's most capable flagship model for long-running agents", "value": "claude-fable-5" },
+    { "label": "claude-opus-4-8", "description": "Coding flagship model featuring Adaptive Thinking", "value": "claude-opus-4-8" },
+    { "label": "claude-sonnet-5", "description": "Standard model balancing speed, intelligence, and cost (Default)", "value": "claude-sonnet-5" },
+    { "label": "claude-haiku-4-5", "description": "Optimized for high-volume, low-latency tasks", "value": "claude-haiku-4-5" },
+    { "label": "claude-3-7-sonnet-latest", "description": "Hybrid reasoning Sonnet model", "value": "claude-3-7-sonnet-latest" }
+  ],
+  "groq": [
+    { "label": "llama-3.3-70b-versatile", "description": "Fast, versatile Llama 3.3 70B model (Default)", "value": "llama-3.3-70b-versatile" },
+    { "label": "llama-3.1-8b-instant", "description": "Ultra-fast low latency 8B model", "value": "llama-3.1-8b-instant" },
+    { "label": "mixtral-8x7b-32768", "description": "Mixtral MoE fast model", "value": "mixtral-8x7b-32768" },
+    { "label": "gemma2-9b-it", "description": "Google Gemma 2 9B model on Groq", "value": "gemma2-9b-it" }
+  ]
+}
