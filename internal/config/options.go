@@ -1,6 +1,7 @@
 package config
 
 import (
+	_ "embed"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -9,6 +10,17 @@ import (
 
 	"github.com/Nithwin/WindMist/internal/ui/selector"
 )
+
+//go:embed models.json
+var embeddedModelsJSON []byte
+
+const remoteModelsManifestURL = "https://raw.githubusercontent.com/Nithwin/WindMist/main/internal/config/models.json"
+
+type modelEntry struct {
+	Label       string `json:"label"`
+	Description string `json:"description"`
+	Value       string `json:"value"`
+}
 
 // GetProviderOptions returns the list of all supported AI providers with descriptions.
 func GetProviderOptions() []selector.Option {
@@ -41,59 +53,51 @@ func GetProviderOptions() []selector.Option {
 	}
 }
 
-// GetModelOptions returns the curated model options for a provider.
-// For Ollama, it attempts to fetch locally installed models via HTTP.
+// GetModelOptions returns model options for the specified provider.
+// Cloud providers fetch dynamically from remote/embedded models.json manifest.
+// Ollama fetches locally installed models from http://localhost:11434/api/tags.
 func GetModelOptions(providerName, ollamaBaseURL string) []selector.Option {
 	var options []selector.Option
 
-	switch providerName {
-	case "gemini":
-		options = []selector.Option{
-			{Label: "gemini-2.5-flash", Description: "Fast, highly capable multimodal model (Default)", Value: "gemini-2.5-flash"},
-			{Label: "gemini-2.5-pro", Description: "Advanced reasoning and complex task model", Value: "gemini-2.5-pro"},
-			{Label: "gemini-1.5-flash", Description: "Previous generation high-speed model", Value: "gemini-1.5-flash"},
-			{Label: "gemini-1.5-pro", Description: "Previous generation professional model", Value: "gemini-1.5-pro"},
-		}
-
-	case "openai":
-		options = []selector.Option{
-			{Label: "gpt-4o", Description: "Flagship multimodal intelligence (Default)", Value: "gpt-4o"},
-			{Label: "gpt-4o-mini", Description: "Fast, cost-effective small model", Value: "gpt-4o-mini"},
-			{Label: "o3-mini", Description: "Latest fast reasoning model", Value: "o3-mini"},
-			{Label: "o1", Description: "Advanced reasoning model", Value: "o1"},
-			{Label: "o1-mini", Description: "Fast reasoning model", Value: "o1-mini"},
-		}
-
-	case "anthropic":
-		options = []selector.Option{
-			{Label: "claude-3-5-sonnet-latest", Description: "Most intelligent Claude model for coding and reasoning (Default)", Value: "claude-3-5-sonnet-latest"},
-			{Label: "claude-3-5-haiku-latest", Description: "Fastest Claude model for quick tasks", Value: "claude-3-5-haiku-latest"},
-			{Label: "claude-3-opus-latest", Description: "Powerful deep reasoning model", Value: "claude-3-opus-latest"},
-		}
-
-	case "groq":
-		options = []selector.Option{
-			{Label: "llama-3.3-70b-versatile", Description: "Fast, versatile Llama 3.3 70B model (Default)", Value: "llama-3.3-70b-versatile"},
-			{Label: "llama-3.1-8b-instant", Description: "Ultra-fast low latency 8B model", Value: "llama-3.1-8b-instant"},
-			{Label: "mixtral-8x7b-32768", Description: "Mixtral MoE fast model", Value: "mixtral-8x7b-32768"},
-			{Label: "gemma2-9b-it", Description: "Google Gemma 2 9B model on Groq", Value: "gemma2-9b-it"},
-		}
-
-	case "ollama":
+	if providerName == "ollama" {
 		if ollamaBaseURL == "" {
 			ollamaBaseURL = "http://localhost:11434"
 		}
 		localModels, err := fetchOllamaModels(ollamaBaseURL)
-		if err == nil && len(localModels) > 0 {
-			options = append(options, localModels...)
-		} else {
+		if err != nil {
 			options = []selector.Option{
-				{Label: "qwen2.5:8b", Description: "Recommended local model (ensure pulled via 'ollama pull qwen2.5:8b')", Value: "qwen2.5:8b"},
-				{Label: "llama3.2:3b", Description: "Lightweight local model (ensure pulled via 'ollama pull llama3.2:3b')", Value: "llama3.2:3b"},
+				{
+					Label:       "⚠️ Ollama daemon offline",
+					Description: fmt.Sprintf("Ensure 'ollama serve' is running at %s", ollamaBaseURL),
+					Value:       "__CUSTOM__",
+				},
+			}
+		} else if len(localModels) == 0 {
+			options = []selector.Option{
+				{
+					Label:       "📥 No local models downloaded",
+					Description: "Run 'ollama pull <model-name>' in terminal first",
+					Value:       "__CUSTOM__",
+				},
+			}
+		} else {
+			options = localModels
+		}
+	} else {
+		// Cloud providers: fetch from remote models.json or embedded fallback
+		manifest := loadModelsManifest()
+		if entries, ok := manifest[providerName]; ok {
+			for _, e := range entries {
+				options = append(options, selector.Option{
+					Label:       e.Label,
+					Description: e.Description,
+					Value:       e.Value,
+				})
 			}
 		}
 	}
 
+	// Always append custom model escape hatch
 	options = append(options, selector.Option{
 		Label:       "Custom model ID...",
 		Description: "Enter any model name or identifier manually",
@@ -101,6 +105,25 @@ func GetModelOptions(providerName, ollamaBaseURL string) []selector.Option {
 	})
 
 	return options
+}
+
+func loadModelsManifest() map[string][]modelEntry {
+	manifest := make(map[string][]modelEntry)
+
+	// Attempt remote HTTP fetch with 1.5s timeout
+	client := &http.Client{Timeout: 1500 * time.Millisecond}
+	resp, err := client.Get(remoteModelsManifestURL)
+	if err == nil && resp.StatusCode == http.StatusOK {
+		if err := json.NewDecoder(resp.Body).Decode(&manifest); err == nil {
+			resp.Body.Close()
+			return manifest
+		}
+		resp.Body.Close()
+	}
+
+	// Fallback to embedded models.json
+	_ = json.Unmarshal(embeddedModelsJSON, &manifest)
+	return manifest
 }
 
 type ollamaTagsResponse struct {
