@@ -6,15 +6,17 @@ import (
 )
 
 const (
-	EnvGeminiAPIKey = "GEMINI_API_KEY"
-	EnvGroqAPIKey   = "GROQ_API_KEY"
-	EnvOpenAIAPIKey = "OPENAI_API_KEY"
+	EnvGeminiAPIKey    = "GEMINI_API_KEY"
+	EnvGroqAPIKey      = "GROQ_API_KEY"
+	EnvOpenAIAPIKey    = "OPENAI_API_KEY"
+	EnvAnthropicAPIKey = "ANTHROPIC_API_KEY"
 )
 
 var envKeys = map[string]string{
-	"gemini": EnvGeminiAPIKey,
-	"groq":   EnvGroqAPIKey,
-	"openai": EnvOpenAIAPIKey,
+	"gemini":    EnvGeminiAPIKey,
+	"groq":      EnvGroqAPIKey,
+	"openai":    EnvOpenAIAPIKey,
+	"anthropic": EnvAnthropicAPIKey,
 }
 
 // ActiveProvider returns the active provider configuration.
