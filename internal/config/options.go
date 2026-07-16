@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
+	"os/exec"
 	"strings"
 	"time"
 
@@ -55,7 +57,7 @@ func GetProviderOptions() []selector.Option {
 
 // GetModelOptions returns model options for the specified provider.
 // Cloud providers fetch dynamically from remote/embedded models.json manifest.
-// Ollama fetches locally installed models from http://localhost:11434/api/tags.
+// Ollama intelligently checks daemon state, auto-starting or auto-pulling models upon user confirmation.
 func GetModelOptions(providerName, ollamaBaseURL string) []selector.Option {
 	var options []selector.Option
 
@@ -63,26 +65,7 @@ func GetModelOptions(providerName, ollamaBaseURL string) []selector.Option {
 		if ollamaBaseURL == "" {
 			ollamaBaseURL = "http://localhost:11434"
 		}
-		localModels, err := fetchOllamaModels(ollamaBaseURL)
-		if err != nil {
-			options = []selector.Option{
-				{
-					Label:       "⚠️ Ollama daemon offline",
-					Description: fmt.Sprintf("Ensure 'ollama serve' is running at %s", ollamaBaseURL),
-					Value:       "__CUSTOM__",
-				},
-			}
-		} else if len(localModels) == 0 {
-			options = []selector.Option{
-				{
-					Label:       "📥 No local models downloaded",
-					Description: "Run 'ollama pull <model-name>' in terminal first",
-					Value:       "__CUSTOM__",
-				},
-			}
-		} else {
-			options = localModels
-		}
+		options = ensureOllamaReadyAndGetModels(ollamaBaseURL)
 	} else {
 		// Cloud providers: fetch from remote models.json or embedded fallback
 		manifest := loadModelsManifest()
@@ -105,6 +88,86 @@ func GetModelOptions(providerName, ollamaBaseURL string) []selector.Option {
 	})
 
 	return options
+}
+
+func ensureOllamaReadyAndGetModels(baseURL string) []selector.Option {
+	// 1. Check if Ollama binary is installed on the system
+	if _, err := exec.LookPath("ollama"); err != nil {
+		return []selector.Option{
+			{
+				Label:       "❌ Ollama CLI not installed",
+				Description: "Please install Ollama from https://ollama.com first",
+				Value:       "__CUSTOM__",
+			},
+		}
+	}
+
+	// 2. Attempt to fetch local models from the running daemon
+	localModels, err := fetchOllamaModels(baseURL)
+	if err != nil {
+		// Daemon offline: Ask user if they want WindMist to start 'ollama serve'
+		opt, runErr := selector.Run(
+			"Ollama Daemon Not Running",
+			fmt.Sprintf("Ollama server is offline at %s.\nWould you like WindMist to automatically start 'ollama serve' in the background?", baseURL),
+			[]selector.Option{
+				{Label: "Yes (Start 'ollama serve' right now and retry)", Description: "Launch Ollama background service automatically", Value: "yes"},
+				{Label: "No (Skip auto-start)", Description: "Enter model ID manually or start Ollama yourself later", Value: "no"},
+			},
+		)
+		if runErr == nil && opt.Value == "yes" {
+			fmt.Println("\n⏳ Starting 'ollama serve' in background (waiting for initialization)...")
+			cmd := exec.Command("ollama", "serve")
+			if startErr := cmd.Start(); startErr == nil {
+				// Poll the server up to 12 times (every 500ms, max 6 seconds) until ready
+				for i := 0; i < 12; i++ {
+					time.Sleep(500 * time.Millisecond)
+					localModels, err = fetchOllamaModels(baseURL)
+					if err == nil {
+						break
+					}
+				}
+			} else {
+				fmt.Printf("⚠️ Could not start 'ollama serve': %v\n", startErr)
+			}
+		}
+	}
+
+	// 3. If daemon is online but no models are downloaded: Ask user if they want to auto-pull qwen2.5:8b
+	if err == nil && len(localModels) == 0 {
+		opt, runErr := selector.Run(
+			"No Local Models Downloaded",
+			"Ollama is running, but you have 0 models pulled to your system.\nWould you like WindMist to automatically pull 'qwen2.5:8b' right now?",
+			[]selector.Option{
+				{Label: "Yes (Run 'ollama pull qwen2.5:8b' right now)", Description: "Download recommended 8B local model (shows live progress)", Value: "yes"},
+				{Label: "No (Skip and pull later)", Description: "Enter model ID manually or run 'ollama pull' yourself", Value: "no"},
+			},
+		)
+		if runErr == nil && opt.Value == "yes" {
+			fmt.Println("\n📥 Running 'ollama pull qwen2.5:8b' (please wait for download to complete)...")
+			pullCmd := exec.Command("ollama", "pull", "qwen2.5:8b")
+			pullCmd.Stdout = os.Stdout
+			pullCmd.Stderr = os.Stderr
+			if pullErr := pullCmd.Run(); pullErr == nil {
+				fmt.Println("✔ Successfully pulled qwen2.5:8b!")
+				localModels, _ = fetchOllamaModels(baseURL)
+			} else {
+				fmt.Printf("⚠️ Error pulling model: %v\n", pullErr)
+			}
+		}
+	}
+
+	// 4. Return whatever local models are available (if still empty after prompts, return explicit status item)
+	if len(localModels) > 0 {
+		return localModels
+	}
+
+	return []selector.Option{
+		{
+			Label:       "⚠️ Ollama offline or empty",
+			Description: fmt.Sprintf("Run 'ollama serve' and 'ollama pull <model>' at %s", baseURL),
+			Value:       "__CUSTOM__",
+		},
+	}
 }
 
 func loadModelsManifest() map[string][]modelEntry {
