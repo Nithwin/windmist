@@ -2,6 +2,7 @@ package cmd
 
 import (
 	_ "github.com/Nithwin/WindMist/internal/providers/gemini"
+	_ "github.com/Nithwin/WindMist/internal/providers/groq"
 	_ "github.com/Nithwin/WindMist/internal/providers/ollama"
 
 	"github.com/Nithwin/WindMist/internal/chat"
