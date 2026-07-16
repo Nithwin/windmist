@@ -4,6 +4,7 @@ import (
 	_ "github.com/Nithwin/WindMist/internal/providers/gemini"
 	_ "github.com/Nithwin/WindMist/internal/providers/groq"
 	_ "github.com/Nithwin/WindMist/internal/providers/ollama"
+	_ "github.com/Nithwin/WindMist/internal/providers/openai"
 
 	"github.com/Nithwin/WindMist/internal/chat"
 	"github.com/spf13/cobra"
