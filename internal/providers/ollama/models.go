@@ -2,12 +2,12 @@ package ollama
 
 // ChatRequest represents a request to Ollama's /v1/chat/completions endpoint.
 type ChatRequest struct {
-	Model       string       `json:"model"`
-	Messages    []Message    `json:"messages"`
-	Tools       []Tool       `json:"tools,omitempty"`
-	Temperature float32      `json:"temperature,omitempty"`
-	MaxTokens   int          `json:"max_tokens,omitempty"`
-	Stream      bool         `json:"stream"`
+	Model       string    `json:"model"`
+	Messages    []Message `json:"messages"`
+	Tools       []Tool    `json:"tools,omitempty"`
+	Temperature float32   `json:"temperature,omitempty"`
+	MaxTokens   int       `json:"max_tokens,omitempty"`
+	Stream      bool      `json:"stream"`
 }
 
 // Message represents a message in the /v1/chat/completions format.
@@ -27,16 +27,16 @@ type Tool struct {
 
 // Function represents the function details inside a Tool.
 type Function struct {
-	Name        string      `json:"name"`
-	Description string      `json:"description"`
-	Parameters  *Schema     `json:"parameters,omitempty"`
+	Name        string  `json:"name"`
+	Description string  `json:"description"`
+	Parameters  *Schema `json:"parameters,omitempty"`
 }
 
 // Schema represents JSON Schema properties for tool parameters.
 type Schema struct {
-	Type       string             `json:"type"`
+	Type       string               `json:"type"`
 	Properties map[string]*Property `json:"properties,omitempty"`
-	Required   []string           `json:"required,omitempty"`
+	Required   []string             `json:"required,omitempty"`
 }
 
 // Property represents a single parameter property in JSON Schema.
@@ -55,7 +55,7 @@ type ToolCall struct {
 
 // FunctionCall holds the name and JSON string arguments of the called tool.
 type FunctionCall struct {
-	Name string `json:"name"`
+	Name      string `json:"name"`
 	Arguments string `json:"arguments"`
 }
 
