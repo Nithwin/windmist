@@ -8,11 +8,13 @@ import (
 const (
 	EnvGeminiAPIKey = "GEMINI_API_KEY"
 	EnvGroqAPIKey   = "GROQ_API_KEY"
+	EnvOpenAIAPIKey = "OPENAI_API_KEY"
 )
 
 var envKeys = map[string]string{
 	"gemini": EnvGeminiAPIKey,
 	"groq":   EnvGroqAPIKey,
+	"openai": EnvOpenAIAPIKey,
 }
 
 // ActiveProvider returns the active provider configuration.

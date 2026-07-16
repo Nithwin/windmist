@@ -18,6 +18,9 @@ func DefaultConfig() *Config {
 				Model:   "qwen3:8b",
 				BaseURL: "http://localhost:11434",
 			},
+			"openai": {
+				Model: "gpt-4o",
+			},
 		},
 
 		UI: UIConfig{
