@@ -62,15 +62,23 @@ func ReplaceText(ctx context.Context, opts ReplaceOptions) (*ReplaceResult, erro
 	// Step 3: Generate Operations using exact match line coordinates from Search
 	ops := make([]Operation, 0, limit)
 	newlines := strings.Count(opts.OldText, "\n")
+	lastLineLen := len(opts.OldText)
+	if idx := strings.LastIndex(opts.OldText, "\n"); idx != -1 {
+		lastLineLen = len(opts.OldText) - idx - 1
+	}
 	for i := 0; i < limit; i++ {
 		m := matches[i]
+		endColumn := lastLineLen + 1
+		if newlines == 0 {
+			endColumn = m.Column + lastLineLen
+		}
 		ops = append(ops, Operation{
 			Type:        Replace,
 			File:        opts.File,
 			StartLine:   m.Line,
 			EndLine:     m.Line + newlines,
 			StartColumn: m.Column,
-			EndColumn:   m.Column + len(opts.OldText),
+			EndColumn:   endColumn,
 			OldText:     opts.OldText,
 			NewText:     opts.NewText,
 		})
