@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/Nithwin/WindMist/internal/ui"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/Nithwin/WindMist/internal/ui"
 )
 
 // Option represents a selectable item in the selector list.

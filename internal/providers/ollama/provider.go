@@ -71,7 +71,6 @@ func (p *Provider) Generate(
 	return translateResponse(p.model, chatResp)
 }
 
-
 // Stream streams a completion response chunk by chunk via Client.
 func (p *Provider) Stream(
 	ctx context.Context,
