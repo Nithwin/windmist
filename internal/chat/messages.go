@@ -15,3 +15,22 @@ type StreamingMsg struct {
 
 // DoneMsg signals that streaming has completed.
 type DoneMsg struct{}
+
+// switchProviderSuccessMsg represents a successful provider change.
+type switchProviderSuccessMsg struct {
+	Provider string
+	Model    string
+}
+
+// switchModelSuccessMsg represents a successful model change.
+type switchModelSuccessMsg struct {
+	Model string
+}
+
+// switchCancelMsg represents a user cancellation of the menu.
+type switchCancelMsg struct{}
+
+// switchErrorMsg represents an error running the menu.
+type switchErrorMsg struct {
+	Err error
+}
