@@ -94,6 +94,32 @@ func TestSearchCaseSensitivity(t *testing.T) {
 	}
 }
 
+func TestSearchMultilineQuery(t *testing.T) {
+	tempDir := t.TempDir()
+	ctx := context.Background()
+
+	path := filepath.Join(tempDir, "test.go")
+	content := "func f1() error {\n\treturn nil\n}\n\nfunc f2() error {\n\treturn nil\n}\n"
+	if err := os.WriteFile(path, []byte(content), 0644); err != nil {
+		t.Fatalf("failed to create test.go: %v", err)
+	}
+
+	results, err := Search(ctx, SearchOptions{
+		Root:  tempDir,
+		Query: "error {\n\treturn nil\n}",
+	})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if len(results) != 1 || len(results[0].Matches) != 2 {
+		t.Fatalf("expected 2 multi-line matches, got %+v", results)
+	}
+	if results[0].Matches[0].Line != 1 || results[0].Matches[1].Line != 5 {
+		t.Errorf("expected matches starting on lines 1 and 5, got %+v", results[0].Matches)
+	}
+}
+
 func TestSearchWholeWord(t *testing.T) {
 	tempDir := t.TempDir()
 	ctx := context.Background()
