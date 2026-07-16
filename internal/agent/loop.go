@@ -19,9 +19,11 @@ func (a *Agent) runLoop(ctx context.Context, messages []ai.Message, userPrompt s
 			return nil, err
 		}
 
+		prunedHistory := pruneMessages(messages, 8)
+
 		req := &ai.GenerateRequest{
 			System:   a.systemPrompt,
-			Messages: messages,
+			Messages: prunedHistory,
 			Tools:    a.toolDefinitions(),
 		}
 
