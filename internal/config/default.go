@@ -21,6 +21,9 @@ func DefaultConfig() *Config {
 			"openai": {
 				Model: "gpt-4o",
 			},
+			"anthropic": {
+				Model: "claude-3-5-sonnet-latest",
+			},
 		},
 
 		UI: UIConfig{
