@@ -1,8 +1,14 @@
 package chat
 
 import (
+	"fmt"
 	"strings"
 
+	"github.com/Nithwin/WindMist/internal/agent"
+	"github.com/Nithwin/WindMist/internal/ai"
+	"github.com/Nithwin/WindMist/internal/config"
+	"github.com/Nithwin/WindMist/internal/tools"
+	"github.com/Nithwin/WindMist/internal/tools/defaults"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -184,6 +190,53 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.loading = false
 		}
 
+		return m, nil
+
+	case switchProviderSuccessMsg:
+		m.cfg.SetProvider(msg.Provider)
+		m.cfg.SetModel(msg.Provider, msg.Model)
+		_ = config.Save(m.cfg)
+
+		provider, err := ai.New(m.cfg)
+		if err == nil {
+			m.provider = provider
+			manager := tools.NewManager()
+			defaults.RegisterAll(manager)
+			m.agent = agent.New(provider, manager, agent.Config{})
+		}
+
+		m.conversation.AddAssistant(fmt.Sprintf("✨ Provider switched to **%s** (model: `%s`)", msg.Provider, msg.Model))
+		m.refreshViewport()
+		m.loading = false
+		return m, nil
+
+	case switchModelSuccessMsg:
+		m.cfg.SetModel(m.cfg.AI.Provider, msg.Model)
+		_ = config.Save(m.cfg)
+
+		provider, err := ai.New(m.cfg)
+		if err == nil {
+			m.provider = provider
+			manager := tools.NewManager()
+			defaults.RegisterAll(manager)
+			m.agent = agent.New(provider, manager, agent.Config{})
+		}
+
+		m.conversation.AddAssistant(fmt.Sprintf("✨ Model switched to `%s`", msg.Model))
+		m.refreshViewport()
+		m.loading = false
+		return m, nil
+
+	case switchCancelMsg:
+		m.conversation.AddAssistant("❌ Provider/model selection cancelled.")
+		m.refreshViewport()
+		m.loading = false
+		return m, nil
+
+	case switchErrorMsg:
+		m.conversation.AddAssistant(fmt.Sprintf("❌ Error: %v", msg.Err))
+		m.refreshViewport()
+		m.loading = false
 		return m, nil
 	}
 
