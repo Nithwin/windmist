@@ -30,7 +30,6 @@ func appendToolResults(messages []ai.Message, results []ai.ToolResult) []ai.Mess
 	})
 }
 
-
 // pruneMessages shortens the conversation history to prevent exceeding model context limits.
 // It always preserves the first message (original user prompt) and keeps the most recent
 // maxKeep messages. maxKeep should be an even number (e.g., 8) to ensure that Assistant

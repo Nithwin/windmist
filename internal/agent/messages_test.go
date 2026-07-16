@@ -20,7 +20,7 @@ func TestPruneMessages(t *testing.T) {
 
 	// Case 2: History is large -> Should keep index 0 + last maxKeep messages
 	longHistory := []ai.Message{
-		{Role: ai.RoleUser, Content: "Initial task goal"}, // index 0 (MUST BE KEPT)
+		{Role: ai.RoleUser, Content: "Initial task goal"},     // index 0 (MUST BE KEPT)
 		{Role: ai.RoleAssistant, Content: "Turn 1 Assistant"}, // dropped
 		{Role: ai.RoleTool, Content: "Turn 1 Tool"},           // dropped
 		{Role: ai.RoleAssistant, Content: "Turn 2 Assistant"}, // dropped
