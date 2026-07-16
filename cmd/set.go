@@ -32,7 +32,7 @@ var setCmd = &cobra.Command{
 			err = cfg.SetAPIKey(cfg.AI.Provider, value)
 
 		case "base_url":
-			err = cfg.SetBaseURL(cfg.AI.Provider, value)
+			log.Fatal("base_url cannot be set or changed by the user for any provider")
 
 		case "theme":
 			cfg.SetTheme(value)

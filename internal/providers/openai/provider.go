@@ -2,7 +2,6 @@ package openai
 
 import (
 	"context"
-	"strings"
 
 	"github.com/Nithwin/WindMist/internal/ai"
 	"github.com/Nithwin/WindMist/internal/config"
@@ -20,13 +19,7 @@ type Provider struct {
 
 // New creates a new OpenAI provider instance.
 func New(cfg config.ProviderConfig) ai.Provider {
-	baseURL := strings.TrimRight(cfg.BaseURL, "/")
-	if baseURL == "" {
-		baseURL = "https://api.openai.com/v1"
-	}
-	if !strings.HasSuffix(baseURL, "/v1") {
-		baseURL = baseURL + "/v1"
-	}
+	baseURL := "https://api.openai.com/v1"
 
 	model := cfg.Model
 	if model == "" {
