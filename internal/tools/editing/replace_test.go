@@ -62,6 +62,44 @@ type Model interface {
 	}
 }
 
+func TestReplaceTextMultiline(t *testing.T) {
+	tempDir := t.TempDir()
+	ctx := context.Background()
+	path := filepath.Join(tempDir, "config.go")
+	original := "package config\n\nfunc Old() error {\n\treturn nil\n}\n"
+	if err := os.WriteFile(path, []byte(original), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	opts := ReplaceOptions{
+		File:    path,
+		OldText: "func Old() error {\n\treturn nil\n}",
+		NewText: "func New() error {\n\treturn errors.New(\"boom\")\n}",
+	}
+
+	res, err := ReplaceText(ctx, opts)
+	if err != nil {
+		t.Fatalf("expected multi-line old_text present verbatim to be found, got error: %v", err)
+	}
+	if res.Replacements != 1 || len(res.Operations) != 1 {
+		t.Fatalf("expected 1 replacement, got %+v", res)
+	}
+
+	op := res.Operations[0]
+	if op.StartLine != 3 || op.EndLine != 5 {
+		t.Errorf("expected match spanning lines 3-5, got StartLine=%d EndLine=%d", op.StartLine, op.EndLine)
+	}
+
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	expected := "package config\n\nfunc New() error {\n\treturn errors.New(\"boom\")\n}\n"
+	if string(data) != expected {
+		t.Errorf("expected %q, got %q", expected, string(data))
+	}
+}
+
 func TestReplaceTextAmbiguousError(t *testing.T) {
 	tempDir := t.TempDir()
 	ctx := context.Background()
