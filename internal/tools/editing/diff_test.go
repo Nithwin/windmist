@@ -44,7 +44,10 @@ func TestToUnifiedDiffGolden(t *testing.T) {
 	actual := strings.TrimSpace(diff)
 
 	if actual != expected {
-		t.Errorf("ToUnifiedDiff output does not match golden file:\n--- Expected ---\n%s\n--- Actual ---\n%s", expected, actual)
+		t.Errorf("ToUnifiedDiff output does not match golden file:\n\n"+
+			"=== Expected ===\n%s"+
+			"\n\n=== Actual ===\n%s",
+			expected, actual)
 	}
 }
 
