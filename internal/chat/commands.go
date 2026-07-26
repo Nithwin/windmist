@@ -114,6 +114,9 @@ var Registry = []Command{
 		Name:        "/exit",
 		Description: "Exit WindMist",
 		Execute: func(m *Model) tea.Cmd {
+			if m.agent != nil {
+				m.agent.Close()
+			}
 			return tea.Quit
 		},
 	},
@@ -121,6 +124,9 @@ var Registry = []Command{
 		Name:        "/quit",
 		Description: "Exit WindMist",
 		Execute: func(m *Model) tea.Cmd {
+			if m.agent != nil {
+				m.agent.Close()
+			}
 			return tea.Quit
 		},
 	},

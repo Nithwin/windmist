@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 
 	"github.com/Nithwin/WindMist/internal/ai"
+	"github.com/Nithwin/WindMist/internal/lsp"
 	"github.com/Nithwin/WindMist/internal/store"
 	"github.com/Nithwin/WindMist/internal/tools"
 )
@@ -40,10 +41,10 @@ type Result struct {
 // Agent coordinates the language model and the available tools to solve
 // software engineering tasks.
 type Agent struct {
-	provider ai.Provider
-	manager  *tools.Manager
-
-	config Config
+	provider   ai.Provider
+	manager    *tools.Manager
+	config     Config
+	lspManager *lsp.Manager
 }
 
 // New creates a new Agent.
@@ -66,9 +67,17 @@ func New(
 	}
 
 	return &Agent{
-		provider: provider,
-		manager:  manager,
-		config:   config,
+		provider:   provider,
+		manager:    manager,
+		config:     config,
+		lspManager: lsp.NewManager(),
+	}
+}
+
+// Close gracefully shuts down any resources held by the agent (like LSPs).
+func (a *Agent) Close() {
+	if a.lspManager != nil {
+		a.lspManager.CloseAll()
 	}
 }
 
