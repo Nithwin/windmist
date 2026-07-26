@@ -59,6 +59,7 @@ func (m Model) View() string {
 
 		b.WriteString(inputRow)
 		b.WriteString("\n")
+		b.WriteString(renderStatusBar(m))
 	}
 
 	appStyle := lipgloss.NewStyle().
@@ -68,4 +69,55 @@ func (m Model) View() string {
 		Foreground(ui.White)
 
 	return appStyle.Render(b.String())
+}
+
+func renderStatusBar(m Model) string {
+	modelName := "—"
+	if provider, err := m.cfg.ActiveProvider(); err == nil {
+		modelName = provider.Model
+	}
+
+	tokens := 0
+	cost := 0.0
+	mode := "build"
+	
+	if m.session != nil {
+		tokens = m.session.TokenCount
+		cost = m.session.CostEstimate
+		mode = m.session.AgentMode
+	}
+	
+	if mode == "" {
+		mode = "build"
+	}
+
+	duration := fmt.Sprintf("%.1fs", m.responseTime.Seconds())
+	if m.responseTime == 0 {
+		duration = "—"
+	}
+
+	modelTag := lipgloss.JoinHorizontal(lipgloss.Left, "🤖 ", modelName)
+	tokenTag := lipgloss.JoinHorizontal(lipgloss.Left, "📊 ", fmt.Sprintf("%d tokens", tokens))
+	costTag := lipgloss.JoinHorizontal(lipgloss.Left, "💰 ", fmt.Sprintf("$%.3f", cost))
+	modeTag := lipgloss.JoinHorizontal(lipgloss.Left, "🔨 ", strings.ToUpper(mode))
+	timeTag := lipgloss.JoinHorizontal(lipgloss.Left, "⏱ ", duration)
+
+	tags := []string{modelTag, tokenTag, costTag, modeTag, timeTag}
+	
+	var styledTags []string
+	for _, tag := range tags {
+		styledTags = append(styledTags, tag)
+	}
+
+	content := strings.Join(styledTags, ui.BaseStyle.Foreground(ui.Muted).Render(" │ "))
+	
+	box := ui.BaseStyle.
+		Border(lipgloss.RoundedBorder()).
+		BorderForeground(ui.Border).
+		Padding(0, 1).
+		Width(m.MaxContentWidth()).
+		Align(lipgloss.Center).
+		Foreground(ui.MutedLight)
+
+	return box.Render(content)
 }

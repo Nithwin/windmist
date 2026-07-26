@@ -1,16 +1,23 @@
 package chat
 
+import (
+	"time"
+
+	"github.com/Nithwin/WindMist/internal/ai"
+)
+
 // ResponseMsg is sent when the AI finishes generating a response.
 type ResponseMsg struct {
 	Text string
 	Err  error
 }
 
-// StreamingMsg represents a streamed chunk from the AI.
 type StreamingMsg struct {
-	Text string
-	Done bool
-	Err  error
+	Text     string
+	Done     bool
+	Err      error
+	Usage    ai.Usage
+	Duration time.Duration
 }
 
 // DoneMsg signals that streaming has completed.

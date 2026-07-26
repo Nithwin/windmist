@@ -44,8 +44,9 @@ type Model struct {
 	filteredFiles  []string
 	selectedFile   int
 
-	loading   bool
-	streaming bool
+	loading      bool
+	streaming    bool
+	responseTime time.Duration
 
 	waitingApproval bool
 	approvalCommand string
