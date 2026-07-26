@@ -58,5 +58,11 @@ func (m Model) View() string {
 		b.WriteString("\n")
 	}
 
-	return b.String()
+	appStyle := lipgloss.NewStyle().
+		Width(m.width).
+		Height(m.height).
+		Background(ui.Surface).
+		Foreground(ui.White)
+
+	return appStyle.Render(b.String())
 }
