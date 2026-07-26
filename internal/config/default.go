@@ -24,6 +24,15 @@ func DefaultConfig() *Config {
 			"anthropic": {
 				Model: "claude-3-5-sonnet-latest",
 			},
+			"deepseek": {
+				Model: "deepseek-chat",
+			},
+			"mistral": {
+				Model: "mistral-large-latest",
+			},
+			"kimi": {
+				Model: "kimi-k3",
+			},
 		},
 
 		UI: UIConfig{
