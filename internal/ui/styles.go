@@ -18,6 +18,9 @@ var (
 	Border     = lipgloss.Color("#3B3551")
 	Selection  = lipgloss.Color("#3B3551")
 
+	// Brand colors that NEVER change with themes
+	BrandCyan = lipgloss.Color("#00E5FF")
+
 	// ── Typography ──────────────────────────────────────────────────
 	BaseStyle       lipgloss.Style
 	TitleStyle      lipgloss.Style
@@ -91,7 +94,7 @@ func UpdateStyles() {
 
 	AssistantLabelStyle = BaseStyle.
 		Bold(true).
-		Foreground(Purple)
+		Foreground(BrandCyan)
 
 	AssistantBubbleStyle = BaseStyle.
 		Foreground(White).

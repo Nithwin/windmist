@@ -16,7 +16,7 @@ func renderHeader(m Model) string {
 	// ── left: brand name ──────────────────────────────────────────
 	logo := ui.BaseStyle.
 		Bold(true).
-		Foreground(ui.Purple).
+		Foreground(ui.BrandCyan).
 		Render("🌀 WindMist v0.5")
 
 	// ── right: provider badge ────────────────────────────────────
@@ -30,7 +30,7 @@ func renderHeader(m Model) string {
 		Render(model)
 
 	themeTag := ui.BaseStyle.
-		Foreground(ui.Purple).
+		Foreground(ui.BrandCyan).
 		Render(ui.CurrentThemeName)
 
 	right := providerTag + ui.BaseStyle.Render(" ") + ui.BaseStyle.Foreground(ui.Muted).Render("›") + ui.BaseStyle.Render(" ") + modelTag + ui.BaseStyle.Render(" ") + ui.BaseStyle.Foreground(ui.Muted).Render("›") + ui.BaseStyle.Render(" ") + themeTag
