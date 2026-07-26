@@ -40,9 +40,9 @@ var Registry = []Command{
 		Name:        "/new",
 		Description: "Start a new conversation",
 		Execute: func(m *Model) tea.Cmd {
-			m.conversation.Clear()
-			m.refreshViewport()
-			return nil
+			return func() tea.Msg {
+				return createNewSessionMsg{}
+			}
 		},
 	},
 	{

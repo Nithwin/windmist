@@ -27,6 +27,9 @@ type switchSessionSuccessMsg struct {
 	SessionID string
 }
 
+// createNewSessionMsg signals to spin up a new session.
+type createNewSessionMsg struct{}
+
 // switchModelSuccessMsg represents a successful model change.
 type switchModelSuccessMsg struct {
 	Model string

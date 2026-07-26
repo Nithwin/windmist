@@ -8,8 +8,10 @@ import (
 	"github.com/Nithwin/WindMist/internal/agent"
 	"github.com/Nithwin/WindMist/internal/ai"
 	"github.com/Nithwin/WindMist/internal/config"
+	"github.com/Nithwin/WindMist/internal/store"
 	"github.com/Nithwin/WindMist/internal/tools"
 	"github.com/Nithwin/WindMist/internal/tools/defaults"
+	"time"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -261,6 +263,31 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.loading = false
 		}
 
+		return m, nil
+
+	case createNewSessionMsg:
+		activeModel, _ := m.cfg.ActiveModel()
+		sess := &store.Session{
+			ID:          fmt.Sprintf("sess_%d", time.Now().Unix()),
+			Title:       "New Session",
+			ProjectPath: ".",
+			Provider:    m.cfg.AI.Provider,
+			Model:       activeModel,
+			AgentMode:   "build",
+		}
+		if m.store != nil {
+			_ = m.store.CreateSession(sess)
+		}
+
+		m.session = sess
+		m.agent = agent.New(m.provider, m.agent.Manager(), agent.Config{
+			Store:     m.store,
+			SessionID: sess.ID,
+		})
+
+		m.conversation.Clear()
+		m.conversation.AddAssistant("✨ Started a new session.")
+		m.refreshViewport()
 		return m, nil
 
 	case switchSessionSuccessMsg:
