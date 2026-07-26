@@ -56,6 +56,34 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		}
 
+		// Handle approval keys
+		if m.waitingApproval {
+			switch msg.String() {
+			case "y", "Y":
+				if m.approvalChan != nil {
+					m.approvalChan <- true
+				}
+				m.waitingApproval = false
+				m.refreshViewport()
+				return m, nil
+			case "n", "N":
+				if m.approvalChan != nil {
+					m.approvalChan <- false
+				}
+				m.waitingApproval = false
+				m.refreshViewport()
+				return m, nil
+			case "ctrl+c", "esc":
+				if m.approvalChan != nil {
+					m.approvalChan <- false
+				}
+				m.waitingApproval = false
+				return m, tea.Quit
+			}
+			// Block other inputs
+			return m, nil
+		}
+
 		switch msg.String() {
 		case "ctrl+c", "esc":
 			return m, tea.Quit
@@ -162,6 +190,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 		}
 
+	case ApprovalRequestMsg:
+		m.waitingApproval = true
+		m.approvalCommand = msg.Command
+		m.approvalChan = msg.ResponseChan
+		m.refreshViewport()
+		return m, nil
+
 	case StreamingMsg:
 
 		if msg.Err != nil {
@@ -201,7 +236,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if err == nil {
 			m.provider = provider
 			manager := tools.NewManager()
-			defaults.RegisterAll(manager)
+			defaults.RegisterAll(manager, func(cmd string) bool {
+				if program == nil {
+					return false
+				}
+				ch := make(chan bool)
+				program.Send(ApprovalRequestMsg{Command: cmd, ResponseChan: ch})
+				return <-ch
+			})
 			m.agent = agent.New(provider, manager, agent.Config{})
 		}
 
@@ -218,7 +260,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if err == nil {
 			m.provider = provider
 			manager := tools.NewManager()
-			defaults.RegisterAll(manager)
+			defaults.RegisterAll(manager, func(cmd string) bool {
+				if program == nil {
+					return false
+				}
+				ch := make(chan bool)
+				program.Send(ApprovalRequestMsg{Command: cmd, ResponseChan: ch})
+				return <-ch
+			})
 			m.agent = agent.New(provider, manager, agent.Config{})
 		}
 

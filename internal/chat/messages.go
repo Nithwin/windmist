@@ -34,3 +34,9 @@ type switchCancelMsg struct{}
 type switchErrorMsg struct {
 	Err error
 }
+
+// ApprovalRequestMsg is sent when a tool requires user approval.
+type ApprovalRequestMsg struct {
+	Command      string
+	ResponseChan chan bool
+}

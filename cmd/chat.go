@@ -47,7 +47,12 @@ var chatCmd = &cobra.Command{
 		}
 
 		manager := tools.NewManager()
-		defaults.RegisterAll(manager)
+		defaults.RegisterAll(manager, func(cmd string) bool {
+			fmt.Printf("\n⚠️ Agent wants to run: %s\nAllow? (y/N): ", cmd)
+			var ans string
+			fmt.Scanln(&ans)
+			return ans == "y" || ans == "Y"
+		})
 
 		ag := agent.New(provider, manager, agent.Config{})
 

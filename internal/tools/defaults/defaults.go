@@ -8,7 +8,7 @@ import (
 )
 
 // RegisterAll registers all built-in filesystem and editing tools onto the manager.
-func RegisterAll(m *tools.Manager) {
+func RegisterAll(m *tools.Manager, approvalCb system.ApprovalCallback) {
 	if m == nil {
 		return
 	}
@@ -33,5 +33,5 @@ func RegisterAll(m *tools.Manager) {
 	m.Register(editing.NewSearchTool())
 
 	// System tools
-	m.Register(system.NewCommandTool())
+	m.Register(system.NewCommandTool(approvalCb))
 }

@@ -33,6 +33,10 @@ type Model struct {
 	loading   bool
 	streaming bool
 
+	waitingApproval bool
+	approvalCommand string
+	approvalChan    chan bool
+
 	viewport viewport.Model
 
 	markdown *ui.MarkdownRenderer
@@ -54,7 +58,17 @@ func New() Model {
 	}
 
 	manager := tools.NewManager()
-	defaults.RegisterAll(manager)
+	defaults.RegisterAll(manager, func(cmd string) bool {
+		if program == nil {
+			return false
+		}
+		ch := make(chan bool)
+		program.Send(ApprovalRequestMsg{
+			Command:      cmd,
+			ResponseChan: ch,
+		})
+		return <-ch
+	})
 	ag := agent.New(provider, manager, agent.Config{})
 
 	renderer, err := ui.NewMarkdownRenderer()
@@ -98,6 +112,8 @@ func New() Model {
 
 		loading:   false,
 		streaming: false,
+
+		waitingApproval: false,
 
 		viewport: vp,
 
