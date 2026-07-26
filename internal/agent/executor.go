@@ -3,26 +3,26 @@ package agent
 import (
 	"context"
 	"fmt"
-	"sync"
-	"strings"
 	"os"
 	"path/filepath"
+	"strings"
+	"sync"
 
 	"time"
 
-	"github.com/pmezard/go-difflib/difflib"
 	"github.com/Nithwin/WindMist/internal/ai"
 	"github.com/Nithwin/WindMist/internal/store"
 	"github.com/Nithwin/WindMist/internal/tools"
+	"github.com/pmezard/go-difflib/difflib"
 )
 
 // execute runs a slice of tool calls against the tool manager and returns their results.
 func (a *Agent) execute(ctx context.Context, calls []ai.ToolCall, onChunk func(string)) []ai.ToolResult {
 	results := make([]ai.ToolResult, len(calls))
 	var wg sync.WaitGroup
-	
+
 	batchID := fmt.Sprintf("batch_%d", time.Now().UnixNano())
-	
+
 	// Clear redo history when a new edit is made
 	if a.config.Store != nil && a.config.SessionID != "" {
 		_ = a.config.Store.ClearRedoHistory(a.config.SessionID)
@@ -32,11 +32,11 @@ func (a *Agent) execute(ctx context.Context, calls []ai.ToolCall, onChunk func(s
 		wg.Add(1)
 		go func(i int, call ai.ToolCall) {
 			defer wg.Done()
-			
+
 			// Route to MCP Manager if it's an MCP tool
 			if strings.HasPrefix(call.Name, "mcp_") && a.mcpManager != nil {
 				res, err := a.mcpManager.ExecuteTool(ctx, call.Name, call.Args)
-				
+
 				content := ""
 				isError := false
 				if err != nil {
@@ -45,7 +45,7 @@ func (a *Agent) execute(ctx context.Context, calls []ai.ToolCall, onChunk func(s
 				} else {
 					content = fmt.Sprintf("%v", res)
 				}
-				
+
 				results[i] = ai.ToolResult{
 					ID:      call.ID,
 					Name:    call.Name,
@@ -80,8 +80,6 @@ func (a *Agent) execute(ctx context.Context, calls []ai.ToolCall, onChunk func(s
 				onChunk(fmt.Sprintf(" ✅ Done (`%s`).\n\n", call.Name))
 			}
 
-
-
 			content := ""
 			isError := false
 
@@ -91,10 +89,10 @@ func (a *Agent) execute(ctx context.Context, calls []ai.ToolCall, onChunk func(s
 			} else if len(res.FileStates) > 0 {
 				var diffs strings.Builder
 				diffs.WriteString(fmt.Sprintf("Successfully modified %d file(s):\n\n", len(res.FileStates)))
-				
+
 				for i := range res.FileStates {
 					state := &res.FileStates[i]
-					
+
 					// Auto-format the file if possible
 					if autoFormat(state.Path) {
 						// Re-read the formatted content
@@ -102,7 +100,7 @@ func (a *Agent) execute(ctx context.Context, calls []ai.ToolCall, onChunk func(s
 							state.AfterContent = string(contentBytes)
 						}
 					}
-					
+
 					// Now save the file change to the store (with formatted content)
 					if a.config.Store != nil && a.config.SessionID != "" {
 						_ = a.config.Store.SaveFileChange(&store.FileChange{
@@ -114,7 +112,7 @@ func (a *Agent) execute(ctx context.Context, calls []ai.ToolCall, onChunk func(s
 							AfterContent:  state.AfterContent,
 						})
 					}
-					
+
 					diff := difflib.UnifiedDiff{
 						A:        difflib.SplitLines(state.BeforeContent),
 						B:        difflib.SplitLines(state.AfterContent),
@@ -124,7 +122,7 @@ func (a *Agent) execute(ctx context.Context, calls []ai.ToolCall, onChunk func(s
 					}
 					text, _ := difflib.GetUnifiedDiffString(diff)
 					diffs.WriteString(fmt.Sprintf("```diff\n%s\n```\n", strings.TrimSpace(text)))
-					
+
 					// Connect to LSP and check for diagnostics
 					if a.lspManager != nil {
 						absPath, err := filepath.Abs(state.Path)
@@ -142,10 +140,10 @@ func (a *Agent) execute(ctx context.Context, calls []ai.ToolCall, onChunk func(s
 										"text":       state.AfterContent,
 									},
 								})
-								
+
 								// Wait for diagnostics to stream in
 								time.Sleep(500 * time.Millisecond)
-								
+
 								diags := client.GetDiagnostics(uri)
 								if len(diags) > 0 {
 									diffs.WriteString("\n⚠️ **LSP Diagnostics Found:**\n")
@@ -159,9 +157,9 @@ func (a *Agent) execute(ctx context.Context, calls []ai.ToolCall, onChunk func(s
 						}
 					}
 				}
-				
+
 				content = diffs.String()
-				
+
 				// Send the diff to the chat UI via onChunk so the user sees it immediately
 				if onChunk != nil {
 					onChunk("\n" + content + "\n")
@@ -211,10 +209,10 @@ func (a *Agent) toolDefinitions(modeConfig ModeConfig) []ai.ToolDefinition {
 			Parameters:  params,
 		})
 	}
-	
+
 	if a.mcpManager != nil {
 		defs = append(defs, a.mcpManager.GetTools()...)
 	}
-	
+
 	return defs
 }

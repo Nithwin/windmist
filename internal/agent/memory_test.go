@@ -19,15 +19,15 @@ func TestPruneMessages(t *testing.T) {
 	}
 
 	longHistory := []ai.Message{
-		{Role: ai.RoleUser, Content: "Initial task goal"},     
-		{Role: ai.RoleAssistant, Content: "Turn 1 Assistant"}, 
-		{Role: ai.RoleTool, Content: "Turn 1 Tool"},           
-		{Role: ai.RoleAssistant, Content: "Turn 2 Assistant"}, 
-		{Role: ai.RoleTool, Content: "Turn 2 Tool"},           
-		{Role: ai.RoleAssistant, Content: "Turn 3 Assistant"}, 
-		{Role: ai.RoleTool, Content: "Turn 3 Tool"},           
-		{Role: ai.RoleAssistant, Content: "Turn 4 Assistant"}, 
-		{Role: ai.RoleTool, Content: "Turn 4 Tool"},           
+		{Role: ai.RoleUser, Content: "Initial task goal"},
+		{Role: ai.RoleAssistant, Content: "Turn 1 Assistant"},
+		{Role: ai.RoleTool, Content: "Turn 1 Tool"},
+		{Role: ai.RoleAssistant, Content: "Turn 2 Assistant"},
+		{Role: ai.RoleTool, Content: "Turn 2 Tool"},
+		{Role: ai.RoleAssistant, Content: "Turn 3 Assistant"},
+		{Role: ai.RoleTool, Content: "Turn 3 Tool"},
+		{Role: ai.RoleAssistant, Content: "Turn 4 Assistant"},
+		{Role: ai.RoleTool, Content: "Turn 4 Tool"},
 	}
 
 	prunedLong := mem.Prune(longHistory, 50)

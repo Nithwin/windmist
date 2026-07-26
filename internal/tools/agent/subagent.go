@@ -91,11 +91,11 @@ func (t *subAgentTool) Run(ctx context.Context, call tools.Call) tools.Result {
 		AI: config.AIConfig{Provider: providerName},
 		Providers: map[string]config.ProviderConfig{
 			providerName: {
-				Model:  modelName,
+				Model: modelName,
 			},
 		},
 	}
-	
+
 	// Copy API key/base url from original provider if it exists
 	if origProvider, ok := t.cfg.Providers[providerName]; ok {
 		p := subCfg.Providers[providerName]
@@ -110,7 +110,7 @@ func (t *subAgentTool) Run(ctx context.Context, call tools.Call) tools.Result {
 	}
 
 	systemPrompt := "You are a specialized sub-agent for an AI coding assistant. Your job is to read the provided files, analyze them, and fulfill the requested task concisely and accurately. Do not write full files, just provide the exact analysis requested."
-	
+
 	req := &ai.GenerateRequest{
 		System: systemPrompt,
 		Messages: []ai.Message{
@@ -129,7 +129,7 @@ func (t *subAgentTool) Run(ctx context.Context, call tools.Call) tools.Result {
 		if mainErr != nil {
 			return tools.Result{Error: fmt.Errorf("sub-agent failed (%w) and could not resolve main fallback: %v", err, mainErr)}
 		}
-		
+
 		fallbackProvider, fallbackErr := ai.New(t.cfg) // Use exactly the main config
 		if fallbackErr != nil {
 			return tools.Result{Error: fmt.Errorf("sub-agent failed (%w) and failed to init fallback: %v", err, fallbackErr)}

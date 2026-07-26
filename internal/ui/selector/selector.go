@@ -11,9 +11,9 @@ import (
 
 // Option represents a selectable item in the selector list.
 type Option struct {
-	Label       string
-	Desc        string
-	Value       string
+	Label string
+	Desc  string
+	Value string
 }
 
 func (o Option) Title() string       { return o.Label }

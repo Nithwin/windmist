@@ -62,7 +62,7 @@ func (m *Manager) StartAll(ctx context.Context, cfg *config.Config) error {
 		for _, t := range toolList.Tools {
 			// Prefix the tool name to avoid collisions
 			mcpToolName := fmt.Sprintf("mcp_%s_%s", name, t.Name)
-			
+
 			// Extract parameters
 			var params []ai.ToolParameter
 			if props, ok := t.InputSchema["properties"].(map[string]interface{}); ok {
@@ -70,7 +70,7 @@ func (m *Manager) StartAll(ctx context.Context, cfg *config.Config) error {
 					propMap := propVal.(map[string]interface{})
 					desc, _ := propMap["description"].(string)
 					typ, _ := propMap["type"].(string)
-					
+
 					required := false
 					if reqArr, ok := t.InputSchema["required"].([]interface{}); ok {
 						for _, req := range reqArr {
@@ -80,7 +80,7 @@ func (m *Manager) StartAll(ctx context.Context, cfg *config.Config) error {
 							}
 						}
 					}
-					
+
 					params = append(params, ai.ToolParameter{
 						Name:        propName,
 						Type:        typ,
@@ -123,11 +123,11 @@ func (m *Manager) ExecuteTool(ctx context.Context, toolName string, args map[str
 	if len(toolName) <= parts {
 		return nil, fmt.Errorf("invalid MCP tool name: %s", toolName)
 	}
-	
+
 	rest := toolName[parts:]
 	serverName := ""
 	originalToolName := ""
-	
+
 	// Find the server name by checking prefixes
 	for name := range m.servers {
 		if len(rest) > len(name) && rest[:len(name)] == name && rest[len(name)] == '_' {
@@ -136,7 +136,7 @@ func (m *Manager) ExecuteTool(ctx context.Context, toolName string, args map[str
 			break
 		}
 	}
-	
+
 	if serverName == "" {
 		return nil, fmt.Errorf("could not determine MCP server for tool: %s", toolName)
 	}
@@ -154,7 +154,7 @@ func (m *Manager) ExecuteTool(ctx context.Context, toolName string, args map[str
 	if err != nil {
 		return nil, err
 	}
-	
+
 	var callResult struct {
 		Content []struct {
 			Type string `json:"type"`
@@ -162,22 +162,22 @@ func (m *Manager) ExecuteTool(ctx context.Context, toolName string, args map[str
 		} `json:"content"`
 		IsError bool `json:"isError"`
 	}
-	
+
 	if err := json.Unmarshal(res.Result, &callResult); err != nil {
 		return nil, fmt.Errorf("failed to parse MCP tool result: %w", err)
 	}
-	
+
 	if callResult.IsError {
 		if len(callResult.Content) > 0 {
 			return nil, fmt.Errorf("MCP tool error: %s", callResult.Content[0].Text)
 		}
 		return nil, fmt.Errorf("MCP tool execution failed")
 	}
-	
+
 	if len(callResult.Content) > 0 {
 		return callResult.Content[0].Text, nil
 	}
-	
+
 	return "Success", nil
 }
 

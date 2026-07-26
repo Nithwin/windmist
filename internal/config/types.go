@@ -2,12 +2,12 @@ package config
 
 // Config represents the complete WindMist configuration.
 type Config struct {
-	AI           AIConfig                  `yaml:"ai"`
-	Providers    map[string]ProviderConfig `yaml:"providers"`
-	UI           UIConfig                  `yaml:"ui"`
-	Cache        CacheConfig               `yaml:"cache"`
-	SubAgent     SubAgentConfig            `yaml:"subagent,omitempty"`
-	CustomModels map[string][]string       `yaml:"custom_models,omitempty"`
+	AI           AIConfig                   `yaml:"ai"`
+	Providers    map[string]ProviderConfig  `yaml:"providers"`
+	UI           UIConfig                   `yaml:"ui"`
+	Cache        CacheConfig                `yaml:"cache"`
+	SubAgent     SubAgentConfig             `yaml:"subagent,omitempty"`
+	CustomModels map[string][]string        `yaml:"custom_models,omitempty"`
 	MCPServers   map[string]MCPServerConfig `yaml:"mcp_servers,omitempty"`
 }
 

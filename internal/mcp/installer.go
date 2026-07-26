@@ -94,21 +94,21 @@ func Install(entry *CatalogEntry, envValues map[string]string) error {
 	if cfg.MCPServers == nil {
 		cfg.MCPServers = make(map[string]config.MCPServerConfig)
 	}
-	
+
 	// Create the configuration for this server
 	srvConfig := config.MCPServerConfig{
 		Command: entry.Command,
 		Args:    entry.Args,
 		Env:     envValues,
 	}
-	
+
 	// Append the dynamic DB path to the args for some servers like SQLite or Postgres
 	// Some MCP servers take the DB path as an argument rather than an env var
 	if entry.ID == "sqlite" && envValues["SQLITE_DB_PATH"] != "" {
 		srvConfig.Args = append(srvConfig.Args, envValues["SQLITE_DB_PATH"])
 		delete(srvConfig.Env, "SQLITE_DB_PATH") // Remove from env if passed as arg
 	}
-	
+
 	if entry.ID == "postgres" && envValues["POSTGRES_CONNECTION_STRING"] != "" {
 		srvConfig.Args = append(srvConfig.Args, envValues["POSTGRES_CONNECTION_STRING"])
 		delete(srvConfig.Env, "POSTGRES_CONNECTION_STRING")

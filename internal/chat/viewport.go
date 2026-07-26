@@ -51,4 +51,3 @@ func (m *Model) refreshViewport() {
 		m.viewport.GotoBottom()
 	}
 }
-

@@ -45,7 +45,7 @@ func NewManager() *Manager {
 // GetClient returns a running client for the file extension, or starts one if not running.
 func (m *Manager) GetClient(ctx context.Context, projectPath string, filePath string) (*Client, error) {
 	ext := strings.ToLower(filepath.Ext(filePath))
-	
+
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -63,7 +63,7 @@ func (m *Manager) GetClient(ctx context.Context, projectPath string, filePath st
 
 	// Start new client
 	client := NewClient(cfg.Command, cfg.Args, projectPath)
-	
+
 	// Add an idle callback to automatically shut down the LSP to save RAM
 	client.OnIdle(30*time.Second, func() {
 		m.mu.Lock()

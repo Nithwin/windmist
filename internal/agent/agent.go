@@ -78,20 +78,20 @@ func New(
 		lspManager: lsp.NewManager(),
 		mcpManager: mcp.NewManager(),
 	}
-	
+
 	// Start MCP servers asynchronously so it doesn't block UI load
 	go func() {
 		// Create a temporary context for startup
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
-		
+
 		// Load global config to get MCPServers
 		globalCfg, err := appconfig.Load()
 		if err == nil {
 			_ = a.mcpManager.StartAll(ctx, globalCfg)
 		}
 	}()
-	
+
 	return a
 }
 

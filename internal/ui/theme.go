@@ -163,7 +163,7 @@ func ApplyTheme(t Theme) {
 	Amber = lipgloss.Color(t.Colors.Warning)
 	Red = lipgloss.Color(t.Colors.Error)
 	Muted = lipgloss.Color(t.Colors.Muted)
-	MutedLight = lipgloss.Color(t.Colors.Foreground) 
+	MutedLight = lipgloss.Color(t.Colors.Foreground)
 	Surface = lipgloss.Color(t.Colors.Background)
 	White = lipgloss.Color(t.Colors.Foreground)
 	Border = lipgloss.Color(t.Colors.Border)

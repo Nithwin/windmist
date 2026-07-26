@@ -28,29 +28,29 @@ type modelEntry struct {
 func GetProviderOptions() []selector.Option {
 	return []selector.Option{
 		{
-			Label:       "gemini",
-			Desc: "Google Gemini — Fast, highly capable multimodal AI (Default)",
-			Value:       "gemini",
+			Label: "gemini",
+			Desc:  "Google Gemini — Fast, highly capable multimodal AI (Default)",
+			Value: "gemini",
 		},
 		{
-			Label:       "openai",
-			Desc: "OpenAI — Flagship models like GPT-4o, o1, o3-mini",
-			Value:       "openai",
+			Label: "openai",
+			Desc:  "OpenAI — Flagship models like GPT-4o, o1, o3-mini",
+			Value: "openai",
 		},
 		{
-			Label:       "anthropic",
-			Desc: "Anthropic — Claude 3.5 Sonnet, Haiku, Opus models",
-			Value:       "anthropic",
+			Label: "anthropic",
+			Desc:  "Anthropic — Claude 3.5 Sonnet, Haiku, Opus models",
+			Value: "anthropic",
 		},
 		{
-			Label:       "groq",
-			Desc: "Groq — Ultra-fast Llama 3 and Mixtral inference",
-			Value:       "groq",
+			Label: "groq",
+			Desc:  "Groq — Ultra-fast Llama 3 and Mixtral inference",
+			Value: "groq",
 		},
 		{
-			Label:       "ollama",
-			Desc: "Ollama — Run open-source models locally on your system",
-			Value:       "ollama",
+			Label: "ollama",
+			Desc:  "Ollama — Run open-source models locally on your system",
+			Value: "ollama",
 		},
 	}
 }
@@ -72,9 +72,9 @@ func (c *Config) GetModelOptions(providerName, ollamaBaseURL string) []selector.
 		if entries, ok := manifest[providerName]; ok {
 			for _, e := range entries {
 				options = append(options, selector.Option{
-					Label:       e.Label,
-					Desc: e.Description,
-					Value:       e.Value,
+					Label: e.Label,
+					Desc:  e.Description,
+					Value: e.Value,
 				})
 			}
 		}
@@ -84,18 +84,18 @@ func (c *Config) GetModelOptions(providerName, ollamaBaseURL string) []selector.
 	if c.CustomModels != nil {
 		for _, m := range c.CustomModels[providerName] {
 			options = append(options, selector.Option{
-				Label:       fmt.Sprintf("%s (Custom)", m),
-				Desc: "Saved custom model",
-				Value:       m,
+				Label: fmt.Sprintf("%s (Custom)", m),
+				Desc:  "Saved custom model",
+				Value: m,
 			})
 		}
 	}
 
 	// Always append custom model escape hatch
 	options = append(options, selector.Option{
-		Label:       "Custom model ID...",
-		Desc: "Enter any model name or identifier manually",
-		Value:       "__CUSTOM__",
+		Label: "Custom model ID...",
+		Desc:  "Enter any model name or identifier manually",
+		Value: "__CUSTOM__",
 	})
 
 	return options
@@ -106,9 +106,9 @@ func ensureOllamaReadyAndGetModels(baseURL string) []selector.Option {
 	if _, err := exec.LookPath("ollama"); err != nil {
 		return []selector.Option{
 			{
-				Label:       "❌ Ollama CLI not installed",
-				Desc: "Please install Ollama from https://ollama.com first",
-				Value:       "__CUSTOM__",
+				Label: "❌ Ollama CLI not installed",
+				Desc:  "Please install Ollama from https://ollama.com first",
+				Value: "__CUSTOM__",
 			},
 		}
 	}
@@ -174,9 +174,9 @@ func ensureOllamaReadyAndGetModels(baseURL string) []selector.Option {
 
 	return []selector.Option{
 		{
-			Label:       "⚠️ Ollama offline or empty",
-			Desc: fmt.Sprintf("Run 'ollama serve' and 'ollama pull <model>' at %s", baseURL),
-			Value:       "__CUSTOM__",
+			Label: "⚠️ Ollama offline or empty",
+			Desc:  fmt.Sprintf("Run 'ollama serve' and 'ollama pull <model>' at %s", baseURL),
+			Value: "__CUSTOM__",
 		},
 	}
 }
@@ -235,9 +235,9 @@ func fetchOllamaModels(baseURL string) ([]selector.Option, error) {
 			desc = fmt.Sprintf("Installed local (%s, %s)", m.Details.ParameterSize, m.Details.QuantizationLevel)
 		}
 		options = append(options, selector.Option{
-			Label:       m.Name,
-			Desc: desc,
-			Value:       m.Name,
+			Label: m.Name,
+			Desc:  desc,
+			Value: m.Name,
 		})
 	}
 

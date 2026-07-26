@@ -10,9 +10,9 @@ import (
 // It returns true if a formatter was successfully run, or false if no formatter was found or it failed.
 func autoFormat(path string) bool {
 	ext := strings.ToLower(filepath.Ext(path))
-	
+
 	var cmd *exec.Cmd
-	
+
 	switch ext {
 	case ".go":
 		if _, err := exec.LookPath("gofmt"); err == nil {
@@ -33,11 +33,11 @@ func autoFormat(path string) bool {
 			cmd = exec.Command("rustfmt", path)
 		}
 	}
-	
+
 	if cmd == nil {
 		return false
 	}
-	
+
 	// We don't care about the output right now, just run it silently
 	err := cmd.Run()
 	return err == nil

@@ -78,4 +78,3 @@ func renderConversation(m Model) string {
 	b.WriteString("\n")
 	return b.String()
 }
-

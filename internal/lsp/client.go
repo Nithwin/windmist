@@ -16,19 +16,19 @@ import (
 
 // Client represents an LSP JSON-RPC client connected via stdio.
 type Client struct {
-	cmd     *exec.Cmd
-	stdin   io.WriteCloser
-	stdout  io.ReadCloser
-	
+	cmd    *exec.Cmd
+	stdin  io.WriteCloser
+	stdout io.ReadCloser
+
 	projectPath string
-	
+
 	nextID  int64
 	mu      sync.Mutex
 	pending map[int64]chan *JSONRPCMessage
-	
+
 	diagMu      sync.Mutex
 	diagnostics map[string][]Diagnostic // URI -> Diagnostics
-	
+
 	idleTimer  *time.Timer
 	idleMu     sync.Mutex
 	onIdleFunc func()
@@ -73,7 +73,7 @@ type PublishDiagnosticsParams struct {
 func NewClient(command string, args []string, projectPath string) *Client {
 	cmd := exec.Command(command, args...)
 	cmd.Dir = projectPath
-	
+
 	return &Client{
 		cmd:         cmd,
 		projectPath: projectPath,
@@ -88,27 +88,27 @@ func (c *Client) Start(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	
+
 	stdout, err := c.cmd.StdoutPipe()
 	if err != nil {
 		return err
 	}
-	
+
 	c.stdin = stdin
 	c.stdout = stdout
-	
+
 	if err := c.cmd.Start(); err != nil {
 		return err
 	}
-	
+
 	go c.readLoop()
-	
+
 	// Send initialize request
 	type InitParams struct {
 		ProcessID int    `json:"processId"`
 		RootURI   string `json:"rootUri"`
 	}
-	
+
 	_, err = c.Call(ctx, "initialize", InitParams{
 		ProcessID: c.cmd.Process.Pid,
 		RootURI:   "file://" + c.projectPath,
@@ -117,10 +117,10 @@ func (c *Client) Start(ctx context.Context) error {
 		c.Close()
 		return fmt.Errorf("LSP initialization failed: %w", err)
 	}
-	
+
 	// Send initialized notification
 	_ = c.Notify("initialized", map[string]interface{}{})
-	
+
 	return nil
 }
 
@@ -128,7 +128,7 @@ func (c *Client) Start(ctx context.Context) error {
 func (c *Client) ResetIdleTimer() {
 	c.idleMu.Lock()
 	defer c.idleMu.Unlock()
-	
+
 	if c.idleTimer != nil {
 		c.idleTimer.Reset(c.idleDur)
 	}
@@ -138,7 +138,7 @@ func (c *Client) ResetIdleTimer() {
 func (c *Client) OnIdle(duration time.Duration, callback func()) {
 	c.idleMu.Lock()
 	defer c.idleMu.Unlock()
-	
+
 	c.idleDur = duration
 	c.onIdleFunc = callback
 	c.idleTimer = time.AfterFunc(duration, callback)
@@ -147,7 +147,7 @@ func (c *Client) OnIdle(duration time.Duration, callback func()) {
 // Call sends a JSON-RPC request and waits for the response.
 func (c *Client) Call(ctx context.Context, method string, params interface{}) (*JSONRPCMessage, error) {
 	c.ResetIdleTimer()
-	
+
 	id := atomic.AddInt64(&c.nextID, 1)
 	req := JSONRPCRequest{
 		JSONRPC: "2.0",
@@ -155,28 +155,28 @@ func (c *Client) Call(ctx context.Context, method string, params interface{}) (*
 		Method:  method,
 		Params:  params,
 	}
-	
+
 	data, err := json.Marshal(req)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	ch := make(chan *JSONRPCMessage, 1)
 	c.mu.Lock()
 	c.pending[id] = ch
 	c.mu.Unlock()
-	
+
 	defer func() {
 		c.mu.Lock()
 		delete(c.pending, id)
 		c.mu.Unlock()
 	}()
-	
+
 	msg := fmt.Sprintf("Content-Length: %d\r\n\r\n%s", len(data), data)
 	if _, err := c.stdin.Write([]byte(msg)); err != nil {
 		return nil, err
 	}
-	
+
 	select {
 	case res := <-ch:
 		if res.Error != nil {
@@ -191,18 +191,18 @@ func (c *Client) Call(ctx context.Context, method string, params interface{}) (*
 // Notify sends a JSON-RPC notification (no response expected).
 func (c *Client) Notify(method string, params interface{}) error {
 	c.ResetIdleTimer()
-	
+
 	req := map[string]interface{}{
 		"jsonrpc": "2.0",
 		"method":  method,
 		"params":  params,
 	}
-	
+
 	data, err := json.Marshal(req)
 	if err != nil {
 		return err
 	}
-	
+
 	msg := fmt.Sprintf("Content-Length: %d\r\n\r\n%s", len(data), data)
 	_, err = c.stdin.Write([]byte(msg))
 	return err
@@ -229,17 +229,17 @@ func (c *Client) readLoop() {
 				}
 			}
 		}
-		
+
 		if contentLength == 0 {
 			continue
 		}
-		
+
 		// Read body
 		body := make([]byte, contentLength)
 		if _, err := io.ReadFull(reader, body); err != nil {
 			return
 		}
-		
+
 		var res JSONRPCMessage
 		if err := json.Unmarshal(body, &res); err == nil {
 			// If it's a response to a request we made
@@ -265,7 +265,7 @@ func (c *Client) readLoop() {
 func (c *Client) GetDiagnostics(uri string) []Diagnostic {
 	c.diagMu.Lock()
 	defer c.diagMu.Unlock()
-	
+
 	// Create a copy to avoid race conditions
 	if diags, ok := c.diagnostics[uri]; ok {
 		cpy := make([]Diagnostic, len(diags))
@@ -282,7 +282,7 @@ func (c *Client) Close() {
 		c.idleTimer.Stop()
 	}
 	c.idleMu.Unlock()
-	
+
 	_ = c.Notify("exit", nil)
 	if c.cmd.Process != nil {
 		_ = c.cmd.Process.Kill()

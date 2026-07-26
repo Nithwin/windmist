@@ -123,7 +123,7 @@ func (s *Store) GetLastBatchForUndo(sessionID string) ([]FileChange, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	var changes []FileChange
 	err = s.db.Select(&changes, "SELECT * FROM file_changes WHERE session_id = ? AND batch_id = ? ORDER BY id DESC", sessionID, batchID)
 	return changes, err
@@ -136,7 +136,7 @@ func (s *Store) GetNextBatchForRedo(sessionID string) ([]FileChange, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	var changes []FileChange
 	err = s.db.Select(&changes, "SELECT * FROM file_changes WHERE session_id = ? AND batch_id = ? ORDER BY id ASC", sessionID, batchID)
 	return changes, err

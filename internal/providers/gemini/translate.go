@@ -54,7 +54,7 @@ func translateTools(tools []ai.ToolDefinition) []Tool {
 		if len(required) == 0 {
 			required = nil
 		}
-		
+
 		var paramsSchema *Schema
 		if len(properties) > 0 {
 			paramsSchema = &Schema{

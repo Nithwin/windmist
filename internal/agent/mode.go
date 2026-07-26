@@ -54,16 +54,16 @@ func FilterTools(manager *tools.Manager, config ModeConfig) []tools.Definition {
 
 	for _, tool := range manager.List() {
 		def := tool.Definition()
-		
+
 		// If edits are denied, filter out PermWrite and PermDangerous
 		if !config.AllowFileEdits && (def.Category == tools.CategoryEditing || def.Permission == tools.PermWrite || def.Permission == tools.PermDangerous) {
 			continue
 		}
-		
-		// Wait, if commands are denied, we could filter out system/command tools, 
+
+		// Wait, if commands are denied, we could filter out system/command tools,
 		// but maybe we just require permission instead of completely filtering.
 		// For now, in plan mode, we completely disable editing tools.
-		
+
 		allowed = append(allowed, def)
 	}
 
