@@ -27,11 +27,17 @@ func NewManager() *Manager {
 	return &Manager{
 		servers: make(map[string]*Client),
 		configs: map[string]Config{
-			".go": {Command: "gopls", Args: []string{"serve"}},
-			".py": {Command: "pyright-langserver", Args: []string{"--stdio"}},
-			".ts": {Command: "typescript-language-server", Args: []string{"--stdio"}},
-			".js": {Command: "typescript-language-server", Args: []string{"--stdio"}},
-			".rs": {Command: "rust-analyzer", Args: []string{}},
+			".go":   {Command: "gopls", Args: []string{"serve"}},
+			".py":   {Command: "pyright-langserver", Args: []string{"--stdio"}},
+			".ts":   {Command: "typescript-language-server", Args: []string{"--stdio"}},
+			".js":   {Command: "typescript-language-server", Args: []string{"--stdio"}},
+			".rs":   {Command: "rust-analyzer", Args: []string{}},
+			".c":    {Command: "clangd", Args: []string{}},
+			".cpp":  {Command: "clangd", Args: []string{}},
+			".h":    {Command: "clangd", Args: []string{}},
+			".hpp":  {Command: "clangd", Args: []string{}},
+			".java": {Command: "jdtls", Args: []string{}},
+			".rb":   {Command: "solargraph", Args: []string{"stdio"}},
 		},
 	}
 }
