@@ -40,7 +40,7 @@ func renderCommandPalette(m Model) string {
 
 	content := strings.Join(rows, "\n")
 
-	box := ui.BaseStyle.Copy().
+	box := ui.BaseStyle.
 		Border(lipgloss.RoundedBorder()).
 		BorderForeground(ui.PurpleDark).
 		Padding(0, 1).

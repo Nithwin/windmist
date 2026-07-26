@@ -181,7 +181,7 @@ func (m Model) MaxContentWidth() int {
 
 // UpdateInputStyles applies the current UI colors to the textarea input.
 func (m *Model) UpdateInputStyles() {
-	plain := ui.BaseStyle.Copy()
+	plain := ui.BaseStyle
 	m.input.FocusedStyle.Base = plain.Foreground(ui.White)
 	m.input.FocusedStyle.CursorLine = plain.Foreground(ui.White)
 	m.input.FocusedStyle.Placeholder = plain.Foreground(ui.Muted)

@@ -16,12 +16,12 @@ func renderBanner(m Model) string {
 ╚███╔███╔╝██║██║ ╚████║██████╔╝██║ ╚═╝ ██║██║███████║   ██║   
  ╚══╝╚══╝ ╚═╝╚═╝  ╚═══╝╚═════╝ ╚═╝     ╚═╝╚══════╝   ╚═╝`
 
-	cyanStyle := ui.BaseStyle.Copy().Foreground(ui.Cyan)
+	cyanStyle := ui.BaseStyle.Foreground(ui.Cyan)
 
 	b.WriteString(cyanStyle.Bold(true).Render(wordmark))
 	b.WriteString("\n")
 
-	b.WriteString(ui.BaseStyle.Copy().Foreground(ui.MutedLight).Render("🌀 WindMist v0.5 — AI Coding Assistant"))
+	b.WriteString(ui.BaseStyle.Foreground(ui.MutedLight).Render("🌀 WindMist v0.5 — AI Coding Assistant"))
 	b.WriteString("\n\n")
 
 	b.WriteString(ui.LabelStyle.Render("Provider : "))
@@ -38,9 +38,9 @@ func renderBanner(m Model) string {
 	if m.session != nil {
 		modeColor := ui.SuccessStyle
 		if m.session.AgentMode == "plan" {
-			modeColor = ui.BaseStyle.Copy().Foreground(ui.Amber)
+			modeColor = ui.BaseStyle.Foreground(ui.Amber)
 		} else if m.session.AgentMode == "auto" {
-			modeColor = ui.BaseStyle.Copy().Foreground(ui.Purple)
+			modeColor = ui.BaseStyle.Foreground(ui.Purple)
 		}
 		b.WriteString(modeColor.Render(strings.ToUpper(m.session.AgentMode)))
 	} else {
