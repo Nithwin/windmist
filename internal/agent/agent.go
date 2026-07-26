@@ -4,8 +4,12 @@ import (
 	"context"
 	"encoding/json"
 
+	"time"
+
 	"github.com/Nithwin/WindMist/internal/ai"
+	appconfig "github.com/Nithwin/WindMist/internal/config"
 	"github.com/Nithwin/WindMist/internal/lsp"
+	"github.com/Nithwin/WindMist/internal/mcp"
 	"github.com/Nithwin/WindMist/internal/store"
 	"github.com/Nithwin/WindMist/internal/tools"
 )
@@ -45,6 +49,7 @@ type Agent struct {
 	manager    *tools.Manager
 	config     Config
 	lspManager *lsp.Manager
+	mcpManager *mcp.Manager
 }
 
 // New creates a new Agent.
@@ -66,18 +71,37 @@ func New(
 		config.Memory = SlidingWindowMemory{}
 	}
 
-	return &Agent{
+	a := &Agent{
 		provider:   provider,
 		manager:    manager,
 		config:     config,
 		lspManager: lsp.NewManager(),
+		mcpManager: mcp.NewManager(),
 	}
+	
+	// Start MCP servers asynchronously so it doesn't block UI load
+	go func() {
+		// Create a temporary context for startup
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		
+		// Load global config to get MCPServers
+		globalCfg, err := appconfig.Load()
+		if err == nil {
+			_ = a.mcpManager.StartAll(ctx, globalCfg)
+		}
+	}()
+	
+	return a
 }
 
 // Close gracefully shuts down any resources held by the agent (like LSPs).
 func (a *Agent) Close() {
 	if a.lspManager != nil {
 		a.lspManager.CloseAll()
+	}
+	if a.mcpManager != nil {
+		a.mcpManager.CloseAll()
 	}
 }
 
