@@ -4,7 +4,18 @@ import (
 	"fmt"
 
 	"github.com/Nithwin/WindMist/internal/ai"
+	"github.com/pkoukk/tiktoken-go"
 )
+
+var tokenizer *tiktoken.Tiktoken
+
+func init() {
+	var err error
+	tokenizer, err = tiktoken.GetEncoding("cl100k_base")
+	if err != nil {
+		fmt.Printf("Warning: failed to load tiktoken: %v\n", err)
+	}
+}
 
 // appendUser appends a user message to the conversation history.
 func appendUser(messages []ai.Message, content string) []ai.Message {
@@ -34,35 +45,47 @@ func appendToolResults(messages []ai.Message, results []ai.ToolResult) []ai.Mess
 	})
 }
 
-// estimateTokens roughly estimates the number of tokens in a string.
-// A common heuristic is 1 token ≈ 4 characters.
-func estimateTokens(s string) int {
+// countTokens accurately counts the number of tokens in a string using tiktoken.
+func countTokens(s string) int {
+	if tokenizer != nil {
+		return len(tokenizer.Encode(s, nil, nil))
+	}
+	// Fallback heuristic if tokenizer failed to load
 	return len(s) / 4
 }
 
-// estimateMessageTokens calculates the approximate token size of a message.
-func estimateMessageTokens(m ai.Message) int {
-	tokens := estimateTokens(m.Content)
+// countMessageTokens calculates the token size of a message.
+func countMessageTokens(m ai.Message) int {
+	tokens := countTokens(m.Content)
 	for _, call := range m.ToolCalls {
-		tokens += estimateTokens(call.Name) + estimateTokens(fmt.Sprintf("%v", call.Args))
+		tokens += countTokens(call.Name) + countTokens(fmt.Sprintf("%v", call.Args))
 	}
 	for _, res := range m.ToolResults {
-		tokens += estimateTokens(res.Name) + estimateTokens(res.Content)
+		tokens += countTokens(res.Name) + countTokens(res.Content)
 	}
-	return tokens
+	// Add base padding per message
+	return tokens + 4
 }
 
-// pruneMessages uses a sliding window approach based on token estimation.
+// MemoryStrategy defines an interface for context window management.
+type MemoryStrategy interface {
+	Prune(messages []ai.Message, maxTokens int) []ai.Message
+}
+
+// SlidingWindowMemory implements a basic sliding window token pruner.
+type SlidingWindowMemory struct{}
+
+// Prune uses a sliding window approach based on exact token estimation.
 // It keeps the first message (original user instruction) and dynamically
 // retains as many recent messages as possible without exceeding maxTokens.
-func pruneMessages(messages []ai.Message, maxTokens int) []ai.Message {
+func (s SlidingWindowMemory) Prune(messages []ai.Message, maxTokens int) []ai.Message {
 	if len(messages) <= 1 {
 		return messages
 	}
 
 	// Always keep the first message
 	firstMsg := messages[0]
-	firstTokens := estimateMessageTokens(firstMsg)
+	firstTokens := countMessageTokens(firstMsg)
 
 	budget := maxTokens - firstTokens
 	if budget < 0 {
@@ -75,7 +98,7 @@ func pruneMessages(messages []ai.Message, maxTokens int) []ai.Message {
 	// Iterate backwards from the last message to the second message
 	for i := len(messages) - 1; i > 0; i-- {
 		msg := messages[i]
-		tokens := estimateMessageTokens(msg)
+		tokens := countMessageTokens(msg)
 
 		if currentTokens+tokens > budget {
 			break
