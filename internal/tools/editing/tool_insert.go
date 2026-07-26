@@ -19,6 +19,8 @@ func (t *InsertTextTool) Definition() tools.Definition {
 	return tools.Definition{
 		Name:        "insert_text",
 		Description: "Inserts text at a specific 1-indexed line number.",
+		Category:    tools.CategoryEditing,
+		Permission:  tools.PermWrite,
 		Parameters: []tools.Parameter{
 			{
 				Name:        "file",

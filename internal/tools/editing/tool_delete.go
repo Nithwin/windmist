@@ -18,6 +18,8 @@ func (t *DeleteRangeTool) Definition() tools.Definition {
 	return tools.Definition{
 		Name:        "delete_range",
 		Description: "Deletes exact 1-indexed line ranges from a file.",
+		Category:    tools.CategoryEditing,
+		Permission:  tools.PermWrite,
 		Parameters: []tools.Parameter{
 			{
 				Name:        "file",

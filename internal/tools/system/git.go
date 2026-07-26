@@ -21,6 +21,8 @@ func (t *GitTool) Definition() tools.Definition {
 	return tools.Definition{
 		Name:        "git",
 		Description: "Execute git operations. Safe read-only commands (status, log, diff, branch) auto-run. Write commands (commit, checkout, stash, push) require user approval.",
+		Category:    tools.CategoryGit,
+		Permission:  tools.PermDangerous,
 		Parameters: []tools.Parameter{
 			{
 				Name:        "command",

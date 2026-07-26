@@ -19,6 +19,8 @@ func (t *CreateTool) Definition() tools.Definition {
 	return tools.Definition{
 		Name:        "create",
 		Description: "Creates a new file or directory.",
+		Category:    tools.CategoryFilesystem,
+		Permission:  tools.PermWrite,
 		Parameters: []tools.Parameter{
 			{
 				Name:        "path",

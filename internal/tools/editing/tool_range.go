@@ -18,6 +18,8 @@ func (t *ReplaceRangeTool) Definition() tools.Definition {
 	return tools.Definition{
 		Name:        "replace_range",
 		Description: "Replace a contiguous range of lines (1-indexed, inclusive) in an existing file with new text. Use this when you know the exact line numbers from reading context. Preferred over replace_text when the target string appears multiple times in the file.",
+		Category:    tools.CategoryEditing,
+		Permission:  tools.PermWrite,
 		Parameters: []tools.Parameter{
 			{
 				Name:        "file",

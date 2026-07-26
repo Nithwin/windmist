@@ -22,6 +22,8 @@ func (t *TodoTool) Definition() tools.Definition {
 	return tools.Definition{
 		Name:        "todo",
 		Description: "Maintains an in-memory checklist to keep track of multi-step tasks. You can add, complete, remove, or list tasks.",
+		Category:    tools.CategoryAgent,
+		Permission:  tools.PermWrite,
 		Parameters: []tools.Parameter{
 			{
 				Name:        "action",

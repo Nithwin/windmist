@@ -18,6 +18,8 @@ func (t *WriteTool) Definition() tools.Definition {
 	return tools.Definition{
 		Name:        "write",
 		Description: "Overwrites the entire contents of an existing file with new content. WARNING: This replaces all existing code in the file. Prefer using replace_text or replace_range when making targeted edits or modifying existing code.",
+		Category:    tools.CategoryFilesystem,
+		Permission:  tools.PermWrite,
 		Parameters: []tools.Parameter{
 			{
 				Name:        "path",

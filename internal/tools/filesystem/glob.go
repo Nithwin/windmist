@@ -19,6 +19,8 @@ func (t *GlobTool) Definition() tools.Definition {
 	return tools.Definition{
 		Name:        "glob",
 		Description: "Finds files by matching a pattern (e.g., *.go, **/*.js) across the workspace.",
+		Category:    tools.CategorySearch,
+		Permission:  tools.PermReadOnly,
 		Parameters: []tools.Parameter{
 			{
 				Name:        "pattern",

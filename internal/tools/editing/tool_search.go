@@ -18,6 +18,8 @@ func (t *SearchTool) Definition() tools.Definition {
 	return tools.Definition{
 		Name:        "search_text",
 		Description: "Searches for text or regex patterns across files in a directory.",
+		Category:    tools.CategorySearch,
+		Permission:  tools.PermReadOnly,
 		Parameters: []tools.Parameter{
 			{
 				Name:        "query",

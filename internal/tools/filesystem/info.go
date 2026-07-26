@@ -17,6 +17,8 @@ func (t *InfoTool) Definition() tools.Definition {
 	return tools.Definition{
 		Name:        "info",
 		Description: "Retrieves metadata and information about a file or directory.",
+		Category:    tools.CategoryFilesystem,
+		Permission:  tools.PermReadOnly,
 		Parameters: []tools.Parameter{
 			{
 				Name:        "path",

@@ -22,6 +22,8 @@ func (t *WebSearchTool) Definition() tools.Definition {
 	return tools.Definition{
 		Name:        "web_search",
 		Description: "Searches the internet for a given query and returns a summary of the results with URLs. Useful for looking up documentation, error codes, and tutorials.",
+		Category:    tools.CategoryWeb,
+		Permission:  tools.PermReadOnly,
 		Parameters: []tools.Parameter{
 			{
 				Name:        "query",
