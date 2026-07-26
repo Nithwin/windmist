@@ -32,8 +32,6 @@ type Agent struct {
 	manager  *tools.Manager
 
 	config Config
-
-	systemPrompt string
 }
 
 // New creates a new Agent.
@@ -47,10 +45,9 @@ func New(
 	}
 
 	return &Agent{
-		provider:     provider,
-		manager:      manager,
-		config:       config,
-		systemPrompt: prompt.Build(),
+		provider: provider,
+		manager:  manager,
+		config:   config,
 	}
 }
 

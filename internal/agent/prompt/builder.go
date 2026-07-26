@@ -3,12 +3,16 @@ package prompt
 import "strings"
 
 // Build constructs the complete system prompt for WindMist.
-// Additional prompt sections can be added here as the agent evolves.
-func Build() string {
+// It dynamically generates a map of the workspace if cwd is provided.
+func Build(cwd string) string {
 	sections := []string{
 		System(),
 		Developer(),
 		Tools(),
+	}
+
+	if cwd != "" {
+		sections = append(sections, RepoMap(cwd))
 	}
 
 	return strings.Join(sections, "\n\n")
