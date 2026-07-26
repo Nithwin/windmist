@@ -2,7 +2,9 @@ package agent
 
 import (
 	"context"
+	"os"
 
+	"github.com/Nithwin/WindMist/internal/agent/prompt"
 	"github.com/Nithwin/WindMist/internal/ai"
 )
 
@@ -20,9 +22,12 @@ func (a *Agent) runLoop(ctx context.Context, messages []ai.Message, userPrompt s
 		}
 
 		prunedHistory := pruneMessages(messages, a.config.MaxContextTokens)
+		// Build dynamic system prompt
+		cwd, _ := os.Getwd()
+		dynamicSystemPrompt := prompt.Build(cwd)
 
 		req := &ai.GenerateRequest{
-			System:   a.systemPrompt,
+			System:   dynamicSystemPrompt,
 			Messages: prunedHistory,
 			Tools:    a.toolDefinitions(),
 		}
