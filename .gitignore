@@ -1,5 +1,6 @@
 # Go binaries & build artifacts
 WindMist
+bin/
 *.exe
 *.exe~
 *.dll
