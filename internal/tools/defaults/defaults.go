@@ -35,9 +35,11 @@ func RegisterAll(m *tools.Manager, approvalCb system.ApprovalCallback) {
 	m.Register(editing.NewReadContextTool())
 	m.Register(editing.NewInsertTextTool())
 	m.Register(editing.NewSearchTool())
+	m.Register(editing.NewPatchTool())
 
 	// System tools
 	m.Register(system.NewCommandTool(approvalCb))
+	m.Register(system.NewGitTool(approvalCb))
 
 	// Web tools
 	m.Register(web.NewWebSearchTool())
