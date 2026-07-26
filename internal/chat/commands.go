@@ -33,6 +33,7 @@ var Registry = []Command{
 /model      Change model
 /mode       Change agent mode
 /provider   Change provider
+/subagent   Configure sub-agent (cheaper background model)
 /exit       Exit WindMist`,
 			)
 			return nil
@@ -91,6 +92,13 @@ var Registry = []Command{
 		Description: "Change provider",
 		Execute: func(m *Model) tea.Cmd {
 			return selectProviderCmd(m)
+		},
+	},
+	{
+		Name:        "/subagent",
+		Description: "Configure sub-agent (cheaper background model)",
+		Execute: func(m *Model) tea.Cmd {
+			return selectSubagentCmd(m)
 		},
 	},
 	{
@@ -204,6 +212,66 @@ func selectProviderCmd(m *Model) tea.Cmd {
 		}
 
 		return switchProviderSuccessMsg{
+			Provider: providerOpt.Value,
+			Model:    modelValue,
+		}
+	}
+}
+
+func selectSubagentCmd(m *Model) tea.Cmd {
+	return func() tea.Msg {
+		if program == nil {
+			return switchErrorMsg{Err: fmt.Errorf("program instance not initialized")}
+		}
+
+		if err := program.ReleaseTerminal(); err != nil {
+			return switchErrorMsg{Err: fmt.Errorf("failed to release terminal: %w", err)}
+		}
+		defer program.RestoreTerminal()
+
+		providerOpt, err := selector.Run(
+			"Select Sub-Agent Provider",
+			"Choose which AI provider the Sub-Agent should use (Auto uses main config):",
+			append([]selector.Option{{Label: "Auto (Use Main Config)", Value: "auto"}}, config.GetProviderOptions()...),
+		)
+		if err != nil {
+			return switchCancelMsg{}
+		}
+
+		if providerOpt.Value == "auto" {
+			return switchSubagentSuccessMsg{
+				Provider: "",
+				Model:    "",
+			}
+		}
+
+		ollamaBaseURL := ""
+		if pConfig, ok := m.cfg.Providers[providerOpt.Value]; ok {
+			ollamaBaseURL = pConfig.BaseURL
+		}
+		modelOpt, err := selector.Run(
+			fmt.Sprintf("Select Sub-Agent Model for %s", providerOpt.Value),
+			"Choose the active model for this provider (Auto uses fast default):",
+			append([]selector.Option{{Label: "Auto (Fast Default)", Value: "auto"}}, m.cfg.GetModelOptions(providerOpt.Value, ollamaBaseURL)...),
+		)
+		if err != nil {
+			return switchCancelMsg{}
+		}
+
+		modelValue := modelOpt.Value
+		if modelValue == "auto" {
+			modelValue = ""
+		} else if modelValue == "__CUSTOM__" {
+			customVal, err := selector.RunInput("Custom Model ID", "Enter exact model ID (e.g. gpt-4o-mini)", "")
+			if err != nil {
+				return switchCancelMsg{}
+			}
+			modelValue = customVal
+			m.cfg.AddCustomModel(providerOpt.Value, modelValue)
+			_ = config.Save(m.cfg)
+		}
+
+		return switchSubagentSuccessMsg{
 			Provider: providerOpt.Value,
 			Model:    modelValue,
 		}

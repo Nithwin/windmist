@@ -123,10 +123,38 @@ func (t *subAgentTool) Run(ctx context.Context, call tools.Call) tools.Result {
 
 	resp, err := provider.Generate(ctx, req)
 	if err != nil {
-		return tools.Result{Error: fmt.Errorf("sub-agent generation failed: %w", err)}
+		// AUTOMATIC SAFE FALLBACK
+		// If the cheap/sub-agent model fails, we automatically fallback to the user's main active model
+		mainProvider, mainErr := t.cfg.ActiveProvider()
+		if mainErr != nil {
+			return tools.Result{Error: fmt.Errorf("sub-agent failed (%w) and could not resolve main fallback: %v", err, mainErr)}
+		}
+		
+		fallbackProvider, fallbackErr := ai.New(t.cfg) // Use exactly the main config
+		if fallbackErr != nil {
+			return tools.Result{Error: fmt.Errorf("sub-agent failed (%w) and failed to init fallback: %v", err, fallbackErr)}
+		}
+
+		resp, fallbackErr = fallbackProvider.Generate(ctx, req)
+		if fallbackErr != nil {
+			return tools.Result{Error: fmt.Errorf("sub-agent failed (%w) and main fallback also failed: %v", err, fallbackErr)}
+		}
+
+		output := fmt.Sprintf("⚠️ Sub-agent (%s/%s) failed. Safely fell back to main model (%s/%s).\n\nSub-Agent Analysis:\n\n%s", providerName, modelName, t.cfg.AI.Provider, mainProvider.Model, resp.Text)
+		return tools.Result{
+			Output:    output,
+			FilesRead: filesRead,
+		}
 	}
 
 	output := fmt.Sprintf("Sub-Agent Analysis (Model: %s/%s):\n\n%s", providerName, modelName, resp.Text)
+
+	// Add tip if we implicitly used the main model because no cheap one was configured
+	mainProvider, _ := t.cfg.ActiveProvider()
+	if t.cfg.SubAgent.Provider == "" && providerName == t.cfg.AI.Provider && modelName == mainProvider.Model {
+		output = "💡 Tip: Using main model for background research. Type `/subagent` to configure a cheaper model to save costs.\n\n" + output
+	}
+
 	return tools.Result{
 		Output:    output,
 		FilesRead: filesRead,
