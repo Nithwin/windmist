@@ -33,6 +33,20 @@ func renderBanner(m Model) string {
 	if provider, err := m.cfg.ActiveProvider(); err == nil {
 		b.WriteString(provider.Model)
 	}
+	b.WriteString("\n")
+
+	b.WriteString(ui.LabelStyle.Render("Mode     : "))
+	if m.session != nil {
+		modeColor := ui.SuccessStyle
+		if m.session.AgentMode == "plan" {
+			modeColor = lipgloss.NewStyle().Foreground(ui.Amber)
+		} else if m.session.AgentMode == "auto" {
+			modeColor = lipgloss.NewStyle().Foreground(ui.Purple)
+		}
+		b.WriteString(modeColor.Render(strings.ToUpper(m.session.AgentMode)))
+	} else {
+		b.WriteString("BUILD")
+	}
 
 	b.WriteString("\n\n")
 

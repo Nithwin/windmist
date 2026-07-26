@@ -31,6 +31,7 @@ var Registry = []Command{
 /undo       Undo the last AI file edit
 /redo       Redo the last undone file edit
 /model      Change model
+/mode       Change agent mode
 /provider   Change provider
 /exit       Exit WindMist`,
 			)
@@ -76,6 +77,13 @@ var Registry = []Command{
 		Description: "Change model",
 		Execute: func(m *Model) tea.Cmd {
 			return selectModelCmd(m)
+		},
+	},
+	{
+		Name:        "/mode",
+		Description: "Change agent mode",
+		Execute: func(m *Model) tea.Cmd {
+			return selectModeCmd(m)
 		},
 	},
 	{
@@ -244,6 +252,32 @@ func selectModelCmd(m *Model) tea.Cmd {
 		return switchModelSuccessMsg{
 			Model: modelValue,
 		}
+	}
+}
+
+func selectModeCmd(m *Model) tea.Cmd {
+	return func() tea.Msg {
+		if program == nil {
+			return switchErrorMsg{Err: fmt.Errorf("program instance not initialized")}
+		}
+
+		if err := program.ReleaseTerminal(); err != nil {
+			return switchErrorMsg{Err: fmt.Errorf("failed to release terminal: %w", err)}
+		}
+		defer program.RestoreTerminal()
+
+		options := []selector.Option{
+			{Label: "Auto", Desc: "Dynamically switches between Build and Plan based on prompt", Value: "auto"},
+			{Label: "Build", Desc: "Full autonomy mode with read/write access", Value: "build"},
+			{Label: "Plan", Desc: "Read-only mode for architecture and analysis", Value: "plan"},
+		}
+
+		opt, err := selector.Run("Select Agent Mode", "Choose how the AI should behave:", options)
+		if err != nil {
+			return switchCancelMsg{}
+		}
+
+		return switchModeSuccessMsg{Mode: opt.Value}
 	}
 }
 

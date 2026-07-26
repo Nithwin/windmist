@@ -22,6 +22,11 @@ type switchProviderSuccessMsg struct {
 	Model    string
 }
 
+// switchModeSuccessMsg represents a successful agent mode change.
+type switchModeSuccessMsg struct {
+	Mode string
+}
+
 // switchSessionSuccessMsg represents a successful session change.
 type switchSessionSuccessMsg struct {
 	SessionID string

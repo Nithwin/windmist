@@ -95,13 +95,14 @@ func New() (Model, error) {
 		ProjectPath: ".",
 		Provider:    cfg.AI.Provider,
 		Model:       activeModel,
-		AgentMode:   "build",
+		AgentMode:   "auto",
 	}
 	_ = dbStore.CreateSession(sess)
 
 	ag := agent.New(provider, manager, agent.Config{
 		Store:     dbStore,
 		SessionID: sess.ID,
+		Mode:      sess.AgentMode,
 	})
 
 	renderer, err := ui.NewMarkdownRenderer()
