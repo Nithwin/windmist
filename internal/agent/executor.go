@@ -4,7 +4,9 @@ import (
 	"context"
 	"fmt"
 	"sync"
+	"strings"
 
+	"github.com/pmezard/go-difflib/difflib"
 	"github.com/Nithwin/WindMist/internal/ai"
 	"github.com/Nithwin/WindMist/internal/store"
 	"github.com/Nithwin/WindMist/internal/tools"
@@ -63,6 +65,28 @@ func (a *Agent) execute(ctx context.Context, calls []ai.ToolCall, onChunk func(s
 			if res.Error != nil {
 				content = fmt.Sprintf("error executing tool %s: %v", call.Name, res.Error)
 				isError = true
+			} else if len(res.FileStates) > 0 {
+				var diffs strings.Builder
+				diffs.WriteString(fmt.Sprintf("Successfully modified %d file(s):\n\n", len(res.FileStates)))
+				
+				for _, state := range res.FileStates {
+					diff := difflib.UnifiedDiff{
+						A:        difflib.SplitLines(state.BeforeContent),
+						B:        difflib.SplitLines(state.AfterContent),
+						FromFile: "a/" + state.Path,
+						ToFile:   "b/" + state.Path,
+						Context:  3,
+					}
+					text, _ := difflib.GetUnifiedDiffString(diff)
+					diffs.WriteString(fmt.Sprintf("```diff\n%s\n```\n", strings.TrimSpace(text)))
+				}
+				
+				content = diffs.String()
+				
+				// Send the diff to the chat UI via onChunk so the user sees it immediately
+				if onChunk != nil {
+					onChunk("\n" + content + "\n")
+				}
 			} else if res.Output != nil {
 				content = fmt.Sprintf("%v", res.Output)
 			} else {
