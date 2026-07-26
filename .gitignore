@@ -65,3 +65,6 @@ Thumbs.db
 # Test sandbox & generated examples
 examples/
 CLAUDE_CODE_TODO.md
+
+# V2 Roadmap (internal planning)
+todo/
