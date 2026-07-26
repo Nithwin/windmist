@@ -50,7 +50,7 @@ var setCmd = &cobra.Command{
 				modelOpt, err := selector.Run(
 					fmt.Sprintf("Select Model for %s", value),
 					"Choose the active model for this provider:",
-					config.GetModelOptions(value, ollamaBaseURL),
+					cfg.GetModelOptions(value, ollamaBaseURL),
 				)
 				if err != nil {
 					log.Fatal(err)
@@ -62,6 +62,7 @@ var setCmd = &cobra.Command{
 						log.Fatal(err)
 					}
 					modelValue = customVal
+					cfg.AddCustomModel(value, modelValue)
 				}
 				err = cfg.SetModel(value, modelValue)
 				if err != nil {
@@ -84,7 +85,7 @@ var setCmd = &cobra.Command{
 				opt, err := selector.Run(
 					fmt.Sprintf("Select Model for %s", cfg.AI.Provider),
 					"Choose the active model to use:",
-					config.GetModelOptions(cfg.AI.Provider, ollamaBaseURL),
+					cfg.GetModelOptions(cfg.AI.Provider, ollamaBaseURL),
 				)
 				if err != nil {
 					log.Fatal(err)
@@ -96,6 +97,7 @@ var setCmd = &cobra.Command{
 						log.Fatal(err)
 					}
 					value = customVal
+					cfg.AddCustomModel(cfg.AI.Provider, value)
 				}
 			}
 			err = cfg.SetModel(cfg.AI.Provider, value)
@@ -116,8 +118,8 @@ var setCmd = &cobra.Command{
 		case "theme":
 			if value == "" {
 				opt, err := selector.Run("Select UI Theme", "Choose visual theme:", []selector.Option{
-					{Label: "dark", Description: "Dark theme with purple & cyan accents", Value: "dark"},
-					{Label: "light", Description: "Light theme", Value: "light"},
+					{Label: "dark", Desc: "Dark theme with purple & cyan accents", Value: "dark"},
+					{Label: "light", Desc: "Light theme", Value: "light"},
 				})
 				if err != nil {
 					log.Fatal(err)

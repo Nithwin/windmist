@@ -1,11 +1,8 @@
 package chat
 
 import (
-	"fmt"
 	"strings"
 
-	"github.com/Nithwin/WindMist/internal/config"
-	"github.com/Nithwin/WindMist/internal/ui/selector"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -26,9 +23,14 @@ var Registry = []Command{
 
 /help       Show available commands
 /new        Start a new conversation
+/sessions   Load a previous session
+/undo       Undo the last AI file edit
+/redo       Redo the last undone file edit
 /model      Change model
+/mode       Change agent mode
 /provider   Change provider
-/clear      Clear conversation
+/subagent   Configure sub-agent (cheaper background model)
+/theme      Change UI theme
 /exit       Exit WindMist`,
 			)
 			return nil
@@ -38,18 +40,34 @@ var Registry = []Command{
 		Name:        "/new",
 		Description: "Start a new conversation",
 		Execute: func(m *Model) tea.Cmd {
-			m.conversation.Clear()
-			m.refreshViewport()
-			return nil
+			return func() tea.Msg {
+				return createNewSessionMsg{}
+			}
 		},
 	},
 	{
-		Name:        "/clear",
-		Description: "Clear conversation",
+		Name:        "/sessions",
+		Description: "Load a previous session",
 		Execute: func(m *Model) tea.Cmd {
-			m.conversation.Clear()
-			m.refreshViewport()
-			return nil
+			return selectSessionCmd(m)
+		},
+	},
+	{
+		Name:        "/undo",
+		Description: "Undo the last AI file edit",
+		Execute: func(m *Model) tea.Cmd {
+			return func() tea.Msg {
+				return undoFileChangeMsg{}
+			}
+		},
+	},
+	{
+		Name:        "/redo",
+		Description: "Redo the last undone file edit",
+		Execute: func(m *Model) tea.Cmd {
+			return func() tea.Msg {
+				return redoFileChangeMsg{}
+			}
 		},
 	},
 	{
@@ -60,6 +78,13 @@ var Registry = []Command{
 		},
 	},
 	{
+		Name:        "/mode",
+		Description: "Change agent mode",
+		Execute: func(m *Model) tea.Cmd {
+			return selectModeCmd(m)
+		},
+	},
+	{
 		Name:        "/provider",
 		Description: "Change provider",
 		Execute: func(m *Model) tea.Cmd {
@@ -67,9 +92,40 @@ var Registry = []Command{
 		},
 	},
 	{
+		Name:        "/subagent",
+		Description: "Configure sub-agent (cheaper background model)",
+		Execute: func(m *Model) tea.Cmd {
+			return selectSubagentCmd(m)
+		},
+	},
+	{
+		Name:        "/theme",
+		Description: "Change UI theme",
+		Execute: func(m *Model) tea.Cmd {
+			return selectThemeCmd(m)
+		},
+	},
+	{
+		Name:        "/apikey",
+		Description: "Set API Key for the current provider",
+		Execute: func(m *Model) tea.Cmd {
+			return setAPIKeyCmd(m)
+		},
+	},
+	{
+		Name:        "/mcp",
+		Description: "Install an MCP server (e.g. GitHub, Postgres)",
+		Execute: func(m *Model) tea.Cmd {
+			return selectMCPCmd(m)
+		},
+	},
+	{
 		Name:        "/exit",
 		Description: "Exit WindMist",
 		Execute: func(m *Model) tea.Cmd {
+			if m.agent != nil {
+				m.agent.Close()
+			}
 			return tea.Quit
 		},
 	},
@@ -77,102 +133,12 @@ var Registry = []Command{
 		Name:        "/quit",
 		Description: "Exit WindMist",
 		Execute: func(m *Model) tea.Cmd {
+			if m.agent != nil {
+				m.agent.Close()
+			}
 			return tea.Quit
 		},
 	},
-}
-
-func selectProviderCmd(m *Model) tea.Cmd {
-	return func() tea.Msg {
-		if program == nil {
-			return switchErrorMsg{Err: fmt.Errorf("program instance not initialized")}
-		}
-
-		// 1. Release terminal of main program so selector can render cleanly
-		if err := program.ReleaseTerminal(); err != nil {
-			return switchErrorMsg{Err: fmt.Errorf("failed to release terminal: %w", err)}
-		}
-		defer program.RestoreTerminal()
-
-		// 2. Select Provider
-		providerOpt, err := selector.Run(
-			"Select AI Provider",
-			"Choose which AI provider you want WindMist to use:",
-			config.GetProviderOptions(),
-		)
-		if err != nil {
-			return switchCancelMsg{}
-		}
-
-		// 3. Select Model for this provider
-		ollamaBaseURL := ""
-		if pConfig, ok := m.cfg.Providers[providerOpt.Value]; ok {
-			ollamaBaseURL = pConfig.BaseURL
-		}
-		modelOpt, err := selector.Run(
-			fmt.Sprintf("Select Model for %s", providerOpt.Value),
-			"Choose the active model for this provider:",
-			config.GetModelOptions(providerOpt.Value, ollamaBaseURL),
-		)
-		if err != nil {
-			return switchCancelMsg{}
-		}
-
-		modelValue := modelOpt.Value
-		if modelValue == "__CUSTOM__" {
-			customVal, err := selector.RunInput("Custom Model ID", "Enter exact model ID (e.g. gpt-4o)", "")
-			if err != nil {
-				return switchCancelMsg{}
-			}
-			modelValue = customVal
-		}
-
-		return switchProviderSuccessMsg{
-			Provider: providerOpt.Value,
-			Model:    modelValue,
-		}
-	}
-}
-
-func selectModelCmd(m *Model) tea.Cmd {
-	return func() tea.Msg {
-		if program == nil {
-			return switchErrorMsg{Err: fmt.Errorf("program instance not initialized")}
-		}
-
-		// 1. Release terminal of main program
-		if err := program.ReleaseTerminal(); err != nil {
-			return switchErrorMsg{Err: fmt.Errorf("failed to release terminal: %w", err)}
-		}
-		defer program.RestoreTerminal()
-
-		// 2. Select Model for current provider
-		ollamaBaseURL := ""
-		if pConfig, ok := m.cfg.Providers[m.cfg.AI.Provider]; ok {
-			ollamaBaseURL = pConfig.BaseURL
-		}
-		modelOpt, err := selector.Run(
-			fmt.Sprintf("Select Model for %s", m.cfg.AI.Provider),
-			"Choose the active model to use:",
-			config.GetModelOptions(m.cfg.AI.Provider, ollamaBaseURL),
-		)
-		if err != nil {
-			return switchCancelMsg{}
-		}
-
-		modelValue := modelOpt.Value
-		if modelValue == "__CUSTOM__" {
-			customVal, err := selector.RunInput("Custom Model ID", "Enter exact model ID (e.g. gpt-4o)", "")
-			if err != nil {
-				return switchCancelMsg{}
-			}
-			modelValue = customVal
-		}
-
-		return switchModelSuccessMsg{
-			Model: modelValue,
-		}
-	}
 }
 
 func FilterCommands(input string) []Command {
@@ -200,3 +166,5 @@ func FindCommand(name string) (Command, bool) {
 
 	return Command{}, false
 }
+
+// mcpEnvPromptChain returns a tea.Msg that recursively prompts for each required env variable.

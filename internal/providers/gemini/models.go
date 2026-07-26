@@ -27,6 +27,7 @@ type Schema struct {
 	Properties  map[string]*Schema `json:"properties,omitempty"`
 	Required    []string           `json:"required,omitempty"`
 	Enum        []string           `json:"enum,omitempty"`
+	Items       *Schema            `json:"items,omitempty"`
 }
 
 // SystemInstruction represents Gemini's system instruction.

@@ -52,11 +52,11 @@ var chatCmd = &cobra.Command{
 			var ans string
 			fmt.Scanln(&ans)
 			return ans == "y" || ans == "Y"
-		})
+		}, cfg)
 
 		ag := agent.New(provider, manager, agent.Config{})
 
-		res, err := ag.Run(context.Background(), args[0], func(s string) {
+		res, err := ag.Run(context.Background(), nil, args[0], func(s string) {
 			fmt.Print(s)
 		})
 		if err != nil {

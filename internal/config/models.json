@@ -1,9 +1,9 @@
 {
   "gemini": [
-    { "label": "gemini-3.5-flash", "description": "Latest high-speed Gemini 3.5 Flash model (Default)", "value": "gemini-3.5-flash" },
-    { "label": "gemini-3.1-pro", "description": "Latest advanced reasoning Gemini 3.1 Pro model", "value": "gemini-3.1-pro" },
-    { "label": "gemini-2.5-flash", "description": "High-speed multimodal model", "value": "gemini-2.5-flash" },
-    { "label": "gemini-2.5-pro", "description": "Advanced reasoning model", "value": "gemini-2.5-pro" }
+    { "label": "gemini-3.6-flash", "description": "Latest ultra-high-speed Gemini 3.6 Flash model (Default)", "value": "gemini-3.6-flash" },
+    { "label": "gemini-3.6-pro", "description": "Latest advanced reasoning Gemini 3.6 Pro model", "value": "gemini-3.6-pro" },
+    { "label": "gemini-3.5-flash", "description": "High-speed multimodal model", "value": "gemini-3.5-flash" },
+    { "label": "gemini-3.1-pro", "description": "Advanced reasoning model", "value": "gemini-3.1-pro" }
   ],
   "openai": [
     { "label": "gpt-5.5-pro", "description": "Latest frontier GPT-5.5 Pro model for professional coding (Default)", "value": "gpt-5.5-pro" },
@@ -27,5 +27,30 @@
     { "label": "llama-3.1-8b-instant", "description": "Ultra-fast low latency 8B model", "value": "llama-3.1-8b-instant" },
     { "label": "mixtral-8x7b-32768", "description": "Mixtral MoE fast model", "value": "mixtral-8x7b-32768" },
     { "label": "gemma2-9b-it", "description": "Google Gemma 2 9B model on Groq", "value": "gemma2-9b-it" }
+  ],
+  "deepseek": [
+    { "label": "deepseek-chat", "description": "DeepSeek V3 Chat Model (Default)", "value": "deepseek-chat" },
+    { "label": "deepseek-reasoner", "description": "DeepSeek R1 Reasoning Model", "value": "deepseek-reasoner" }
+  ],
+  "mistral": [
+    { "label": "mistral-large-latest", "description": "Mistral Large (Default)", "value": "mistral-large-latest" },
+    { "label": "mistral-small-latest", "description": "Mistral Small", "value": "mistral-small-latest" },
+    { "label": "codestral-latest", "description": "Codestral specialized code model", "value": "codestral-latest" }
+  ],
+  "kimi": [
+    { "label": "kimi-k3", "description": "Latest flagship Kimi K3 model with 1M token context (Default)", "value": "kimi-k3" },
+    { "label": "kimi-k2.7-code", "description": "Kimi specialized coding model", "value": "kimi-k2.7-code" },
+    { "label": "moonshot-v1-8k", "description": "Legacy 8k context model", "value": "moonshot-v1-8k" },
+    { "label": "moonshot-v1-32k", "description": "Legacy 32k context model", "value": "moonshot-v1-32k" }
+  ],
+  "perplexity": [
+    { "label": "llama-3.1-sonar-large-128k-online", "description": "Perplexity Sonar Large Online (Default)", "value": "llama-3.1-sonar-large-128k-online" },
+    { "label": "llama-3.1-sonar-small-128k-online", "description": "Perplexity Sonar Small Online", "value": "llama-3.1-sonar-small-128k-online" },
+    { "label": "llama-3.1-sonar-huge-128k-online", "description": "Perplexity Sonar Huge Online", "value": "llama-3.1-sonar-huge-128k-online" }
+  ],
+  "together": [
+    { "label": "meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo", "description": "Llama 3.1 70B Turbo (Default)", "value": "meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo" },
+    { "label": "meta-llama/Meta-Llama-3.1-405B-Instruct-Turbo", "description": "Llama 3.1 405B Turbo", "value": "meta-llama/Meta-Llama-3.1-405B-Instruct-Turbo" },
+    { "label": "Qwen/Qwen2.5-72B-Instruct-Turbo", "description": "Qwen 2.5 72B Turbo", "value": "Qwen/Qwen2.5-72B-Instruct-Turbo" }
   ]
 }

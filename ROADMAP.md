@@ -126,7 +126,7 @@ gantt
 **Goal:** Prepare WindMist for widespread open-source adoption, extensible plugin development, and cross-platform distribution.
 
 ### Key Deliverables:
-- [ ] **Model Context Protocol (MCP) Integration (`plugins/`)**
+- [x] **Model Context Protocol (MCP) Integration (`plugins/`)**
   - Support standard MCP client specs so developers can connect custom database tools, Jira integrations, and cloud monitoring servers directly to WindMist.
 - [ ] **Custom Plugin Engine**
   - Allow users to write shared object plugins (`.so` or external binaries) that conform to our Go `Tool` interface.

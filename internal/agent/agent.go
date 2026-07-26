@@ -2,8 +2,15 @@ package agent
 
 import (
 	"context"
+	"encoding/json"
+
+	"time"
 
 	"github.com/Nithwin/WindMist/internal/ai"
+	appconfig "github.com/Nithwin/WindMist/internal/config"
+	"github.com/Nithwin/WindMist/internal/lsp"
+	"github.com/Nithwin/WindMist/internal/mcp"
+	"github.com/Nithwin/WindMist/internal/store"
 	"github.com/Nithwin/WindMist/internal/tools"
 )
 
@@ -15,6 +22,14 @@ type Config struct {
 	// MaxContextTokens is the maximum number of tokens retained in the
 	// sliding window context memory.
 	MaxContextTokens int
+	// Store is the optional database connection for session persistence.
+	Store *store.Store
+	// SessionID is the unique identifier for the current session, if persistence is enabled.
+	SessionID string
+	// Mode is the operating mode of the agent (e.g., build, plan, auto).
+	Mode string
+	// Memory defines the token pruning strategy.
+	Memory MemoryStrategy
 }
 
 // Result contains the final output produced by the agent.
@@ -30,10 +45,11 @@ type Result struct {
 // Agent coordinates the language model and the available tools to solve
 // software engineering tasks.
 type Agent struct {
-	provider ai.Provider
-	manager  *tools.Manager
-
-	config Config
+	provider   ai.Provider
+	manager    *tools.Manager
+	config     Config
+	lspManager *lsp.Manager
+	mcpManager *mcp.Manager
 }
 
 // New creates a new Agent.
@@ -48,16 +64,80 @@ func New(
 	if config.MaxContextTokens <= 0 {
 		config.MaxContextTokens = DefaultMaxContextTokens
 	}
+	if config.Mode == "" {
+		config.Mode = string(ModeBuild)
+	}
+	if config.Memory == nil {
+		config.Memory = SlidingWindowMemory{}
+	}
 
-	return &Agent{
-		provider: provider,
-		manager:  manager,
-		config:   config,
+	a := &Agent{
+		provider:   provider,
+		manager:    manager,
+		config:     config,
+		lspManager: lsp.NewManager(),
+		mcpManager: mcp.NewManager(),
+	}
+
+	// Start MCP servers asynchronously so it doesn't block UI load
+	go func() {
+		// Create a temporary context for startup
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+
+		// Load global config to get MCPServers
+		globalCfg, err := appconfig.Load()
+		if err == nil {
+			_ = a.mcpManager.StartAll(ctx, globalCfg)
+		}
+	}()
+
+	return a
+}
+
+// Close gracefully shuts down any resources held by the agent (like LSPs).
+func (a *Agent) Close() {
+	if a.lspManager != nil {
+		a.lspManager.CloseAll()
+	}
+	if a.mcpManager != nil {
+		a.mcpManager.CloseAll()
 	}
 }
 
+// Manager returns the tools manager associated with the agent.
+func (a *Agent) Manager() *tools.Manager {
+	return a.manager
+}
+
 // Run executes a single user request.
-func (a *Agent) Run(ctx context.Context, userPrompt string, onChunk func(string)) (*Result, error) {
-	messages := make([]ai.Message, 0, 8)
-	return a.runLoop(ctx, messages, userPrompt, onChunk)
+func (a *Agent) Run(ctx context.Context, initialMessages []ai.Message, userPrompt string, onChunk func(string)) (*Result, error) {
+	if initialMessages == nil {
+		initialMessages = make([]ai.Message, 0, 8)
+	}
+	return a.runLoop(ctx, initialMessages, userPrompt, onChunk)
+}
+
+func (a *Agent) saveMessage(msg ai.Message) {
+	if a.config.Store == nil || a.config.SessionID == "" {
+		return
+	}
+
+	sMsg := &store.Message{
+		SessionID: a.config.SessionID,
+		Role:      string(msg.Role),
+		Content:   msg.Content,
+	}
+
+	if len(msg.ToolCalls) > 0 {
+		b, _ := json.Marshal(msg.ToolCalls)
+		sMsg.ToolCalls = string(b)
+	}
+
+	if len(msg.ToolResults) > 0 {
+		b, _ := json.Marshal(msg.ToolResults)
+		sMsg.ToolResults = string(b)
+	}
+
+	_ = a.config.Store.SaveMessage(sMsg)
 }

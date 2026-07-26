@@ -18,6 +18,8 @@ func (t *RenameTool) Definition() tools.Definition {
 	return tools.Definition{
 		Name:        "rename",
 		Description: "Renames or moves a file or directory.",
+		Category:    tools.CategoryFilesystem,
+		Permission:  tools.PermWrite,
 		Parameters: []tools.Parameter{
 			{
 				Name:        "old_path",

@@ -6,13 +6,19 @@ var program *tea.Program
 
 // Run starts the WindMist Bubble Tea application.
 func Run() error {
+	model, err := New()
+	if err != nil {
+		return err
+	}
+
 	p := tea.NewProgram(
-		New(),
+		model,
 		tea.WithAltScreen(),
+		tea.WithMouseCellMotion(),
 	)
 
 	program = p
 
-	_, err := p.Run()
+	_, err = p.Run()
 	return err
 }

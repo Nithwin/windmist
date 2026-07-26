@@ -18,6 +18,8 @@ func (t *ReplaceTextTool) Definition() tools.Definition {
 	return tools.Definition{
 		Name:        "replace_text",
 		Description: "Replace a unique piece of text in an existing file. Use this when the target text is known exactly. Prefer range-based editing when exact line numbers are available.",
+		Category:    tools.CategoryEditing,
+		Permission:  tools.PermWrite,
 		Parameters: []tools.Parameter{
 			{
 				Name:        "file",
@@ -88,10 +90,26 @@ func (t *ReplaceTextTool) Run(ctx context.Context, call tools.Call) tools.Result
 		MaxReplacements: maxReplacements,
 	}
 
+	beforeBytes, _ := os.ReadFile(file)
+
 	result, err := ReplaceText(ctx, opts)
 	if err != nil {
 		return tools.Result{Error: err}
 	}
 
-	return tools.Result{Output: result}
+	// Capture AfterContent
+	afterBytes, _ := os.ReadFile(opts.File)
+
+	return tools.Result{
+		Output:       result,
+		FilesChanged: []string{opts.File},
+		FileStates: []tools.FileState{
+			{
+				Path:          opts.File,
+				BeforeContent: string(beforeBytes),
+				AfterContent:  string(afterBytes),
+				ChangeType:    "edit",
+			},
+		},
+	}
 }

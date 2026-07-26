@@ -17,6 +17,8 @@ func (t *ExistsTool) Definition() tools.Definition {
 	return tools.Definition{
 		Name:        "exists",
 		Description: "Checks if a file or directory exists.",
+		Category:    tools.CategoryFilesystem,
+		Permission:  tools.PermReadOnly,
 		Parameters: []tools.Parameter{
 			{
 				Name:        "path",

@@ -19,6 +19,8 @@ func (t *InsertTextTool) Definition() tools.Definition {
 	return tools.Definition{
 		Name:        "insert_text",
 		Description: "Inserts text at a specific 1-indexed line number.",
+		Category:    tools.CategoryEditing,
+		Permission:  tools.PermWrite,
 		Parameters: []tools.Parameter{
 			{
 				Name:        "file",
@@ -69,10 +71,26 @@ func (t *InsertTextTool) Run(ctx context.Context, call tools.Call) tools.Result 
 		NewText: newText,
 	}
 
+	beforeBytes, _ := os.ReadFile(file)
+
 	result, err := InsertText(ctx, opts)
 	if err != nil {
 		return tools.Result{Error: err}
 	}
 
-	return tools.Result{Output: result}
+	// Capture AfterContent
+	afterBytes, _ := os.ReadFile(file)
+
+	return tools.Result{
+		Output:       result,
+		FilesChanged: []string{file},
+		FileStates: []tools.FileState{
+			{
+				Path:          file,
+				BeforeContent: string(beforeBytes),
+				AfterContent:  string(afterBytes),
+				ChangeType:    "edit",
+			},
+		},
+	}
 }

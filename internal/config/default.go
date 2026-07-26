@@ -24,6 +24,21 @@ func DefaultConfig() *Config {
 			"anthropic": {
 				Model: "claude-3-5-sonnet-latest",
 			},
+			"deepseek": {
+				Model: "deepseek-chat",
+			},
+			"mistral": {
+				Model: "mistral-large-latest",
+			},
+			"kimi": {
+				Model: "kimi-k3",
+			},
+			"perplexity": {
+				Model: "llama-3.1-sonar-large-128k-online",
+			},
+			"together": {
+				Model: "meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo",
+			},
 		},
 
 		UI: UIConfig{

@@ -18,6 +18,8 @@ func (t *ReplaceRangeTool) Definition() tools.Definition {
 	return tools.Definition{
 		Name:        "replace_range",
 		Description: "Replace a contiguous range of lines (1-indexed, inclusive) in an existing file with new text. Use this when you know the exact line numbers from reading context. Preferred over replace_text when the target string appears multiple times in the file.",
+		Category:    tools.CategoryEditing,
+		Permission:  tools.PermWrite,
 		Parameters: []tools.Parameter{
 			{
 				Name:        "file",
@@ -76,10 +78,26 @@ func (t *ReplaceRangeTool) Run(ctx context.Context, call tools.Call) tools.Resul
 		NewText:   newText,
 	}
 
+	beforeBytes, _ := os.ReadFile(file)
+
 	result, err := ReplaceRange(ctx, opts)
 	if err != nil {
 		return tools.Result{Error: err}
 	}
 
-	return tools.Result{Output: result}
+	// Capture AfterContent
+	afterBytes, _ := os.ReadFile(file)
+
+	return tools.Result{
+		Output:       result,
+		FilesChanged: []string{file},
+		FileStates: []tools.FileState{
+			{
+				Path:          file,
+				BeforeContent: string(beforeBytes),
+				AfterContent:  string(afterBytes),
+				ChangeType:    "edit",
+			},
+		},
+	}
 }

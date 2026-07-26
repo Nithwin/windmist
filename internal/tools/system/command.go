@@ -27,6 +27,8 @@ func (t *CommandTool) Definition() tools.Definition {
 	return tools.Definition{
 		Name:        "run_command",
 		Description: "Execute a bash command in the terminal. Use this to run tests, compile code, execute git commands, or check system state.",
+		Category:    tools.CategorySystem,
+		Permission:  tools.PermDangerous,
 		Parameters: []tools.Parameter{
 			{
 				Name:        "command",

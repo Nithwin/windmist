@@ -8,6 +8,17 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
+// formatTokenCount renders a human-friendly token count (e.g. "1.2k")
+func formatTokenCount(n int) string {
+	if n >= 1000000 {
+		return fmt.Sprintf("%.1fM", float64(n)/1000000)
+	}
+	if n >= 1000 {
+		return fmt.Sprintf("%.1fk", float64(n)/1000)
+	}
+	return fmt.Sprintf("%d", n)
+}
+
 func renderHeader(m Model) string {
 	model := "—"
 	if provider, err := m.cfg.ActiveProvider(); err == nil {
@@ -15,32 +26,88 @@ func renderHeader(m Model) string {
 	}
 
 	// ── left: brand name ──────────────────────────────────────────
-	logo := lipgloss.NewStyle().
+	logo := ui.BaseStyle.
 		Bold(true).
-		Foreground(ui.Purple).
+		Foreground(ui.BrandCyan).
 		Render("🌀 WindMist v0.5")
 
-	// ── right: provider badge ────────────────────────────────────
-	providerTag := lipgloss.NewStyle().
-		Bold(true).
-		Foreground(ui.Cyan).
-		Render(m.cfg.AI.Provider)
+	// ── right: status tags ────────────────────────────────────
+	tokens := 0
+	cost := 0.0
+	mode := "build"
 
-	modelTag := lipgloss.NewStyle().
-		Foreground(ui.MutedLight).
-		Render(model)
+	if m.session != nil {
+		tokens = m.session.TokenCount
+		cost = m.session.CostEstimate
+		mode = m.session.AgentMode
+	}
 
-	right := fmt.Sprintf("%s %s %s",
-		providerTag,
-		lipgloss.NewStyle().Foreground(ui.Muted).Render("›"),
-		modelTag,
-	)
+	if mode == "" {
+		mode = "build"
+	}
+
+	duration := fmt.Sprintf("%.1fs", m.responseTime.Seconds())
+	if m.responseTime == 0 {
+		duration = "—"
+	}
+
+	modelTag := ui.BaseStyle.Foreground(ui.Cyan).Bold(true).Render(model)
+
+	// Token display: show real-time streaming tokens when active,
+	// otherwise show session total
+	var tokenTag string
+	if m.streaming && m.streamTokens.TotalTokens > 0 {
+		// Show live streaming tokens with animated indicator
+		frame := spinnerFrames[m.spinnerFrame%len(spinnerFrames)]
+		inTok := formatTokenCount(m.streamTokens.InputTokens)
+		outTok := formatTokenCount(m.streamTokens.OutputTokens)
+		tokenTag = ui.BaseStyle.Foreground(ui.Cyan).Bold(true).Render(
+			fmt.Sprintf("%s %s↑ %s↓", frame, inTok, outTok),
+		)
+	} else if m.loading {
+		// Loading but no token data yet
+		frame := spinnerFrames[m.spinnerFrame%len(spinnerFrames)]
+		tokenTag = ui.BaseStyle.Foreground(ui.Cyan).Render(
+			fmt.Sprintf("%s %s tok", frame, formatTokenCount(tokens)),
+		)
+	} else {
+		tokenTag = ui.BaseStyle.Foreground(ui.MutedLight).Render(
+			fmt.Sprintf("%s tok", formatTokenCount(tokens)),
+		)
+	}
+
+	// Only show cost if it's > 0 (to avoid showing $0.000 for free APIs like Ollama/Groq)
+	costStr := ""
+	if cost > 0 {
+		costStr = fmt.Sprintf("$%.3f", cost)
+	}
+	costTag := ui.BaseStyle.Foreground(ui.MutedLight).Render(costStr)
+
+	modeTag := ui.BaseStyle.Foreground(ui.MutedLight).Render(strings.ToUpper(mode))
+	timeTag := ui.BaseStyle.Foreground(ui.MutedLight).Render(duration)
+	themeTag := ui.BaseStyle.Foreground(ui.BrandCyan).Render(ui.CurrentThemeName)
+
+	tags := []string{modelTag, tokenTag}
+	if costStr != "" {
+		tags = append(tags, costTag)
+	}
+	tags = append(tags, modeTag, timeTag, themeTag)
+
+	// Show queued message indicator
+	if m.queuedMessage != "" {
+		queueTag := ui.BaseStyle.Foreground(lipgloss.Color("220")).Bold(true).Render("📋 QUEUED")
+		tags = append(tags, queueTag)
+	}
+
+	right := strings.Join(tags, ui.BaseStyle.Foreground(ui.Muted).Render(" │ "))
 
 	// ── padded spacer fills remaining width ──────────────────────
-	const totalWidth = 78
+	totalWidth := m.MaxContentWidth()
 	leftLen := lipgloss.Width(logo)
 	rightLen := lipgloss.Width(right)
-	gap := totalWidth - leftLen - rightLen
+
+	// Subtract 4 for left/right borders and padding (1+1+1+1)
+	gap := totalWidth - 4 - leftLen - rightLen
 	if gap < 1 {
 		gap = 1
 	}
@@ -48,11 +115,11 @@ func renderHeader(m Model) string {
 	row := lipgloss.JoinHorizontal(
 		lipgloss.Center,
 		logo,
-		strings.Repeat(" ", gap),
+		ui.BaseStyle.Render(strings.Repeat(" ", gap)),
 		right,
 	)
 
-	box := lipgloss.NewStyle().
+	box := ui.BaseStyle.
 		Border(lipgloss.RoundedBorder()).
 		BorderForeground(ui.PurpleDark).
 		Padding(0, 1).

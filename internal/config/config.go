@@ -6,17 +6,27 @@ import (
 )
 
 const (
-	EnvGeminiAPIKey    = "GEMINI_API_KEY"
-	EnvGroqAPIKey      = "GROQ_API_KEY"
-	EnvOpenAIAPIKey    = "OPENAI_API_KEY"
-	EnvAnthropicAPIKey = "ANTHROPIC_API_KEY"
+	EnvGeminiAPIKey     = "GEMINI_API_KEY"
+	EnvGroqAPIKey       = "GROQ_API_KEY"
+	EnvOpenAIAPIKey     = "OPENAI_API_KEY"
+	EnvAnthropicAPIKey  = "ANTHROPIC_API_KEY"
+	EnvDeepSeekAPIKey   = "DEEPSEEK_API_KEY"
+	EnvMistralAPIKey    = "MISTRAL_API_KEY"
+	EnvMoonshotAPIKey   = "MOONSHOT_API_KEY"
+	EnvPerplexityAPIKey = "PERPLEXITY_API_KEY"
+	EnvTogetherAPIKey   = "TOGETHER_API_KEY"
 )
 
 var envKeys = map[string]string{
-	"gemini":    EnvGeminiAPIKey,
-	"groq":      EnvGroqAPIKey,
-	"openai":    EnvOpenAIAPIKey,
-	"anthropic": EnvAnthropicAPIKey,
+	"gemini":     EnvGeminiAPIKey,
+	"groq":       EnvGroqAPIKey,
+	"openai":     EnvOpenAIAPIKey,
+	"anthropic":  EnvAnthropicAPIKey,
+	"deepseek":   EnvDeepSeekAPIKey,
+	"mistral":    EnvMistralAPIKey,
+	"kimi":       EnvMoonshotAPIKey,
+	"perplexity": EnvPerplexityAPIKey,
+	"together":   EnvTogetherAPIKey,
 }
 
 // ActiveProvider returns the active provider configuration.
@@ -104,10 +114,73 @@ func (c *Config) SetAPIKey(providerName, apiKey string) error {
 
 // SetBaseURL updates a provider base URL.
 func (c *Config) SetBaseURL(providerName, baseURL string) error {
-	return fmt.Errorf("base_url cannot be set or changed by the user for any provider")
+	provider, ok := c.Providers[providerName]
+	if !ok {
+		return fmt.Errorf("unsupported provider: %s", providerName)
+	}
+
+	provider.BaseURL = baseURL
+	c.Providers[providerName] = provider
+
+	return nil
 }
 
 // SetTheme updates the UI theme.
 func (c *Config) SetTheme(theme string) {
 	c.UI.Theme = theme
+}
+
+// AddCustomModel adds a new custom model to a provider if it doesn't already exist.
+func (c *Config) AddCustomModel(providerName, model string) {
+	if c.CustomModels == nil {
+		c.CustomModels = make(map[string][]string)
+	}
+
+	for _, m := range c.CustomModels[providerName] {
+		if m == model {
+			return // already exists
+		}
+	}
+	c.CustomModels[providerName] = append(c.CustomModels[providerName], model)
+}
+
+// ActiveSubAgentProvider returns the provider to use for sub-agents.
+// If the user hasn't explicitly set one, it falls back to the main AI provider.
+func (c *Config) ActiveSubAgentProvider() string {
+	if c.SubAgent.Provider != "" {
+		return c.SubAgent.Provider
+	}
+	return c.AI.Provider
+}
+
+// ActiveSubAgentModel returns the model to use for sub-agents.
+// If the user hasn't explicitly set one, it attempts to use a fast default for the active provider.
+// If no fast default exists, it falls back to the main AI model.
+func (c *Config) ActiveSubAgentModel() string {
+	if c.SubAgent.Model != "" {
+		return c.SubAgent.Model
+	}
+
+	provider := c.ActiveSubAgentProvider()
+
+	// Hardcoded cheap/fast models for known providers
+	switch provider {
+	case "openai":
+		return "gpt-4o-mini"
+	case "anthropic":
+		return "claude-3-5-haiku-latest"
+	case "gemini":
+		return "gemini-2.5-flash"
+	case "groq":
+		return "llama-3.1-8b-instant"
+	}
+
+	// Fallback to the main model if using the main provider
+	if provider == c.AI.Provider {
+		if m, err := c.ActiveModel(); err == nil {
+			return m
+		}
+	}
+
+	return ""
 }

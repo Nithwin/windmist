@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"strings"
@@ -49,7 +50,12 @@ func (c *Client) StreamContent(
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("gemini api returned status %d", resp.StatusCode)
+		data, _ := io.ReadAll(resp.Body)
+		var apiErr ErrorResponse
+		if err := json.Unmarshal(data, &apiErr); err == nil {
+			return fmt.Errorf("gemini api (%d): %s", apiErr.Error.Code, apiErr.Error.Message)
+		}
+		return fmt.Errorf("gemini api returned status %d: %s", resp.StatusCode, string(data))
 	}
 
 	scanner := bufio.NewScanner(resp.Body)

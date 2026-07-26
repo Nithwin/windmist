@@ -19,6 +19,8 @@ func (t *CreateTool) Definition() tools.Definition {
 	return tools.Definition{
 		Name:        "create",
 		Description: "Creates a new file or directory.",
+		Category:    tools.CategoryFilesystem,
+		Permission:  tools.PermWrite,
 		Parameters: []tools.Parameter{
 			{
 				Name:        "path",
@@ -73,6 +75,15 @@ func (t *CreateTool) Run(ctx context.Context, call tools.Call) tools.Result {
 	defer file.Close()
 
 	return tools.Result{
-		Output: "File created successfully.",
+		Output:       "File created successfully.",
+		FilesChanged: []string{path},
+		FileStates: []tools.FileState{
+			{
+				Path:          path,
+				BeforeContent: "", // It didn't exist
+				AfterContent:  "", // It is empty initially
+				ChangeType:    "create",
+			},
+		},
 	}
 }

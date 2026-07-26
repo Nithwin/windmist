@@ -1,16 +1,23 @@
 package chat
 
 import (
+	"context"
+	"fmt"
+	"path/filepath"
+	"time"
+
 	"github.com/Nithwin/WindMist/internal/agent"
 	"github.com/Nithwin/WindMist/internal/ai"
 	"github.com/Nithwin/WindMist/internal/config"
+	"github.com/Nithwin/WindMist/internal/store"
 	"github.com/Nithwin/WindMist/internal/tools"
 	"github.com/Nithwin/WindMist/internal/tools/defaults"
 	"github.com/Nithwin/WindMist/internal/ui"
+	"github.com/Nithwin/WindMist/internal/ui/selector"
+	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/textarea"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 )
 
 // Model represents the WindMist application.
@@ -19,10 +26,14 @@ type Model struct {
 
 	provider ai.Provider
 	agent    *agent.Agent
+	store    *store.Store
+	session  *store.Session
 
 	conversation Conversation
 
-	input textarea.Model
+	input        textarea.Model
+	inputHistory []string
+	historyIndex int
 
 	showSplash bool
 
@@ -30,8 +41,21 @@ type Model struct {
 	filteredCommands []Command
 	selectedCommand  int
 
-	loading   bool
-	streaming bool
+	showFilePicker bool
+	workspaceFiles []string
+	filteredFiles  []string
+	selectedFile   int
+
+	loading      bool
+	streaming    bool
+	spinnerFrame int
+	responseTime time.Duration
+
+	// Input queuing: let user type next message while loading
+	queuedMessage string
+
+	// Streaming token counter: updated in real-time
+	streamTokens ai.Usage
 
 	waitingApproval bool
 	approvalCommand string
@@ -41,20 +65,40 @@ type Model struct {
 
 	markdown *ui.MarkdownRenderer
 
+	// Inline Selector state
+	showSelector bool
+	selectorList list.Model
+	onSelect     func(selector.Option) tea.Cmd
+	onCancel     func() tea.Cmd
+
+	// Inline Prompt state
+	inlinePrompt   string
+	onPromptSubmit func(string) tea.Cmd
+	isPassword     bool
+
 	width  int
 	height int
+
+	cancel context.CancelFunc
 }
 
 // New creates a new Bubble Tea model.
-func New() Model {
+func New() (Model, error) {
 	cfg, err := config.Load()
 	if err != nil {
-		panic(err)
+		return Model{}, fmt.Errorf("failed to load configuration: %w", err)
 	}
+
+	customDir := ""
+	cfgDir, err := config.ConfigDir()
+	if err == nil {
+		customDir = filepath.Join(cfgDir, "themes")
+	}
+	_ = ui.LoadTheme(cfg.UI.Theme, customDir)
 
 	provider, err := ai.New(cfg)
 	if err != nil {
-		panic(err)
+		return Model{}, fmt.Errorf("failed to initialize AI provider: %w", err)
 	}
 
 	manager := tools.NewManager()
@@ -68,12 +112,35 @@ func New() Model {
 			ResponseChan: ch,
 		})
 		return <-ch
+	}, cfg)
+	dbStore, err := store.NewStore()
+	if err != nil {
+		return Model{}, fmt.Errorf("failed to initialize db store: %w", err)
+	}
+
+	// For now, create a new session on startup
+	// Later we can implement logic to load an existing session
+	// using the /session commands
+	activeModel, _ := cfg.ActiveModel()
+	sess := &store.Session{
+		ID:          fmt.Sprintf("sess_%d", time.Now().Unix()),
+		Title:       "New Session",
+		ProjectPath: ".",
+		Provider:    cfg.AI.Provider,
+		Model:       activeModel,
+		AgentMode:   "auto",
+	}
+	_ = dbStore.CreateSession(sess)
+
+	ag := agent.New(provider, manager, agent.Config{
+		Store:     dbStore,
+		SessionID: sess.ID,
+		Mode:      sess.AgentMode,
 	})
-	ag := agent.New(provider, manager, agent.Config{})
 
 	renderer, err := ui.NewMarkdownRenderer()
 	if err != nil {
-		panic(err)
+		return Model{}, fmt.Errorf("failed to initialize markdown renderer: %w", err)
 	}
 
 	ta := textarea.New()
@@ -85,24 +152,20 @@ func New() Model {
 	ta.ShowLineNumbers = false
 	ta.Prompt = ""
 
-	// Clean minimal style — no borders, transparent background
-	plain := lipgloss.NewStyle()
-	ta.FocusedStyle.Base = plain.Foreground(ui.White)
-	ta.FocusedStyle.CursorLine = plain.Foreground(ui.White)
-	ta.FocusedStyle.Placeholder = plain.Foreground(ui.Muted)
-	ta.FocusedStyle.EndOfBuffer = plain.Foreground(ui.Muted)
-	ta.BlurredStyle.Base = plain.Foreground(ui.MutedLight)
-	ta.BlurredStyle.Placeholder = plain.Foreground(ui.Muted)
-	ta.BlurredStyle.CursorLine = plain
-
 	vp := viewport.New(0, 0)
+	vp.MouseWheelEnabled = true
+	vp.MouseWheelDelta = 3
 
-	return Model{
+	model := Model{
 		cfg:          cfg,
 		provider:     provider,
 		agent:        ag,
+		store:        dbStore,
+		session:      sess,
 		conversation: Conversation{},
 		input:        ta,
+		inputHistory: make([]string, 0),
+		historyIndex: 0,
 
 		showSplash: true,
 
@@ -119,11 +182,22 @@ func New() Model {
 
 		markdown: renderer,
 	}
+
+	model.UpdateInputStyles()
+
+	model.updateViewportSize()
+
+	return model, nil
 }
 
 // Init initializes the application.
 func (m Model) Init() tea.Cmd {
-	return textarea.Blink
+	return tea.Batch(
+		textarea.Blink,
+		func() tea.Msg {
+			return WorkspaceFilesMsg{Files: getWorkspaceFiles()}
+		},
+	)
 }
 
 // MaxContentWidth calculates the maximum width for the UI content based on the window size.
@@ -137,4 +211,20 @@ func (m Model) MaxContentWidth() int {
 		return 40
 	}
 	return w
+}
+
+// UpdateInputStyles applies the current UI colors to the textarea input.
+func (m *Model) UpdateInputStyles() {
+	plain := ui.BaseStyle
+	m.input.FocusedStyle.Base = plain.Foreground(ui.White)
+	m.input.FocusedStyle.Text = plain.Foreground(ui.White)
+	m.input.FocusedStyle.CursorLine = plain.Foreground(ui.White)
+	m.input.FocusedStyle.Placeholder = plain.Foreground(ui.Muted)
+	m.input.FocusedStyle.EndOfBuffer = plain.Foreground(ui.Muted)
+	m.input.FocusedStyle.Prompt = plain
+	m.input.BlurredStyle.Base = plain.Foreground(ui.MutedLight)
+	m.input.BlurredStyle.Text = plain.Foreground(ui.MutedLight)
+	m.input.BlurredStyle.Placeholder = plain.Foreground(ui.Muted)
+	m.input.BlurredStyle.CursorLine = plain
+	m.input.BlurredStyle.Prompt = plain
 }

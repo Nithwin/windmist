@@ -18,6 +18,8 @@ func (t *AppendTool) Definition() tools.Definition {
 	return tools.Definition{
 		Name:        "append",
 		Description: "Appends content to an existing file.",
+		Category:    tools.CategoryFilesystem,
+		Permission:  tools.PermWrite,
 		Parameters: []tools.Parameter{
 			{
 				Name:        "path",
@@ -46,6 +48,12 @@ func (t *AppendTool) Run(ctx context.Context, call tools.Call) tools.Result {
 		return tools.Result{Error: os.ErrInvalid}
 	}
 
+	beforeBytes, readErr := os.ReadFile(path)
+	beforeContent := ""
+	if readErr == nil {
+		beforeContent = string(beforeBytes)
+	}
+
 	file, err := os.OpenFile(path, os.O_WRONLY|os.O_APPEND, 0)
 	if err != nil {
 		return tools.Result{Error: err}
@@ -58,7 +66,18 @@ func (t *AppendTool) Run(ctx context.Context, call tools.Call) tools.Result {
 		return tools.Result{Error: err}
 	}
 
+	afterBytes, _ := os.ReadFile(path)
+
 	return tools.Result{
-		Output: fmt.Sprintf("Appended %d bytes to %q", len(content), path),
+		Output:       fmt.Sprintf("Appended %d bytes to %q", len(content), path),
+		FilesChanged: []string{path},
+		FileStates: []tools.FileState{
+			{
+				Path:          path,
+				BeforeContent: beforeContent,
+				AfterContent:  string(afterBytes),
+				ChangeType:    "edit",
+			},
+		},
 	}
 }

@@ -35,24 +35,39 @@ func translateTools(tools []ai.ToolDefinition) []Tool {
 				schemaType = "OBJECT"
 			}
 
+			var itemsSchema *Schema
+			if schemaType == "ARRAY" {
+				itemsSchema = &Schema{Type: "STRING"}
+			}
+
 			properties[p.Name] = &Schema{
 				Type:        schemaType,
 				Description: p.Description,
 				Enum:        p.Enum,
+				Items:       itemsSchema,
 			}
 			if p.Required {
 				required = append(required, p.Name)
 			}
 		}
 
-		funcDecls = append(funcDecls, FunctionDeclaration{
-			Name:        tool.Name,
-			Description: tool.Description,
-			Parameters: &Schema{
+		if len(required) == 0 {
+			required = nil
+		}
+
+		var paramsSchema *Schema
+		if len(properties) > 0 {
+			paramsSchema = &Schema{
 				Type:       "OBJECT",
 				Properties: properties,
 				Required:   required,
-			},
+			}
+		}
+
+		funcDecls = append(funcDecls, FunctionDeclaration{
+			Name:        tool.Name,
+			Description: tool.Description,
+			Parameters:  paramsSchema,
 		})
 	}
 

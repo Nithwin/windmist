@@ -1,14 +1,17 @@
 package defaults
 
 import (
+	"github.com/Nithwin/WindMist/internal/config"
 	"github.com/Nithwin/WindMist/internal/tools"
+	"github.com/Nithwin/WindMist/internal/tools/agent"
 	"github.com/Nithwin/WindMist/internal/tools/editing"
 	"github.com/Nithwin/WindMist/internal/tools/filesystem"
 	"github.com/Nithwin/WindMist/internal/tools/system"
+	"github.com/Nithwin/WindMist/internal/tools/web"
 )
 
 // RegisterAll registers all built-in filesystem and editing tools onto the manager.
-func RegisterAll(m *tools.Manager, approvalCb system.ApprovalCallback) {
+func RegisterAll(m *tools.Manager, approvalCb system.ApprovalCallback, cfg *config.Config) {
 	if m == nil {
 		return
 	}
@@ -23,6 +26,8 @@ func RegisterAll(m *tools.Manager, approvalCb system.ApprovalCallback) {
 	m.Register(filesystem.NewCreateTool())
 	m.Register(filesystem.NewInfoTool())
 	m.Register(filesystem.NewExistsTool())
+	m.Register(filesystem.NewGlobTool())
+	m.Register(filesystem.NewGrepTool())
 
 	// Editing tools
 	m.Register(editing.NewReplaceTextTool())
@@ -31,7 +36,19 @@ func RegisterAll(m *tools.Manager, approvalCb system.ApprovalCallback) {
 	m.Register(editing.NewReadContextTool())
 	m.Register(editing.NewInsertTextTool())
 	m.Register(editing.NewSearchTool())
+	m.Register(editing.NewPatchTool())
 
 	// System tools
 	m.Register(system.NewCommandTool(approvalCb))
+	m.Register(system.NewGitTool(approvalCb))
+
+	// Web tools
+	m.Register(web.NewWebSearchTool())
+	m.Register(web.NewFetchTool())
+
+	// Agent tools
+	m.Register(agent.NewTodoTool())
+	if cfg != nil {
+		m.Register(agent.NewSubAgentTool(cfg))
+	}
 }

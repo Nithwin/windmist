@@ -30,7 +30,7 @@ var modelCmd = &cobra.Command{
 			opt, err := selector.Run(
 				fmt.Sprintf("Select Model for %s", cfg.AI.Provider),
 				"Choose the active model to use:",
-				config.GetModelOptions(cfg.AI.Provider, ollamaBaseURL),
+				cfg.GetModelOptions(cfg.AI.Provider, ollamaBaseURL),
 			)
 			if err != nil {
 				log.Fatal(err)
@@ -42,6 +42,7 @@ var modelCmd = &cobra.Command{
 					log.Fatal(err)
 				}
 				value = customVal
+				cfg.AddCustomModel(cfg.AI.Provider, value)
 			}
 		}
 

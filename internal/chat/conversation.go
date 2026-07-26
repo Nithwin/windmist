@@ -1,11 +1,15 @@
 package chat
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/Nithwin/WindMist/internal/ui"
 	"github.com/charmbracelet/lipgloss"
 )
+
+// spinnerFrames defines the animation frames for the loading spinner.
+var spinnerFrames = []string{"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"}
 
 func renderConversation(m Model) string {
 	var b strings.Builder
@@ -15,9 +19,9 @@ func renderConversation(m Model) string {
 		lipgloss.Left,
 		ui.AssistantLabelStyle.Render("🌀 WindMist v0.5 is ready"),
 		ui.MutedStyle.Render("Type a message below, or try:"),
-		"",
-		"  "+ui.LabelStyle.Render("/help")+"  "+ui.MutedLightStyle.Render("→  show all commands"),
-		"  "+ui.LabelStyle.Render("/exit")+"  "+ui.MutedLightStyle.Render("→  quit"),
+		ui.BaseStyle.Render(""),
+		ui.BaseStyle.Render("  "+ui.LabelStyle.Render("/help")+"  "+ui.MutedLightStyle.Render("→  show all commands")),
+		ui.BaseStyle.Render("  "+ui.LabelStyle.Render("/exit")+"  "+ui.MutedLightStyle.Render("→  quit")),
 	)
 	b.WriteString(hint)
 	b.WriteString("\n\n")
@@ -39,31 +43,35 @@ func renderConversation(m Model) string {
 		case "user":
 			label := ui.UserLabelStyle.Render("  you")
 			b.WriteString(label)
-			b.WriteString("\n")
+			b.WriteString(ui.BaseStyle.Render("\n"))
 			content := ui.UserBubbleStyle.Width(maxWidth).Render(msg.Content)
 			b.WriteString(content)
-			b.WriteString("\n")
+			b.WriteString(ui.BaseStyle.Render("\n"))
 
 		case "assistant":
 			label := ui.AssistantLabelStyle.Render("🌀 WindMist v0.5")
 			b.WriteString(label)
-			b.WriteString("\n")
+			b.WriteString(ui.BaseStyle.Render("\n"))
 			contentStr := msg.Content
 			if contentStr == "" && m.loading && i == len(m.conversation.Messages)-1 {
-				contentStr = ui.MutedStyle.Render("Thinking...")
+				// Animated spinner
+				frame := spinnerFrames[m.spinnerFrame%len(spinnerFrames)]
+				contentStr = ui.BaseStyle.Foreground(ui.Cyan).Bold(true).Render(
+					fmt.Sprintf("  %s  Thinking...", frame),
+				)
 			} else {
 				rendered := m.markdown.RenderWithWidth(contentStr, maxWidth)
 
 				contentStr = ui.AssistantBubbleStyle.Render(rendered)
 			}
 			b.WriteString(contentStr)
-			b.WriteString("\n")
+			b.WriteString(ui.BaseStyle.Render("\n"))
 		}
 
 		// subtle divider between exchanges (not after last msg)
 		if i < len(m.conversation.Messages)-1 {
 			b.WriteString(divider)
-			b.WriteString("\n")
+			b.WriteString(ui.BaseStyle.Render("\n"))
 		}
 	}
 

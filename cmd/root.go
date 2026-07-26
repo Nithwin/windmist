@@ -2,10 +2,15 @@ package cmd
 
 import (
 	_ "github.com/Nithwin/WindMist/internal/providers/anthropic"
+	_ "github.com/Nithwin/WindMist/internal/providers/deepseek"
 	_ "github.com/Nithwin/WindMist/internal/providers/gemini"
 	_ "github.com/Nithwin/WindMist/internal/providers/groq"
+	_ "github.com/Nithwin/WindMist/internal/providers/kimi"
+	_ "github.com/Nithwin/WindMist/internal/providers/mistral"
 	_ "github.com/Nithwin/WindMist/internal/providers/ollama"
 	_ "github.com/Nithwin/WindMist/internal/providers/openai"
+	_ "github.com/Nithwin/WindMist/internal/providers/perplexity"
+	_ "github.com/Nithwin/WindMist/internal/providers/together"
 
 	"github.com/Nithwin/WindMist/internal/chat"
 	"github.com/spf13/cobra"
