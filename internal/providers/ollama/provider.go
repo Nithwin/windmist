@@ -126,6 +126,6 @@ func (p *Provider) Stream(
 			}
 		})
 	}
-	
+
 	return &finalResp, err
 }

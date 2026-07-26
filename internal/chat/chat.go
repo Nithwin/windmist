@@ -13,7 +13,7 @@ func (m Model) sendMessage(prompt string) {
 				Text: s,
 			})
 		})
-		
+
 		if err != nil {
 			program.Send(StreamingMsg{
 				Err:  err,

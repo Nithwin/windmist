@@ -29,7 +29,7 @@ func (a *Agent) runLoop(ctx context.Context, messages []ai.Message, userPrompt s
 
 		var resp *ai.GenerateResponse
 		var err error
-		
+
 		// Use stream only for the first turn (to show the user something is happening)
 		// Or always stream. Since we patched providers to return GenerateResponse, we can always Stream!
 		resp, err = a.provider.Stream(ctx, req, onChunk)
