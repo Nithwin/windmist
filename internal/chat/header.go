@@ -35,7 +35,8 @@ func renderHeader(m Model) string {
 	const totalWidth = 78
 	leftLen := lipgloss.Width(logo)
 	rightLen := lipgloss.Width(right)
-	gap := totalWidth - leftLen - rightLen
+	// Subtract 4 for left/right borders and padding (1+1+1+1)
+	gap := totalWidth - 4 - leftLen - rightLen
 	if gap < 1 {
 		gap = 1
 	}
