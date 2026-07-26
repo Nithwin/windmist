@@ -32,7 +32,6 @@ var Registry = []Command{
 /redo       Redo the last undone file edit
 /model      Change model
 /provider   Change provider
-/clear      Clear conversation
 /exit       Exit WindMist`,
 			)
 			return nil
@@ -70,15 +69,6 @@ var Registry = []Command{
 			return func() tea.Msg {
 				return redoFileChangeMsg{}
 			}
-		},
-	},
-	{
-		Name:        "/clear",
-		Description: "Clear conversation",
-		Execute: func(m *Model) tea.Cmd {
-			m.conversation.Clear()
-			m.refreshViewport()
-			return nil
 		},
 	},
 	{
