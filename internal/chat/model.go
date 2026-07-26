@@ -126,20 +126,10 @@ func New() (Model, error) {
 	ta.SetHeight(3)
 	ta.ShowLineNumbers = false
 	ta.Prompt = ""
-
-	// Clean minimal style — no borders, transparent background
-	plain := lipgloss.NewStyle()
-	ta.FocusedStyle.Base = plain.Foreground(ui.White)
-	ta.FocusedStyle.CursorLine = plain.Foreground(ui.White)
-	ta.FocusedStyle.Placeholder = plain.Foreground(ui.Muted)
-	ta.FocusedStyle.EndOfBuffer = plain.Foreground(ui.Muted)
-	ta.BlurredStyle.Base = plain.Foreground(ui.MutedLight)
-	ta.BlurredStyle.Placeholder = plain.Foreground(ui.Muted)
-	ta.BlurredStyle.CursorLine = plain
-
+	
 	vp := viewport.New(0, 0)
-
-	return Model{
+	
+	model := Model{
 		cfg:          cfg,
 		provider:     provider,
 		agent:        ag,
@@ -164,7 +154,12 @@ func New() (Model, error) {
 		viewport: vp,
 
 		markdown: renderer,
-	}, nil
+	}
+
+	model.UpdateInputStyles()
+
+	return model, nil
+
 }
 
 // Init initializes the application.
@@ -183,4 +178,16 @@ func (m Model) MaxContentWidth() int {
 		return 40
 	}
 	return w
+}
+
+// UpdateInputStyles applies the current UI colors to the textarea input.
+func (m *Model) UpdateInputStyles() {
+	plain := lipgloss.NewStyle()
+	m.input.FocusedStyle.Base = plain.Foreground(ui.White)
+	m.input.FocusedStyle.CursorLine = plain.Foreground(ui.White)
+	m.input.FocusedStyle.Placeholder = plain.Foreground(ui.Muted)
+	m.input.FocusedStyle.EndOfBuffer = plain.Foreground(ui.Muted)
+	m.input.BlurredStyle.Base = plain.Foreground(ui.MutedLight)
+	m.input.BlurredStyle.Placeholder = plain.Foreground(ui.Muted)
+	m.input.BlurredStyle.CursorLine = plain
 }

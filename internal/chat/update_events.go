@@ -249,6 +249,7 @@ func (m Model) handleEventMsg(msg tea.Msg) (Model, tea.Cmd) {
 		if err != nil {
 			m.conversation.AddAssistant(fmt.Sprintf("❌ Failed to load theme: %v", err))
 		} else {
+			m.UpdateInputStyles()
 			m.conversation.AddAssistant(fmt.Sprintf("✨ Theme switched to **%s**", msg.Theme))
 		}
 
