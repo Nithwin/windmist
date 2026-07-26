@@ -34,7 +34,7 @@ func (a *Agent) runLoop(ctx context.Context, messages []ai.Message, userPrompt s
 			return nil, err
 		}
 
-		prunedHistory := pruneMessages(messages, a.config.MaxContextTokens)
+		prunedHistory := a.config.Memory.Prune(messages, a.config.MaxContextTokens)
 		// Build dynamic system prompt based on mode
 		cwd, _ := os.Getwd()
 		modeConfig := GetModeConfig(Mode(effectiveMode))

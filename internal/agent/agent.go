@@ -23,6 +23,8 @@ type Config struct {
 	SessionID string
 	// Mode is the operating mode of the agent (e.g., build, plan, auto).
 	Mode string
+	// Memory defines the token pruning strategy.
+	Memory MemoryStrategy
 }
 
 // Result contains the final output produced by the agent.
@@ -58,6 +60,9 @@ func New(
 	}
 	if config.Mode == "" {
 		config.Mode = string(ModeBuild)
+	}
+	if config.Memory == nil {
+		config.Memory = SlidingWindowMemory{}
 	}
 
 	return &Agent{
