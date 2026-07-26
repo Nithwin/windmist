@@ -52,13 +52,18 @@ func (t *WriteTool) Run(ctx context.Context, call tools.Call) tools.Result {
 		}
 	}
 
+	beforeBytes, readErr := os.ReadFile(path)
+	beforeContent := ""
+	if readErr == nil {
+		beforeContent = string(beforeBytes)
+	}
+
 	file, err := os.OpenFile(path, os.O_WRONLY|os.O_TRUNC, 0)
 	if err != nil {
 		return tools.Result{
 			Error: err,
 		}
 	}
-
 	defer file.Close()
 
 	_, err = file.WriteString(content)
@@ -69,6 +74,15 @@ func (t *WriteTool) Run(ctx context.Context, call tools.Call) tools.Result {
 	}
 
 	return tools.Result{
-		Output: fmt.Sprintf("Wrote %d bytes to %q", len(content), path),
+		Output:       fmt.Sprintf("Wrote %d bytes to %q", len(content), path),
+		FilesChanged: []string{path},
+		FileStates: []tools.FileState{
+			{
+				Path:          path,
+				BeforeContent: beforeContent,
+				AfterContent:  content,
+				ChangeType:    "edit",
+			},
+		},
 	}
 }
