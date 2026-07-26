@@ -3,6 +3,7 @@ package agent
 import (
 	"context"
 	"os"
+	"time"
 
 	"github.com/Nithwin/WindMist/internal/agent/prompt"
 	"github.com/Nithwin/WindMist/internal/ai"
@@ -35,9 +36,33 @@ func (a *Agent) runLoop(ctx context.Context, messages []ai.Message, userPrompt s
 		var resp *ai.GenerateResponse
 		var err error
 
-		// Use stream only for the first turn (to show the user something is happening)
-		// Or always stream. Since we patched providers to return GenerateResponse, we can always Stream!
-		resp, err = a.provider.Stream(ctx, req, onChunk)
+		maxRetries := 3
+		backoff := 1 * time.Second
+
+		for attempt := 0; attempt <= maxRetries; attempt++ {
+			resp, err = a.provider.Stream(ctx, req, onChunk)
+			if err == nil {
+				break
+			}
+
+			// Don't retry if context is cancelled by user
+			if ctx.Err() != nil {
+				break
+			}
+
+			if attempt == maxRetries {
+				break
+			}
+
+			// Wait before retrying
+			select {
+			case <-ctx.Done():
+				break
+			case <-time.After(backoff):
+			}
+			backoff *= 2
+		}
+
 		if err != nil {
 			return nil, err
 		}
