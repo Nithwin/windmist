@@ -47,7 +47,7 @@ func (t *CommandTool) Run(ctx context.Context, call tools.Call) tools.Result {
 	cmd := exec.CommandContext(ctx, "bash", "-c", cmdStr)
 
 	output, err := cmd.CombinedOutput()
-	
+
 	// If it timed out, append a notice
 	if ctx.Err() == context.DeadlineExceeded {
 		return tools.Result{
