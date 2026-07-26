@@ -21,6 +21,8 @@ type Config struct {
 	Store *store.Store
 	// SessionID is the unique identifier for the current session, if persistence is enabled.
 	SessionID string
+	// Mode is the operating mode of the agent (e.g., build, plan, auto).
+	Mode string
 }
 
 // Result contains the final output produced by the agent.
@@ -53,6 +55,9 @@ func New(
 	}
 	if config.MaxContextTokens <= 0 {
 		config.MaxContextTokens = DefaultMaxContextTokens
+	}
+	if config.Mode == "" {
+		config.Mode = string(ModeBuild)
 	}
 
 	return &Agent{

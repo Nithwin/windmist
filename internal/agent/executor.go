@@ -83,14 +83,15 @@ func (a *Agent) execute(ctx context.Context, calls []ai.ToolCall, onChunk func(s
 }
 
 // toolDefinitions converts the registered tool definitions from tools.Manager into ai.ToolDefinition format.
-func (a *Agent) toolDefinitions() []ai.ToolDefinition {
+func (a *Agent) toolDefinitions(modeConfig ModeConfig) []ai.ToolDefinition {
 	if a.manager == nil {
 		return nil
 	}
-	toolsList := a.manager.List()
+
+	toolsList := FilterTools(a.manager, modeConfig)
+
 	defs := make([]ai.ToolDefinition, 0, len(toolsList))
-	for _, t := range toolsList {
-		def := t.Definition()
+	for _, def := range toolsList {
 		params := make([]ai.ToolParameter, 0, len(def.Parameters))
 		for _, p := range def.Parameters {
 			params = append(params, ai.ToolParameter{
