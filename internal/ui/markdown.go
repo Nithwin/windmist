@@ -195,7 +195,7 @@ func (m *MarkdownRenderer) RenderWithWidth(text string, width int) string {
 		return text
 	}
 	if width <= 0 {
-		width = 80
+		width = 120
 	}
 	r, err := glamour.NewTermRenderer(
 		glamour.WithStylesFromJSONBytes(windmistStyle),

@@ -26,14 +26,11 @@ func renderConversation(m Model) string {
 		return b.String()
 	}
 
-	divider := ui.DividerStyle.Render(strings.Repeat("─", 76))
+	maxWidth := m.MaxContentWidth()
+
+	divider := ui.DividerStyle.Render(strings.Repeat("─", maxWidth))
 	b.WriteString(divider)
 	b.WriteString("\n")
-
-	maxWidth := m.viewport.Width - 4
-	if maxWidth < 20 {
-		maxWidth = 76
-	}
 
 	for i, msg := range m.conversation.Messages {
 

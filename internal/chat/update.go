@@ -21,7 +21,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
 		m.height = msg.Height
-		m.input.SetWidth(m.width - 12)
+		m.input.SetWidth(m.MaxContentWidth())
 		m.refreshViewport()
 		return m, nil
 
