@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"sync"
 	"strings"
+	"os"
 
 	"github.com/pmezard/go-difflib/difflib"
 	"github.com/Nithwin/WindMist/internal/ai"
@@ -47,17 +48,7 @@ func (a *Agent) execute(ctx context.Context, calls []ai.ToolCall, onChunk func(s
 				onChunk(fmt.Sprintf(" ✅ Done (`%s`).\n\n", call.Name))
 			}
 
-			if a.config.Store != nil && a.config.SessionID != "" && len(res.FileStates) > 0 {
-				for _, state := range res.FileStates {
-					_ = a.config.Store.SaveFileChange(&store.FileChange{
-						SessionID:     a.config.SessionID,
-						FilePath:      state.Path,
-						ChangeType:    state.ChangeType,
-						BeforeContent: state.BeforeContent,
-						AfterContent:  state.AfterContent,
-					})
-				}
-			}
+
 
 			content := ""
 			isError := false
@@ -69,7 +60,28 @@ func (a *Agent) execute(ctx context.Context, calls []ai.ToolCall, onChunk func(s
 				var diffs strings.Builder
 				diffs.WriteString(fmt.Sprintf("Successfully modified %d file(s):\n\n", len(res.FileStates)))
 				
-				for _, state := range res.FileStates {
+				for i := range res.FileStates {
+					state := &res.FileStates[i]
+					
+					// Auto-format the file if possible
+					if autoFormat(state.Path) {
+						// Re-read the formatted content
+						if contentBytes, err := os.ReadFile(state.Path); err == nil {
+							state.AfterContent = string(contentBytes)
+						}
+					}
+					
+					// Now save the file change to the store (with formatted content)
+					if a.config.Store != nil && a.config.SessionID != "" {
+						_ = a.config.Store.SaveFileChange(&store.FileChange{
+							SessionID:     a.config.SessionID,
+							FilePath:      state.Path,
+							ChangeType:    state.ChangeType,
+							BeforeContent: state.BeforeContent,
+							AfterContent:  state.AfterContent,
+						})
+					}
+					
 					diff := difflib.UnifiedDiff{
 						A:        difflib.SplitLines(state.BeforeContent),
 						B:        difflib.SplitLines(state.AfterContent),
