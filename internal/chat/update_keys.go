@@ -112,36 +112,6 @@ func (m Model) handleKeyMsg(msg tea.KeyMsg) (Model, tea.Cmd) {
 		return m, nil
 	}
 
-	// Update slash command suggestions (check first line only).
-	value := m.input.Value()
-	firstLine := strings.SplitN(value, "\n", 2)[0]
-
-	if strings.HasPrefix(firstLine, "/") {
-		m.showCommands = true
-		m.filteredCommands = FilterCommands(firstLine)
-		m.showFilePicker = false
-	} else {
-		m.showCommands = false
-		m.filteredCommands = nil
-		m.selectedCommand = 0
-		
-		// Check for file picker trigger (@) anywhere in the text
-		words := strings.Fields(value)
-		if len(words) > 0 && strings.HasPrefix(words[len(words)-1], "@") {
-			m.showFilePicker = true
-			query := words[len(words)-1][1:]
-			m.filteredFiles = FilterFiles(m.workspaceFiles, query)
-			if m.selectedFile >= len(m.filteredFiles) {
-				m.selectedFile = 0
-			}
-		} else {
-			m.showFilePicker = false
-			m.filteredFiles = nil
-			m.selectedFile = 0
-		}
-	}
-	m.updateViewportSize()
-
 	// Navigate the command palette.
 	if m.showCommands {
 		switch msg.String() {
@@ -272,5 +242,43 @@ func (m Model) handleKeyMsg(msg tea.KeyMsg) (Model, tea.Cmd) {
 
 	var cmd tea.Cmd
 	m.input, cmd = m.input.Update(msg)
+	
+	// Update slash command suggestions (check first line only).
+	value := m.input.Value()
+	firstLine := strings.SplitN(value, "\n", 2)[0]
+
+	if strings.HasPrefix(firstLine, "/") {
+		m.showCommands = true
+		m.filteredCommands = FilterCommands(firstLine)
+		m.showFilePicker = false
+	} else {
+		m.showCommands = false
+		m.filteredCommands = nil
+		m.selectedCommand = 0
+		
+		// Check for file picker trigger (@) anywhere in the text
+		// Don't trigger if there's a trailing space
+		if strings.HasSuffix(value, " ") || strings.HasSuffix(value, "\n") {
+			m.showFilePicker = false
+			m.filteredFiles = nil
+			m.selectedFile = 0
+		} else {
+			words := strings.Fields(value)
+			if len(words) > 0 && strings.HasPrefix(words[len(words)-1], "@") {
+				m.showFilePicker = true
+				query := words[len(words)-1][1:]
+				m.filteredFiles = FilterFiles(m.workspaceFiles, query)
+				if m.selectedFile >= len(m.filteredFiles) {
+					m.selectedFile = 0
+				}
+			} else {
+				m.showFilePicker = false
+				m.filteredFiles = nil
+				m.selectedFile = 0
+			}
+		}
+	}
+	m.updateViewportSize()
+	
 	return m, cmd
 }
