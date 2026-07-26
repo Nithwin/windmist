@@ -125,3 +125,16 @@ func New() Model {
 func (m Model) Init() tea.Cmd {
 	return textarea.Blink
 }
+
+// MaxContentWidth calculates the maximum width for the UI content based on the window size.
+// We allow it to expand dynamically, capped at 120 columns for typography/readability.
+func (m Model) MaxContentWidth() int {
+	w := m.width - 4 // padding
+	if w > 120 {
+		return 120
+	}
+	if w < 40 {
+		return 40
+	}
+	return w
+}

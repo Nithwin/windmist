@@ -19,7 +19,7 @@ func (m Model) View() string {
 		b.WriteString("\n")
 
 		// Separator above input area
-		b.WriteString(ui.DividerStyle.Render(strings.Repeat("─", 80)))
+		b.WriteString(ui.DividerStyle.Render(strings.Repeat("─", m.MaxContentWidth()+4)))
 		b.WriteString("\n\n")
 
 		// Show command palette ABOVE the input
