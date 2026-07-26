@@ -1,7 +1,6 @@
 package chat
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/Nithwin/WindMist/internal/ui"
@@ -30,11 +29,7 @@ func renderHeader(m Model) string {
 		Foreground(ui.MutedLight).
 		Render(model)
 
-	right := fmt.Sprintf("%s %s %s",
-		providerTag,
-		ui.BaseStyle.Foreground(ui.Muted).Render("›"),
-		modelTag,
-	)
+	right := providerTag + ui.BaseStyle.Render(" ") + ui.BaseStyle.Foreground(ui.Muted).Render("›") + ui.BaseStyle.Render(" ") + modelTag
 
 	// ── padded spacer fills remaining width ──────────────────────
 	const totalWidth = 78

@@ -183,10 +183,14 @@ func (m Model) MaxContentWidth() int {
 func (m *Model) UpdateInputStyles() {
 	plain := ui.BaseStyle
 	m.input.FocusedStyle.Base = plain.Foreground(ui.White)
+	m.input.FocusedStyle.Text = plain.Foreground(ui.White)
 	m.input.FocusedStyle.CursorLine = plain.Foreground(ui.White)
 	m.input.FocusedStyle.Placeholder = plain.Foreground(ui.Muted)
 	m.input.FocusedStyle.EndOfBuffer = plain.Foreground(ui.Muted)
+	m.input.FocusedStyle.Prompt = plain
 	m.input.BlurredStyle.Base = plain.Foreground(ui.MutedLight)
+	m.input.BlurredStyle.Text = plain.Foreground(ui.MutedLight)
 	m.input.BlurredStyle.Placeholder = plain.Foreground(ui.Muted)
 	m.input.BlurredStyle.CursorLine = plain
+	m.input.BlurredStyle.Prompt = plain
 }
