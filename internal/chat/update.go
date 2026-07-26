@@ -22,6 +22,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case StreamingMsg:
 		return m.handleStreamMsg(msg)
 
+	case WorkspaceFilesMsg:
+		m.workspaceFiles = msg.Files
+		return m, nil
+
 	// All other custom events (Session, Agent Mode, Undo/Redo, Models)
 	case ApprovalRequestMsg, switchModeSuccessMsg, createNewSessionMsg,
 		undoFileChangeMsg, redoFileChangeMsg, switchSessionSuccessMsg,

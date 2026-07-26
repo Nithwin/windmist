@@ -165,20 +165,17 @@ func New() (Model, error) {
 
 	model.updateViewportSize()
 
-	// Async load files so startup is fast
-	go func() {
-		files := getWorkspaceFiles()
-		// We'd ideally send a Msg, but this is fine for now
-		model.workspaceFiles = files
-	}()
-
 	return model, nil
-
 }
 
 // Init initializes the application.
 func (m Model) Init() tea.Cmd {
-	return textarea.Blink
+	return tea.Batch(
+		textarea.Blink,
+		func() tea.Msg {
+			return WorkspaceFilesMsg{Files: getWorkspaceFiles()}
+		},
+	)
 }
 
 // MaxContentWidth calculates the maximum width for the UI content based on the window size.
