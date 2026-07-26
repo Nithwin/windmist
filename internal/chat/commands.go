@@ -112,7 +112,7 @@ func selectProviderCmd(m *Model) tea.Cmd {
 		modelOpt, err := selector.Run(
 			fmt.Sprintf("Select Model for %s", providerOpt.Value),
 			"Choose the active model for this provider:",
-			config.GetModelOptions(providerOpt.Value, ollamaBaseURL),
+			m.cfg.GetModelOptions(providerOpt.Value, ollamaBaseURL),
 		)
 		if err != nil {
 			return switchCancelMsg{}
@@ -125,6 +125,10 @@ func selectProviderCmd(m *Model) tea.Cmd {
 				return switchCancelMsg{}
 			}
 			modelValue = customVal
+
+			// Save the custom model so it shows up next time
+			m.cfg.AddCustomModel(providerOpt.Value, modelValue)
+			_ = config.Save(m.cfg)
 		}
 
 		return switchProviderSuccessMsg{
@@ -154,7 +158,7 @@ func selectModelCmd(m *Model) tea.Cmd {
 		modelOpt, err := selector.Run(
 			fmt.Sprintf("Select Model for %s", m.cfg.AI.Provider),
 			"Choose the active model to use:",
-			config.GetModelOptions(m.cfg.AI.Provider, ollamaBaseURL),
+			m.cfg.GetModelOptions(m.cfg.AI.Provider, ollamaBaseURL),
 		)
 		if err != nil {
 			return switchCancelMsg{}
@@ -167,6 +171,10 @@ func selectModelCmd(m *Model) tea.Cmd {
 				return switchCancelMsg{}
 			}
 			modelValue = customVal
+
+			// Save the custom model so it shows up next time
+			m.cfg.AddCustomModel(m.cfg.AI.Provider, modelValue)
+			_ = config.Save(m.cfg)
 		}
 
 		return switchModelSuccessMsg{

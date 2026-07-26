@@ -58,7 +58,7 @@ func GetProviderOptions() []selector.Option {
 // GetModelOptions returns model options for the specified provider.
 // Cloud providers fetch dynamically from remote/embedded models.json manifest.
 // Ollama intelligently checks daemon state, auto-starting or auto-pulling models upon user confirmation.
-func GetModelOptions(providerName, ollamaBaseURL string) []selector.Option {
+func (c *Config) GetModelOptions(providerName, ollamaBaseURL string) []selector.Option {
 	var options []selector.Option
 
 	if providerName == "ollama" {
@@ -77,6 +77,17 @@ func GetModelOptions(providerName, ollamaBaseURL string) []selector.Option {
 					Value:       e.Value,
 				})
 			}
+		}
+	}
+
+	// Append custom models
+	if c.CustomModels != nil {
+		for _, m := range c.CustomModels[providerName] {
+			options = append(options, selector.Option{
+				Label:       fmt.Sprintf("%s (Custom)", m),
+				Description: "Saved custom model",
+				Value:       m,
+			})
 		}
 	}
 
