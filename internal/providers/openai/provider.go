@@ -63,12 +63,11 @@ func (p *Provider) Generate(
 	return translateResponse(p.model, chatResp)
 }
 
-// Stream streams a completion response chunk by chunk via Client.
 func (p *Provider) Stream(
 	ctx context.Context,
 	req *ai.GenerateRequest,
 	onChunk func(string),
-) error {
+) (*ai.GenerateResponse, error) {
 
 	messages := translateMessages(req.Messages)
 	if req.System != "" {
@@ -87,13 +86,23 @@ func (p *Provider) Stream(
 		Stream:      true,
 	}
 
-	return p.client.StreamContent(ctx, chatReq, func(resp *StreamResponse) {
+	var finalResp ai.GenerateResponse
+	finalResp.Model = p.model
+
+	err := p.client.StreamContent(ctx, chatReq, func(resp *StreamResponse) {
 		if len(resp.Choices) == 0 {
 			return
 		}
 		delta := resp.Choices[0].Delta
 		if delta.Content != "" {
-			onChunk(delta.Content)
+			finalResp.Text += delta.Content
+			if onChunk != nil {
+				onChunk(delta.Content)
+			}
 		}
+		// Note: Tool call accumulation for OpenAI streaming is deferred to a future PR.
+		// For now, streaming with tools may drop tool calls on OpenAI.
 	})
+
+	return &finalResp, err
 }

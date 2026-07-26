@@ -61,31 +61,37 @@ func (p *Provider) Generate(
 	return translateResponse(p.model, messagesResp)
 }
 
-// Stream streams a completion response chunk by chunk via Client.
 func (p *Provider) Stream(
 	ctx context.Context,
 	req *ai.GenerateRequest,
 	onChunk func(string),
-) error {
+) (*ai.GenerateResponse, error) {
 
-	maxTokens := req.MaxTokens
-	if maxTokens <= 0 {
-		maxTokens = 4096
-	}
-
-	messagesReq := &MessagesRequest{
+	msgReq := &MessagesRequest{
 		Model:       p.model,
 		Messages:    translateMessages(req.Messages),
 		System:      req.System,
-		MaxTokens:   maxTokens,
-		Temperature: req.Temperature,
 		Tools:       translateTools(req.Tools),
+		Temperature: req.Temperature,
+		MaxTokens:   req.MaxTokens,
 		Stream:      true,
 	}
 
-	return p.client.StreamContent(ctx, messagesReq, func(event *StreamEvent) {
+	if msgReq.MaxTokens == 0 {
+		msgReq.MaxTokens = 4096
+	}
+
+	var finalResp ai.GenerateResponse
+	finalResp.Model = p.model
+
+	err := p.client.StreamContent(ctx, msgReq, func(event *StreamEvent) {
 		if event.Type == "content_block_delta" && event.Delta.Type == "text_delta" && event.Delta.Text != "" {
-			onChunk(event.Delta.Text)
+			finalResp.Text += event.Delta.Text
+			if onChunk != nil {
+				onChunk(event.Delta.Text)
+			}
 		}
 	})
+
+	return &finalResp, err
 }

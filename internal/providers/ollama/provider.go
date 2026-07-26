@@ -76,7 +76,7 @@ func (p *Provider) Stream(
 	ctx context.Context,
 	req *ai.GenerateRequest,
 	onChunk func(string),
-) error {
+) (*ai.GenerateResponse, error) {
 
 	messages := translateMessages(req.Messages)
 	if req.System != "" {
@@ -95,26 +95,37 @@ func (p *Provider) Stream(
 		Stream:      true,
 	}
 
+	var finalResp ai.GenerateResponse
+	finalResp.Model = p.model
+
 	err := p.client.StreamContent(ctx, chatReq, func(resp *StreamResponse) {
 		if len(resp.Choices) == 0 {
 			return
 		}
 		delta := resp.Choices[0].Delta
 		if delta.Content != "" {
-			onChunk(delta.Content)
+			finalResp.Text += delta.Content
+			if onChunk != nil {
+				onChunk(delta.Content)
+			}
 		}
 	})
+
 	if err != nil && strings.Contains(err.Error(), "does not support tools") {
 		chatReq.Tools = nil
-		return p.client.StreamContent(ctx, chatReq, func(resp *StreamResponse) {
+		err = p.client.StreamContent(ctx, chatReq, func(resp *StreamResponse) {
 			if len(resp.Choices) == 0 {
 				return
 			}
 			delta := resp.Choices[0].Delta
 			if delta.Content != "" {
-				onChunk(delta.Content)
+				finalResp.Text += delta.Content
+				if onChunk != nil {
+					onChunk(delta.Content)
+				}
 			}
 		})
 	}
-	return err
+
+	return &finalResp, err
 }
