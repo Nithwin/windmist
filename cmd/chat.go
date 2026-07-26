@@ -56,7 +56,7 @@ var chatCmd = &cobra.Command{
 
 		ag := agent.New(provider, manager, agent.Config{})
 
-		res, err := ag.Run(context.Background(), args[0], func(s string) {
+		res, err := ag.Run(context.Background(), nil, args[0], func(s string) {
 			fmt.Print(s)
 		})
 		if err != nil {

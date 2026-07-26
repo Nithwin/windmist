@@ -2,8 +2,10 @@ package agent
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/Nithwin/WindMist/internal/ai"
+	"github.com/Nithwin/WindMist/internal/store"
 	"github.com/Nithwin/WindMist/internal/tools"
 )
 
@@ -15,6 +17,10 @@ type Config struct {
 	// MaxContextTokens is the maximum number of tokens retained in the
 	// sliding window context memory.
 	MaxContextTokens int
+	// Store is the optional database connection for session persistence.
+	Store *store.Store
+	// SessionID is the unique identifier for the current session, if persistence is enabled.
+	SessionID string
 }
 
 // Result contains the final output produced by the agent.
@@ -57,7 +63,33 @@ func New(
 }
 
 // Run executes a single user request.
-func (a *Agent) Run(ctx context.Context, userPrompt string, onChunk func(string)) (*Result, error) {
-	messages := make([]ai.Message, 0, 8)
-	return a.runLoop(ctx, messages, userPrompt, onChunk)
+func (a *Agent) Run(ctx context.Context, initialMessages []ai.Message, userPrompt string, onChunk func(string)) (*Result, error) {
+	if initialMessages == nil {
+		initialMessages = make([]ai.Message, 0, 8)
+	}
+	return a.runLoop(ctx, initialMessages, userPrompt, onChunk)
+}
+
+func (a *Agent) saveMessage(msg ai.Message) {
+	if a.config.Store == nil || a.config.SessionID == "" {
+		return
+	}
+
+	sMsg := &store.Message{
+		SessionID: a.config.SessionID,
+		Role:      string(msg.Role),
+		Content:   msg.Content,
+	}
+
+	if len(msg.ToolCalls) > 0 {
+		b, _ := json.Marshal(msg.ToolCalls)
+		sMsg.ToolCalls = string(b)
+	}
+
+	if len(msg.ToolResults) > 0 {
+		b, _ := json.Marshal(msg.ToolResults)
+		sMsg.ToolResults = string(b)
+	}
+
+	_ = a.config.Store.SaveMessage(sMsg)
 }
