@@ -3,7 +3,6 @@ package chat
 import (
 	"fmt"
 	"os"
-	"os/exec"
 	"strconv"
 	"strings"
 
@@ -474,16 +473,12 @@ func selectMCPCmd(m *Model) tea.Cmd {
 			
 			// --- Auto-Auth Magic for GitHub ---
 			if entry.ID == "github" && envKey == "GITHUB_PERSONAL_ACCESS_TOKEN" {
-				// Try to silently fetch the token from the GitHub CLI (gh)
-				out, err := exec.Command("gh", "auth", "token").Output()
-				if err == nil {
-					token := strings.TrimSpace(string(out))
-					if token != "" {
-						envValues[envKey] = token
-						fmt.Printf("\n✨ Automatically detected and loaded GitHub token from 'gh' CLI!\n")
-						continue
-					}
+				token, err := mcp.PerformGithubOAuth()
+				if err == nil && token != "" {
+					envValues[envKey] = token
+					continue
 				}
+				fmt.Printf("\n⚠️ OAuth failed (%v), falling back to manual entry...\n", err)
 			}
 			// ----------------------------------
 
