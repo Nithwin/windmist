@@ -77,3 +77,8 @@ type ApprovalRequestMsg struct {
 	Command      string
 	ResponseChan chan bool
 }
+
+// WorkspaceFilesMsg contains the list of files found in the workspace
+type WorkspaceFilesMsg struct {
+	Files []string
+}
