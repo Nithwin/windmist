@@ -22,6 +22,12 @@ type switchProviderSuccessMsg struct {
 	Model    string
 }
 
+// switchSubagentSuccessMsg represents a successful subagent change.
+type switchSubagentSuccessMsg struct {
+	Provider string
+	Model    string
+}
+
 // switchModeSuccessMsg represents a successful agent mode change.
 type switchModeSuccessMsg struct {
 	Mode string

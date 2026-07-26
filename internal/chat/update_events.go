@@ -206,6 +206,33 @@ func (m Model) handleEventMsg(msg tea.Msg) (Model, tea.Cmd) {
 		m.loading = false
 		return m, nil
 
+	case switchSubagentSuccessMsg:
+		m.cfg.SubAgent.Provider = msg.Provider
+		m.cfg.SubAgent.Model = msg.Model
+		_ = config.Save(m.cfg)
+
+		// Re-register tools with the new config so sub-agent picks it up
+		manager := tools.NewManager()
+		defaults.RegisterAll(manager, func(cmd string) bool {
+			if program == nil {
+				return false
+			}
+			ch := make(chan bool)
+			program.Send(ApprovalRequestMsg{Command: cmd, ResponseChan: ch})
+			return <-ch
+		}, m.cfg)
+		m.agent = agent.New(m.provider, manager, agent.Config{})
+
+		if msg.Provider == "" {
+			m.conversation.AddAssistant("✨ Sub-Agent reset to Auto (will use fast fallback or main model).")
+		} else {
+			m.conversation.AddAssistant(fmt.Sprintf("✨ Sub-Agent switched to **%s** (model: `%s`)", msg.Provider, msg.Model))
+		}
+		
+		m.refreshViewport()
+		m.loading = false
+		return m, nil
+
 	case switchCancelMsg:
 		m.conversation.AddAssistant("❌ Provider/model selection cancelled.")
 		m.refreshViewport()
