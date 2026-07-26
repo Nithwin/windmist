@@ -18,6 +18,8 @@ func (t *AppendTool) Definition() tools.Definition {
 	return tools.Definition{
 		Name:        "append",
 		Description: "Appends content to an existing file.",
+		Category:    tools.CategoryFilesystem,
+		Permission:  tools.PermWrite,
 		Parameters: []tools.Parameter{
 			{
 				Name:        "path",

@@ -20,6 +20,8 @@ func (t *PatchTool) Definition() tools.Definition {
 	return tools.Definition{
 		Name:        "patch",
 		Description: "Applies a unified diff patch to the workspace. Useful for making complex modifications to files efficiently.",
+		Category:    tools.CategoryEditing,
+		Permission:  tools.PermWrite,
 		Parameters: []tools.Parameter{
 			{
 				Name:        "diff",

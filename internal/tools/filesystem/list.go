@@ -19,6 +19,8 @@ func (t *ListTool) Definition() tools.Definition {
 	return tools.Definition{
 		Name:        "list",
 		Description: "Lists files and directories inside a specified directory.",
+		Category:    tools.CategoryFilesystem,
+		Permission:  tools.PermReadOnly,
 		Parameters: []tools.Parameter{
 			{
 				Name:        "path",

@@ -29,3 +29,23 @@ func (m *Manager) List() []Tool {
 
 	return list
 }
+
+func (m *Manager) ListByCategory(categories ...Category) []Tool {
+	if len(categories) == 0 {
+		return m.List()
+	}
+
+	catMap := make(map[Category]bool)
+	for _, c := range categories {
+		catMap[c] = true
+	}
+
+	list := make([]Tool, 0)
+	for _, tool := range m.tools {
+		if catMap[tool.Definition().Category] {
+			list = append(list, tool)
+		}
+	}
+
+	return list
+}

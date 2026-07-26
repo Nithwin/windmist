@@ -23,6 +23,8 @@ func (t *GrepTool) Definition() tools.Definition {
 	return tools.Definition{
 		Name:        "grep",
 		Description: "Searches for a regex pattern inside files across the workspace. Returns file path, line number, and the matching line.",
+		Category:    tools.CategorySearch,
+		Permission:  tools.PermReadOnly,
 		Parameters: []tools.Parameter{
 			{
 				Name:        "pattern",

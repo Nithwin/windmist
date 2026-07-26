@@ -18,6 +18,8 @@ func (t *DeleteTool) Definition() tools.Definition {
 	return tools.Definition{
 		Name:        "delete",
 		Description: "Deletes a file or directory.",
+		Category:    tools.CategoryFilesystem,
+		Permission:  tools.PermWrite,
 		Parameters: []tools.Parameter{
 			{
 				Name:        "path",

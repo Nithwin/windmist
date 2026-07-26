@@ -19,6 +19,8 @@ func (t *ReadContextTool) Definition() tools.Definition {
 	return tools.Definition{
 		Name:        "read_context",
 		Description: "Reads a specific range of lines from a file with 1-indexed line numbers formatted for editing context.",
+		Category:    tools.CategoryEditing,
+		Permission:  tools.PermWrite,
 		Parameters: []tools.Parameter{
 			{
 				Name:        "path",

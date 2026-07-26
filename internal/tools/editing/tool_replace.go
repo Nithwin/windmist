@@ -18,6 +18,8 @@ func (t *ReplaceTextTool) Definition() tools.Definition {
 	return tools.Definition{
 		Name:        "replace_text",
 		Description: "Replace a unique piece of text in an existing file. Use this when the target text is known exactly. Prefer range-based editing when exact line numbers are available.",
+		Category:    tools.CategoryEditing,
+		Permission:  tools.PermWrite,
 		Parameters: []tools.Parameter{
 			{
 				Name:        "file",

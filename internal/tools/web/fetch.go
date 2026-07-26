@@ -21,6 +21,8 @@ func (t *FetchTool) Definition() tools.Definition {
 	return tools.Definition{
 		Name:        "fetch",
 		Description: "Fetches the text content of a given URL. Useful for reading documentation pages or articles.",
+		Category:    tools.CategoryWeb,
+		Permission:  tools.PermReadOnly,
 		Parameters: []tools.Parameter{
 			{
 				Name:        "url",
