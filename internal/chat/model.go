@@ -51,6 +51,12 @@ type Model struct {
 	spinnerFrame int
 	responseTime time.Duration
 
+	// Input queuing: let user type next message while loading
+	queuedMessage string
+
+	// Streaming token counter: updated in real-time
+	streamTokens ai.Usage
+
 	waitingApproval bool
 	approvalCommand string
 	approvalChan    chan bool

@@ -97,6 +97,7 @@ func (m Model) handleKeyMsg(msg tea.KeyMsg) (Model, tea.Cmd) {
 			m.loading = false
 			m.streaming = false
 			m.spinnerFrame = 0
+			m.queuedMessage = "" // Clear any queued message
 			m.conversation.AddAssistant("\n\n*(Cancelled by user)*")
 			m.refreshViewport()
 			return m, nil
@@ -267,10 +268,12 @@ func (m Model) handleKeyMsg(msg tea.KeyMsg) (Model, tea.Cmd) {
 		}
 
 		// Normal AI message.
-		// Block new AI messages while a request is in-flight.
+		// Queue input if a request is already in-flight.
 		if m.loading {
-			// Don't fire another request — just show feedback.
-			m.conversation.AddAssistant("⏳ *Please wait — a request is still in progress. Press `Ctrl+C` to cancel it.*")
+			// Queue this message — it will auto-send when the current request finishes.
+			m.queuedMessage = prompt
+			m.input.SetValue("")
+			m.conversation.AddAssistant("📋 *Message queued — will send automatically when current request finishes.*")
 			m.refreshViewport()
 			return m, nil
 		}
