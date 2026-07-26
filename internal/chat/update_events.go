@@ -281,6 +281,25 @@ func (m Model) handleEventMsg(msg tea.Msg) (Model, tea.Cmd) {
 		m.loading = false
 		return m, nil
 
+	case indexWorkspaceMsg:
+		if m.ragIndexer == nil {
+			m.conversation.AddAssistant("❌ RAG indexer is not initialized.")
+			m.refreshViewport()
+			return m, nil
+		}
+
+		m.conversation.AddAssistant("⏳ *Indexing workspace for semantic search. This might take a moment...*")
+		m.refreshViewport()
+
+		// Run indexing in background and return a result message when done
+		return m, func() tea.Msg {
+			count, err := m.ragIndexer.IndexProject(".")
+			if err != nil {
+				return switchErrorMsg{Err: fmt.Errorf("indexing failed: %w", err)}
+			}
+			return ResponseMsg{Text: fmt.Sprintf("✅ Workspace indexed successfully! %d code chunks embedded.", count)}
+		}
+
 	case switchErrorMsg:
 		m.conversation.AddAssistant(fmt.Sprintf("❌ Error: %v", msg.Err))
 		m.refreshViewport()

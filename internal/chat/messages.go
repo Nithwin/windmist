@@ -71,6 +71,9 @@ type mcpInstallSuccessMsg struct {
 	Name string
 }
 
+// indexWorkspaceMsg triggers indexing of the codebase for RAG.
+type indexWorkspaceMsg struct{}
+
 // setAPIKeySuccessMsg represents a successful API key update.
 type setAPIKeySuccessMsg struct {
 	Provider string

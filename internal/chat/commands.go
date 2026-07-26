@@ -113,6 +113,15 @@ var Registry = []Command{
 		},
 	},
 	{
+		Name:        "/index",
+		Description: "Index workspace for semantic search (RAG)",
+		Execute: func(m *Model) tea.Cmd {
+			return func() tea.Msg {
+				return indexWorkspaceMsg{}
+			}
+		},
+	},
+	{
 		Name:        "/mcp",
 		Description: "Install an MCP server (e.g. GitHub, Postgres)",
 		Execute: func(m *Model) tea.Cmd {

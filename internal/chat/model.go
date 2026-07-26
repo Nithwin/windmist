@@ -3,14 +3,17 @@ package chat
 import (
 	"context"
 	"fmt"
+	"os"
 	"path/filepath"
 	"time"
 
 	"github.com/Nithwin/WindMist/internal/agent"
 	"github.com/Nithwin/WindMist/internal/ai"
 	"github.com/Nithwin/WindMist/internal/config"
+	"github.com/Nithwin/WindMist/internal/rag"
 	"github.com/Nithwin/WindMist/internal/store"
 	"github.com/Nithwin/WindMist/internal/tools"
+	toolagent "github.com/Nithwin/WindMist/internal/tools/agent"
 	"github.com/Nithwin/WindMist/internal/tools/defaults"
 	"github.com/Nithwin/WindMist/internal/ui"
 	"github.com/Nithwin/WindMist/internal/ui/selector"
@@ -65,6 +68,9 @@ type Model struct {
 
 	markdown *ui.MarkdownRenderer
 
+	// RAG components
+	ragIndexer *rag.Indexer
+
 	// Inline Selector state
 	showSelector bool
 	selectorList list.Model
@@ -117,6 +123,29 @@ func New() (Model, error) {
 	if err != nil {
 		return Model{}, fmt.Errorf("failed to initialize db store: %w", err)
 	}
+
+	// Initialize RAG System
+	home, _ := os.UserHomeDir()
+	ragDbPath := filepath.Join(home, ".windmist", "rag.db")
+	ragStore, err := rag.NewDocumentStore(ragDbPath)
+	if err != nil {
+		return Model{}, fmt.Errorf("failed to initialize RAG store: %w", err)
+	}
+	ragEmbedder := rag.NewTFIDFEmbedder(512)
+	ragSearcher := rag.NewSearcher(ragStore, ragEmbedder)
+	ragIndexer := rag.NewIndexer(ragStore, ragEmbedder)
+
+	// Rebuild vocabulary on startup if we have indexed chunks
+	if chunks, err := ragStore.GetAllChunks(); err == nil && len(chunks) > 0 {
+		docs := make([]string, len(chunks))
+		for i, c := range chunks {
+			docs[i] = c.Content
+		}
+		ragEmbedder.BuildVocabulary(docs)
+	}
+
+	// Register Semantic Search Tool
+	manager.Register(toolagent.NewSemanticSearchTool(ragSearcher))
 
 	// For now, create a new session on startup
 	// Later we can implement logic to load an existing session
@@ -181,6 +210,8 @@ func New() (Model, error) {
 		viewport: vp,
 
 		markdown: renderer,
+
+		ragIndexer: ragIndexer,
 	}
 
 	model.UpdateInputStyles()

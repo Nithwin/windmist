@@ -5,6 +5,7 @@ import (
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"fmt"
 )
 
 // Update handles all user interactions and routes them to specific handlers.
@@ -24,6 +25,15 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case StreamingMsg:
 		return m.handleStreamMsg(msg)
+
+	case ResponseMsg:
+		if msg.Err != nil {
+			m.conversation.AddAssistant(fmt.Sprintf("❌ Error: %v", msg.Err))
+		} else {
+			m.conversation.AddAssistant(msg.Text)
+		}
+		m.refreshViewport()
+		return m, nil
 
 	case spinnerTickMsg:
 		if m.loading {
@@ -54,7 +64,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// All other custom events (Session, Agent Mode, Undo/Redo, Models)
 	case ApprovalRequestMsg, switchModeSuccessMsg, createNewSessionMsg,
 		undoFileChangeMsg, redoFileChangeMsg, switchSessionSuccessMsg,
-		switchProviderSuccessMsg, switchModelSuccessMsg, switchSubagentSuccessMsg, switchThemeSuccessMsg, mcpInstallSuccessMsg, setAPIKeySuccessMsg, switchCancelMsg, switchErrorMsg:
+		switchProviderSuccessMsg, switchModelSuccessMsg, switchSubagentSuccessMsg, switchThemeSuccessMsg, mcpInstallSuccessMsg, setAPIKeySuccessMsg, switchCancelMsg, switchErrorMsg, indexWorkspaceMsg:
 
 		var evtCmd tea.Cmd
 		m, evtCmd = m.handleEventMsg(msg)
