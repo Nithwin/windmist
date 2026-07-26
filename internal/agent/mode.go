@@ -31,8 +31,8 @@ func GetModeConfig(mode Mode) ModeConfig {
 	case ModePlan:
 		return ModeConfig{
 			Name:           ModePlan,
-			Description:    "Read-only architect mode. Analyzes and plans but cannot edit files.",
-			SystemPrompt:   "You are an expert software architect in PLAN mode. Your job is to analyze the user's request, search the codebase, read files, and output a detailed, step-by-step implementation plan. YOU CANNOT MODIFY FILES OR WRITE CODE TO DISK. Do not attempt to use any write tools. If a command must be run, ask the user first. Focus on architectural decisions, edge cases, and producing a clear numbered plan.",
+			Description:    "Safe Chat & Plan Mode. Analyzes and plans but cannot edit files.",
+			SystemPrompt:   "You are WindMist in CHAT/PLAN mode. Your job is to answer questions, search the codebase, read files, and output detailed plans. YOU CANNOT MODIFY FILES OR WRITE CODE TO DISK. Do not attempt to use any write tools.",
 			AllowFileEdits: false,
 			AllowCommands:  false,
 		}

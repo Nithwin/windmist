@@ -69,6 +69,11 @@ type mcpInstallSuccessMsg struct {
 	Name string
 }
 
+// setAPIKeySuccessMsg represents a successful API key update.
+type setAPIKeySuccessMsg struct {
+	Provider string
+}
+
 // switchCancelMsg represents a user cancellation of the menu.
 type switchCancelMsg struct{}
 
