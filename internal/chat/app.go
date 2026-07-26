@@ -18,6 +18,6 @@ func Run() error {
 
 	program = p
 
-	_, err := p.Run()
+	_, err = p.Run()
 	return err
 }
