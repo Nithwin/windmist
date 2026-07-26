@@ -64,3 +64,4 @@ Thumbs.db
 
 # Test sandbox & generated examples
 examples/
+CLAUDE_CODE_TODO.md
