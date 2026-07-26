@@ -104,7 +104,15 @@ func (c *Config) SetAPIKey(providerName, apiKey string) error {
 
 // SetBaseURL updates a provider base URL.
 func (c *Config) SetBaseURL(providerName, baseURL string) error {
-	return fmt.Errorf("base_url cannot be set or changed by the user for any provider")
+	provider, ok := c.Providers[providerName]
+	if !ok {
+		return fmt.Errorf("unsupported provider: %s", providerName)
+	}
+
+	provider.BaseURL = baseURL
+	c.Providers[providerName] = provider
+
+	return nil
 }
 
 // SetTheme updates the UI theme.
