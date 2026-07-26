@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"path/filepath"
 	"strings"
 	"sync"
 
@@ -123,39 +122,6 @@ func (a *Agent) execute(ctx context.Context, calls []ai.ToolCall, onChunk func(s
 					text, _ := difflib.GetUnifiedDiffString(diff)
 					diffs.WriteString(fmt.Sprintf("```diff\n%s\n```\n", strings.TrimSpace(text)))
 
-					// Connect to LSP and check for diagnostics
-					if a.lspManager != nil {
-						absPath, err := filepath.Abs(state.Path)
-						if err == nil {
-							client, err := a.lspManager.GetClient(ctx, ".", absPath)
-							if err == nil && client != nil {
-								uri := "file://" + absPath
-								// Trigger a didOpen/didChange or simply wait for the server
-								// to send diagnostics based on file watching, or explicitly send them
-								_ = client.Notify("textDocument/didOpen", map[string]interface{}{
-									"textDocument": map[string]interface{}{
-										"uri":        uri,
-										"languageId": "",
-										"version":    1,
-										"text":       state.AfterContent,
-									},
-								})
-
-								// Wait for diagnostics to stream in
-								time.Sleep(500 * time.Millisecond)
-
-								diags := client.GetDiagnostics(uri)
-								if len(diags) > 0 {
-									diffs.WriteString("\n⚠️ **LSP Diagnostics Found:**\n")
-									for _, d := range diags {
-										if d.Severity == 1 { // Error only
-											diffs.WriteString(fmt.Sprintf("- [%s] %s\n", d.Source, d.Message))
-										}
-									}
-								}
-							}
-						}
-					}
 				}
 
 				content = diffs.String()

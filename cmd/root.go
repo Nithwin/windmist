@@ -1,31 +1,23 @@
 package cmd
 
 import (
-	_ "github.com/Nithwin/WindMist/internal/providers/anthropic"
-	_ "github.com/Nithwin/WindMist/internal/providers/deepseek"
 	_ "github.com/Nithwin/WindMist/internal/providers/gemini"
-	_ "github.com/Nithwin/WindMist/internal/providers/groq"
-	_ "github.com/Nithwin/WindMist/internal/providers/kimi"
-	_ "github.com/Nithwin/WindMist/internal/providers/mistral"
-	_ "github.com/Nithwin/WindMist/internal/providers/ollama"
-	_ "github.com/Nithwin/WindMist/internal/providers/openai"
-	_ "github.com/Nithwin/WindMist/internal/providers/perplexity"
-	_ "github.com/Nithwin/WindMist/internal/providers/together"
 
 	"github.com/Nithwin/WindMist/internal/chat"
 	"github.com/spf13/cobra"
 )
 
+// rootCmd keeps the app focused on the simplest terminal chat flow.
 var rootCmd = &cobra.Command{
 	Use:   "windmist",
-	Short: "WindMist - AI Coding Assistant",
-	Long:  "WindMist is an AI-powered coding assistant for your terminal.",
+	Short: "WindMist - simple terminal AI assistant",
+	Long:  "WindMist is a simple AI assistant for your terminal.",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return chat.Run()
 	},
 }
 
-// Execute runs the root command.
+// Execute starts the root command.
 func Execute() error {
 	return rootCmd.Execute()
 }

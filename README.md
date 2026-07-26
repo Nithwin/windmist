@@ -1,7 +1,7 @@
 <div align="center">
 
 # 🌀 WindMist `v1.0.0`
-### Autonomous AI Software Engineer Running Directly in Your Terminal
+### Simple Terminal AI Assistant Running Directly in Your Terminal
 
 <img src="images/Gemini_Generated_Image_4fucu04fucu04fuc.png?v=2" alt="WindMist Hero Banner" width="860" />
 
@@ -13,12 +13,12 @@
 [![Discord](https://img.shields.io/badge/Discord-Join-7289DA?style=for-the-badge&logo=discord)](https://discord.gg/9hNxQdHYX)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-10B981?style=for-the-badge)](CONTRIBUTING.md)
 
-**A modern open-source AI coding assistant running right inside your terminal.**  
-WindMist (`v1.0.0`) is built in high-performance Go to inspect code, edit files atomically across your workspace, and engage in multi-turn reasoning loops with local tools.
+**A simple open-source AI assistant running right inside your terminal.**
+WindMist (`v1.0.0`) is built in Go to let you chat with an AI model and work with files using a small set of beginner-friendly tools.
 
 > **🌐 Official Website:** [windmist.vercel.app](https://windmist.vercel.app/) &nbsp;|&nbsp; **💻 Website Repo:** [`windmist-site`](https://github.com/Nithwin/windmist-site) &nbsp;|&nbsp; **💬 Community:** [Discord](https://discord.gg/9hNxQdHYX)
 
-[Demo](#-demo) • [Installation](#-installation) • [Quick Start](#-quick-start) • [Features](#-features--capabilities) • [Commands](#-core-commands) • [Architecture](docs/architecture.md) • [Contributing](CONTRIBUTING.md)
+[Demo](#-demo) • [Installation](#-installation) • [Quick Start](#-quick-start) • [Features](#-features--capabilities) • [Commands](#-core-commands) • [Architecture](docs/architecture.md) • [Build Guide](docs/build-windmist.md) • [Contributing](CONTRIBUTING.md)
 
 </div>
 
@@ -69,16 +69,14 @@ go build -o windmist ./cmd/windmist
 
 ---
 
-## ✨ Features & Capabilities
+## ✨ What This Basic Version Includes
 
-WindMist (`v1.0.0`) provides a robust, native engineering environment inside your terminal:
+WindMist (`v1.0.0`) keeps the first version small and easy to learn:
 
-* ✅ **Interactive AI Chat & TUI:** Rich Bubble Tea and Lip Gloss interface with real-time streaming, markdown rendering, and syntax coloring.
-* ✅ **Native Gemini Provider (`internal/providers/gemini`):** Full multi-turn conversation support with native `OBJECT` schema translation and function calling (`v1beta`).
-* ✅ **15 Atomic Filesystem & Editing Tools (`internal/tools/...`):**
-  * **Filesystem Operations:** `read`, `write`, `append`, `delete`, `rename`, `list`, `create`, `info`, `exists`.
-  * **Precision Editing:** `replace_text`, `replace_range`, `delete_range`, `read_context`, `insert_text`, `search_text`.
-* ✅ **Autonomous Agent Loop (`internal/agent`):** Stateless multi-turn reasoning loop with automated tool execution, context tracking, and self-correction.
+* ✅ **Terminal Chat:** Run `windmist` and talk to the assistant in your terminal.
+* ✅ **One Provider by Default:** Gemini is the default provider in this branch.
+* ✅ **Basic File Tools:** `read`, `write`, `list`, and one simple edit tool.
+* ✅ **Simple Agent Loop:** The assistant can read a prompt, use a tool, and reply.
 
 ---
 
@@ -94,17 +92,25 @@ WindMist (`v1.0.0`) provides a robust, native engineering environment inside you
 
 ---
 
-## 💡 Why WindMist?
+## 💡 Why This Basic Version?
 
-Our mission is to provide an open-source AI coding assistant that operates with native execution speed, deep workspace awareness, and complete local sovereignty over your development workflows.
+This branch is meant to be easy to follow for beginners.
 
-Most AI CLI tools struggle with sluggish startup times or cumbersome configuration requirements. WindMist eliminates this overhead by isolating everything close to your terminal—CLI parsing, interactive Bubble Tea UX, concurrent file walking, and the autonomous tool execution loop—strictly inside a high-performance Go core (`internal/`).
+It keeps the flow small: start the app, send a prompt, read a file, write a file, and get an answer.
 
 ---
 
 ## 📐 Architecture Overview
 
-For a comprehensive breakdown of our system architecture, domain-driven Go modules (`internal/`), and multi-turn execution loop, please read **[`docs/architecture.md`](docs/architecture.md)**.
+For the full architecture, read **[`docs/architecture.md`](docs/architecture.md)**.
+
+## 🧭 Build Guide
+
+If you want to recreate WindMist step by step, start with **[`docs/build-windmist.md`](docs/build-windmist.md)**. It explains how to build the app in simple language with small examples.
+
+## 📘 What Is Included
+
+If you want a very short summary of the branch, read **[`docs/basic-version.md`](docs/basic-version.md)**.
 
 ---
 

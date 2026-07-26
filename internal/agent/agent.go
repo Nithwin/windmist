@@ -8,7 +8,6 @@ import (
 
 	"github.com/Nithwin/WindMist/internal/ai"
 	appconfig "github.com/Nithwin/WindMist/internal/config"
-	"github.com/Nithwin/WindMist/internal/lsp"
 	"github.com/Nithwin/WindMist/internal/mcp"
 	"github.com/Nithwin/WindMist/internal/store"
 	"github.com/Nithwin/WindMist/internal/tools"
@@ -48,7 +47,6 @@ type Agent struct {
 	provider   ai.Provider
 	manager    *tools.Manager
 	config     Config
-	lspManager *lsp.Manager
 	mcpManager *mcp.Manager
 }
 
@@ -75,7 +73,6 @@ func New(
 		provider:   provider,
 		manager:    manager,
 		config:     config,
-		lspManager: lsp.NewManager(),
 		mcpManager: mcp.NewManager(),
 	}
 
@@ -95,11 +92,8 @@ func New(
 	return a
 }
 
-// Close gracefully shuts down any resources held by the agent (like LSPs).
+// Close gracefully shuts down any resources held by the agent.
 func (a *Agent) Close() {
-	if a.lspManager != nil {
-		a.lspManager.CloseAll()
-	}
 	if a.mcpManager != nil {
 		a.mcpManager.CloseAll()
 	}

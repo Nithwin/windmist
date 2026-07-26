@@ -13,62 +13,39 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	flagModel    string
-	flagProvider string
-)
-
 var chatCmd = &cobra.Command{
 	Use:  "chat <prompt>",
 	Args: cobra.MinimumNArgs(1),
 
 	Run: func(cmd *cobra.Command, args []string) {
 
+		// Load the saved settings before starting the assistant.
 		cfg, err := config.Load()
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		if flagProvider != "" {
-			if err := cfg.SetProvider(flagProvider); err != nil {
-				log.Fatal(err)
-			}
-		}
-
-		if flagModel != "" {
-			if err := cfg.SetModel(cfg.AI.Provider, flagModel); err != nil {
-				log.Fatal(err)
-			}
-		}
-
+		// Create the configured AI provider.
 		provider, err := ai.New(cfg)
 		if err != nil {
 			log.Fatal(err)
 		}
 
+		// Register only the basic tools used in this beginner version.
 		manager := tools.NewManager()
-		defaults.RegisterAll(manager, func(cmd string) bool {
-			fmt.Printf("\n⚠️ Agent wants to run: %s\nAllow? (y/N): ", cmd)
-			var ans string
-			fmt.Scanln(&ans)
-			return ans == "y" || ans == "Y"
-		}, cfg)
+		defaults.RegisterAll(manager, nil, cfg)
 
+		// Run one prompt and print the final answer.
 		ag := agent.New(provider, manager, agent.Config{})
-
-		res, err := ag.Run(context.Background(), nil, args[0], func(s string) {
-			fmt.Print(s)
-		})
+		res, err := ag.Run(context.Background(), nil, args[0], nil)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		fmt.Println("\n\n" + res.Content)
+		fmt.Println(res.Content)
 	},
 }
 
 func init() {
-	chatCmd.Flags().StringVarP(&flagModel, "model", "m", "", "AI model to use (e.g. gpt-4o, claude-3-5-sonnet-latest, qwen2.5:8b)")
-	chatCmd.Flags().StringVarP(&flagProvider, "provider", "p", "", "AI provider to use (e.g. gemini, ollama, groq, openai, anthropic)")
 	rootCmd.AddCommand(chatCmd)
 }
