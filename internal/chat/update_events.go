@@ -248,6 +248,11 @@ func (m Model) handleEventMsg(msg tea.Msg) (Model, tea.Cmd) {
 		m.refreshViewport()
 		return m, nil
 
+	case setAPIKeySuccessMsg:
+		m.conversation.AddAssistant(fmt.Sprintf("🔑 Successfully saved new API key for **%s**.\nRemember to restart WindMist or select the provider again to apply the changes.", msg.Provider))
+		m.refreshViewport()
+		return m, nil
+
 	case switchThemeSuccessMsg:
 		m.cfg.SetTheme(msg.Theme)
 		_ = config.Save(m.cfg)

@@ -113,6 +113,13 @@ var Registry = []Command{
 		},
 	},
 	{
+		Name:        "/apikey",
+		Description: "Set API Key for the current provider",
+		Execute: func(m *Model) tea.Cmd {
+			return setAPIKeyCmd(m)
+		},
+	},
+	{
 		Name:        "/mcp",
 		Description: "Install an MCP server (e.g. GitHub, Postgres)",
 		Execute: func(m *Model) tea.Cmd {
@@ -481,6 +488,45 @@ func selectMCPCmd(m *Model) tea.Cmd {
 
 		return mcpInstallSuccessMsg{
 			Name: entry.Name,
+		}
+	}
+}
+
+func setAPIKeyCmd(m *Model) tea.Cmd {
+	return func() tea.Msg {
+		if program == nil {
+			return switchErrorMsg{Err: fmt.Errorf("program instance not initialized")}
+		}
+
+		if err := program.ReleaseTerminal(); err != nil {
+			return switchErrorMsg{Err: fmt.Errorf("failed to release terminal: %w", err)}
+		}
+		defer program.RestoreTerminal()
+
+		provider := m.cfg.AI.Provider
+		if provider == "" {
+			provider = "default"
+		}
+		
+		fmt.Printf("\n🔑 Enter API Key for [%s]:\n> ", provider)
+		var val string
+		fmt.Scanln(&val)
+		val = strings.TrimSpace(val)
+		
+		if val == "" {
+			return switchCancelMsg{}
+		}
+
+		if err := m.cfg.SetAPIKey(provider, val); err != nil {
+			return switchErrorMsg{Err: fmt.Errorf("failed to set api key: %w", err)}
+		}
+		
+		if err := config.Save(m.cfg); err != nil {
+			return switchErrorMsg{Err: fmt.Errorf("failed to save config: %w", err)}
+		}
+
+		return setAPIKeySuccessMsg{
+			Provider: provider,
 		}
 	}
 }
