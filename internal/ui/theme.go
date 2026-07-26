@@ -138,11 +138,11 @@ var BuiltinThemes = map[string]Theme{
 		Colors: ThemeColors{
 			Background: "#161122", // Deep Premium Amethyst
 			Foreground: "#F8FAFC", // Crisp white
-			Accent:     "#00F0FF", // Neon Cyan (Main)
+			Accent:     "#D946EF", // Vibrant Fuchsia (Maps to Purple)
 			Success:    "#00FF9D", // Neon Mint
 			Error:      "#FF006A", // Neon Crimson
 			Warning:    "#FFB800", // Neon Gold
-			Info:       "#D946EF", // Vibrant Fuchsia
+			Info:       "#00F0FF", // Neon Cyan (Maps to Cyan)
 			Muted:      "#6B6282", // Muted purple/gray
 			Border:     "#2D243F", // Deep purple border
 			Selection:  "#2D243F",
