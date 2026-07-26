@@ -3,7 +3,6 @@ package agent
 import (
 	"context"
 
-	"github.com/Nithwin/WindMist/internal/agent/prompt"
 	"github.com/Nithwin/WindMist/internal/ai"
 	"github.com/Nithwin/WindMist/internal/tools"
 )
@@ -13,6 +12,9 @@ type Config struct {
 	// MaxTurns is the maximum number of reasoning iterations the agent
 	// may perform before terminating the request.
 	MaxTurns int
+	// MaxContextTokens is the maximum number of tokens retained in the
+	// sliding window context memory.
+	MaxContextTokens int
 }
 
 // Result contains the final output produced by the agent.
@@ -42,6 +44,9 @@ func New(
 ) *Agent {
 	if config.MaxTurns <= 0 {
 		config.MaxTurns = DefaultMaxTurns
+	}
+	if config.MaxContextTokens <= 0 {
+		config.MaxContextTokens = DefaultMaxContextTokens
 	}
 
 	return &Agent{
