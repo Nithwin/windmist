@@ -106,6 +106,16 @@ func (s *Store) GetFileChangesBySession(sessionID string) ([]FileChange, error) 
 	return changes, err
 }
 
+// GetLastFileChange gets the most recent file change for a session
+func (s *Store) GetLastFileChange(sessionID string) (*FileChange, error) {
+	var change FileChange
+	err := s.db.Get(&change, "SELECT * FROM file_changes WHERE session_id = ? ORDER BY id DESC LIMIT 1", sessionID)
+	if err != nil {
+		return nil, err
+	}
+	return &change, nil
+}
+
 // DeleteSession completely deletes a session and all cascading data
 func (s *Store) DeleteSession(id string) error {
 	res, err := s.db.Exec("DELETE FROM sessions WHERE id = ?", id)

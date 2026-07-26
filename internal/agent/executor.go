@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/Nithwin/WindMist/internal/ai"
+	"github.com/Nithwin/WindMist/internal/store"
 	"github.com/Nithwin/WindMist/internal/tools"
 )
 
@@ -42,6 +43,18 @@ func (a *Agent) execute(ctx context.Context, calls []ai.ToolCall, onChunk func(s
 
 			if onChunk != nil {
 				onChunk(fmt.Sprintf(" ✅ Done (`%s`).\n\n", call.Name))
+			}
+
+			if a.config.Store != nil && a.config.SessionID != "" && len(res.FileStates) > 0 {
+				for _, state := range res.FileStates {
+					_ = a.config.Store.SaveFileChange(&store.FileChange{
+						SessionID:     a.config.SessionID,
+						FilePath:      state.Path,
+						ChangeType:    state.ChangeType,
+						BeforeContent: state.BeforeContent,
+						AfterContent:  state.AfterContent,
+					})
+				}
 			}
 
 			content := ""

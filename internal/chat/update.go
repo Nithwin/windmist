@@ -3,6 +3,7 @@ package chat
 import (
 	"context"
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/Nithwin/WindMist/internal/agent"
@@ -287,6 +288,54 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		m.conversation.Clear()
 		m.conversation.AddAssistant("✨ Started a new session.")
+		m.refreshViewport()
+		return m, nil
+
+	case undoFileChangeMsg:
+		if m.store == nil || m.session == nil {
+			m.conversation.AddAssistant("❌ Persistence not enabled.")
+			m.refreshViewport()
+			return m, nil
+		}
+
+		change, err := m.store.GetLastFileChange(m.session.ID)
+		if err != nil {
+			m.conversation.AddAssistant("❌ No file changes found to undo.")
+			m.refreshViewport()
+			return m, nil
+		}
+
+		if change.ChangeType == "create" {
+			_ = os.Remove(change.FilePath)
+		} else {
+			_ = os.WriteFile(change.FilePath, []byte(change.BeforeContent), 0644)
+		}
+
+		m.conversation.AddAssistant(fmt.Sprintf("⏮️ **Undid edit** to `%s`", change.FilePath))
+		m.refreshViewport()
+		return m, nil
+
+	case redoFileChangeMsg:
+		if m.store == nil || m.session == nil {
+			m.conversation.AddAssistant("❌ Persistence not enabled.")
+			m.refreshViewport()
+			return m, nil
+		}
+
+		change, err := m.store.GetLastFileChange(m.session.ID)
+		if err != nil {
+			m.conversation.AddAssistant("❌ No file changes found to redo.")
+			m.refreshViewport()
+			return m, nil
+		}
+
+		if change.ChangeType == "delete" {
+			_ = os.Remove(change.FilePath)
+		} else {
+			_ = os.WriteFile(change.FilePath, []byte(change.AfterContent), 0644)
+		}
+
+		m.conversation.AddAssistant(fmt.Sprintf("⏭️ **Redid edit** to `%s`", change.FilePath))
 		m.refreshViewport()
 		return m, nil
 

@@ -46,12 +46,20 @@ type Call struct {
 	Args map[string]any
 }
 
+type FileState struct {
+	Path          string
+	BeforeContent string
+	AfterContent  string
+	ChangeType    string // create, edit, delete
+}
+
 type Result struct {
 	Output       any
 	Error        error
 	Duration     time.Duration // How long the tool took
 	FilesRead    []string      // Files accessed
 	FilesChanged []string      // Files modified
+	FileStates   []FileState   // Exact before/after for Undo/Redo
 	BytesChanged int64         // Total bytes changed
 }
 

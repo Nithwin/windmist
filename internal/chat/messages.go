@@ -30,6 +30,12 @@ type switchSessionSuccessMsg struct {
 // createNewSessionMsg signals to spin up a new session.
 type createNewSessionMsg struct{}
 
+// undoFileChangeMsg signals to undo the last file edit.
+type undoFileChangeMsg struct{}
+
+// redoFileChangeMsg signals to redo the last undone file edit.
+type redoFileChangeMsg struct{}
+
 // switchModelSuccessMsg represents a successful model change.
 type switchModelSuccessMsg struct {
 	Model string

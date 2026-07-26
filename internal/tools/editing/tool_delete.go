@@ -69,10 +69,26 @@ func (t *DeleteRangeTool) Run(ctx context.Context, call tools.Call) tools.Result
 		EndLine:   endLine,
 	}
 
+	beforeBytes, _ := os.ReadFile(file)
+
 	result, err := DeleteRange(ctx, opts)
 	if err != nil {
 		return tools.Result{Error: err}
 	}
 
-	return tools.Result{Output: result}
+	// Capture AfterContent
+	afterBytes, _ := os.ReadFile(file)
+
+	return tools.Result{
+		Output:       result,
+		FilesChanged: []string{file},
+		FileStates: []tools.FileState{
+			{
+				Path:          file,
+				BeforeContent: string(beforeBytes),
+				AfterContent:  string(afterBytes),
+				ChangeType:    "edit",
+			},
+		},
+	}
 }

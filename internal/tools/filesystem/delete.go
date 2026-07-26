@@ -37,8 +37,17 @@ func (t *DeleteTool) Run(ctx context.Context, call tools.Call) tools.Result {
 		return tools.Result{Error: os.ErrInvalid}
 	}
 
-	if _, err := os.Stat(path); err != nil {
+	info, err := os.Stat(path)
+	if err != nil {
 		return tools.Result{Error: err}
+	}
+
+	beforeContent := ""
+	if !info.IsDir() {
+		beforeBytes, err := os.ReadFile(path)
+		if err == nil {
+			beforeContent = string(beforeBytes)
+		}
 	}
 
 	if err := os.RemoveAll(path); err != nil {
@@ -46,6 +55,15 @@ func (t *DeleteTool) Run(ctx context.Context, call tools.Call) tools.Result {
 	}
 
 	return tools.Result{
-		Output: fmt.Sprintf("Deleted %q", path),
+		Output:       fmt.Sprintf("Deleted %q", path),
+		FilesChanged: []string{path},
+		FileStates: []tools.FileState{
+			{
+				Path:          path,
+				BeforeContent: beforeContent,
+				AfterContent:  "",
+				ChangeType:    "delete",
+			},
+		},
 	}
 }

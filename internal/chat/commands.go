@@ -28,6 +28,8 @@ var Registry = []Command{
 /help       Show available commands
 /new        Start a new conversation
 /sessions   Load a previous session
+/undo       Undo the last AI file edit
+/redo       Redo the last undone file edit
 /model      Change model
 /provider   Change provider
 /clear      Clear conversation
@@ -50,6 +52,24 @@ var Registry = []Command{
 		Description: "Load a previous session",
 		Execute: func(m *Model) tea.Cmd {
 			return selectSessionCmd(m)
+		},
+	},
+	{
+		Name:        "/undo",
+		Description: "Undo the last AI file edit",
+		Execute: func(m *Model) tea.Cmd {
+			return func() tea.Msg {
+				return undoFileChangeMsg{}
+			}
+		},
+	},
+	{
+		Name:        "/redo",
+		Description: "Redo the last undone file edit",
+		Execute: func(m *Model) tea.Cmd {
+			return func() tea.Msg {
+				return redoFileChangeMsg{}
+			}
 		},
 	},
 	{
