@@ -45,7 +45,7 @@ var providerCmd = &cobra.Command{
 		modelOpt, err := selector.Run(
 			fmt.Sprintf("Select Model for %s", value),
 			"Choose the active model for this provider:",
-			config.GetModelOptions(value, ollamaBaseURL),
+			cfg.GetModelOptions(value, ollamaBaseURL),
 		)
 		if err != nil {
 			log.Fatal(err)
@@ -57,6 +57,7 @@ var providerCmd = &cobra.Command{
 				log.Fatal(err)
 			}
 			modelValue = customVal
+			cfg.AddCustomModel(value, modelValue)
 		}
 
 		if err := cfg.SetModel(value, modelValue); err != nil {

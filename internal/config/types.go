@@ -2,10 +2,11 @@ package config
 
 // Config represents the complete WindMist configuration.
 type Config struct {
-	AI        AIConfig                  `yaml:"ai"`
-	Providers map[string]ProviderConfig `yaml:"providers"`
-	UI        UIConfig                  `yaml:"ui"`
-	Cache     CacheConfig               `yaml:"cache"`
+	AI           AIConfig                  `yaml:"ai"`
+	Providers    map[string]ProviderConfig `yaml:"providers"`
+	UI           UIConfig                  `yaml:"ui"`
+	Cache        CacheConfig               `yaml:"cache"`
+	CustomModels map[string][]string       `yaml:"custom_models,omitempty"`
 }
 
 // AIConfig stores the active AI provider.

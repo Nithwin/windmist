@@ -129,3 +129,17 @@ func (c *Config) SetBaseURL(providerName, baseURL string) error {
 func (c *Config) SetTheme(theme string) {
 	c.UI.Theme = theme
 }
+
+// AddCustomModel adds a new custom model to a provider if it doesn't already exist.
+func (c *Config) AddCustomModel(providerName, model string) {
+	if c.CustomModels == nil {
+		c.CustomModels = make(map[string][]string)
+	}
+
+	for _, m := range c.CustomModels[providerName] {
+		if m == model {
+			return // already exists
+		}
+	}
+	c.CustomModels[providerName] = append(c.CustomModels[providerName], model)
+}
