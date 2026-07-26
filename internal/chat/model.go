@@ -79,7 +79,7 @@ func New() (Model, error) {
 			ResponseChan: ch,
 		})
 		return <-ch
-	})
+	}, cfg)
 	dbStore, err := store.NewStore()
 	if err != nil {
 		return Model{}, fmt.Errorf("failed to initialize db store: %w", err)
