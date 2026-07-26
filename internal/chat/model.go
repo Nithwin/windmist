@@ -1,6 +1,8 @@
 package chat
 
 import (
+	"fmt"
+
 	"github.com/Nithwin/WindMist/internal/agent"
 	"github.com/Nithwin/WindMist/internal/ai"
 	"github.com/Nithwin/WindMist/internal/config"
@@ -46,15 +48,15 @@ type Model struct {
 }
 
 // New creates a new Bubble Tea model.
-func New() Model {
+func New() (Model, error) {
 	cfg, err := config.Load()
 	if err != nil {
-		panic(err)
+		return Model{}, fmt.Errorf("failed to load configuration: %w", err)
 	}
 
 	provider, err := ai.New(cfg)
 	if err != nil {
-		panic(err)
+		return Model{}, fmt.Errorf("failed to initialize AI provider: %w", err)
 	}
 
 	manager := tools.NewManager()
@@ -73,7 +75,7 @@ func New() Model {
 
 	renderer, err := ui.NewMarkdownRenderer()
 	if err != nil {
-		panic(err)
+		return Model{}, fmt.Errorf("failed to initialize markdown renderer: %w", err)
 	}
 
 	ta := textarea.New()
@@ -118,7 +120,7 @@ func New() Model {
 		viewport: vp,
 
 		markdown: renderer,
-	}
+	}, nil
 }
 
 // Init initializes the application.
