@@ -7,6 +7,8 @@ import (
 	"strings"
 	"os"
 
+	"time"
+
 	"github.com/pmezard/go-difflib/difflib"
 	"github.com/Nithwin/WindMist/internal/ai"
 	"github.com/Nithwin/WindMist/internal/store"
@@ -17,6 +19,13 @@ import (
 func (a *Agent) execute(ctx context.Context, calls []ai.ToolCall, onChunk func(string)) []ai.ToolResult {
 	results := make([]ai.ToolResult, len(calls))
 	var wg sync.WaitGroup
+	
+	batchID := fmt.Sprintf("batch_%d", time.Now().UnixNano())
+	
+	// Clear redo history when a new edit is made
+	if a.config.Store != nil && a.config.SessionID != "" {
+		_ = a.config.Store.ClearRedoHistory(a.config.SessionID)
+	}
 
 	for i, call := range calls {
 		wg.Add(1)
@@ -75,6 +84,7 @@ func (a *Agent) execute(ctx context.Context, calls []ai.ToolCall, onChunk func(s
 					if a.config.Store != nil && a.config.SessionID != "" {
 						_ = a.config.Store.SaveFileChange(&store.FileChange{
 							SessionID:     a.config.SessionID,
+							BatchID:       batchID,
 							FilePath:      state.Path,
 							ChangeType:    state.ChangeType,
 							BeforeContent: state.BeforeContent,

@@ -76,20 +76,24 @@ func (m Model) handleEventMsg(msg tea.Msg) (Model, tea.Cmd) {
 			return m, nil
 		}
 
-		change, err := m.store.GetLastFileChange(m.session.ID)
-		if err != nil {
+		changes, err := m.store.GetLastBatchForUndo(m.session.ID)
+		if err != nil || len(changes) == 0 {
 			m.conversation.AddAssistant("❌ No file changes found to undo.")
 			m.refreshViewport()
 			return m, nil
 		}
 
-		if change.ChangeType == "create" {
-			_ = os.Remove(change.FilePath)
-		} else {
-			_ = os.WriteFile(change.FilePath, []byte(change.BeforeContent), 0644)
+		for _, change := range changes {
+			if change.ChangeType == "create" {
+				_ = os.Remove(change.FilePath)
+			} else {
+				_ = os.WriteFile(change.FilePath, []byte(change.BeforeContent), 0644)
+			}
 		}
 
-		m.conversation.AddAssistant(fmt.Sprintf("⏮️ **Undid edit** to `%s`", change.FilePath))
+		_ = m.store.SetBatchUndoneState(m.session.ID, changes[0].BatchID, true)
+
+		m.conversation.AddAssistant(fmt.Sprintf("⏮️ **Undid %d file edit(s)**", len(changes)))
 		m.refreshViewport()
 		return m, nil
 
@@ -100,20 +104,24 @@ func (m Model) handleEventMsg(msg tea.Msg) (Model, tea.Cmd) {
 			return m, nil
 		}
 
-		change, err := m.store.GetLastFileChange(m.session.ID)
-		if err != nil {
+		changes, err := m.store.GetNextBatchForRedo(m.session.ID)
+		if err != nil || len(changes) == 0 {
 			m.conversation.AddAssistant("❌ No file changes found to redo.")
 			m.refreshViewport()
 			return m, nil
 		}
 
-		if change.ChangeType == "delete" {
-			_ = os.Remove(change.FilePath)
-		} else {
-			_ = os.WriteFile(change.FilePath, []byte(change.AfterContent), 0644)
+		for _, change := range changes {
+			if change.ChangeType == "delete" {
+				_ = os.Remove(change.FilePath)
+			} else {
+				_ = os.WriteFile(change.FilePath, []byte(change.AfterContent), 0644)
+			}
 		}
+		
+		_ = m.store.SetBatchUndoneState(m.session.ID, changes[0].BatchID, false)
 
-		m.conversation.AddAssistant(fmt.Sprintf("⏭️ **Redid edit** to `%s`", change.FilePath))
+		m.conversation.AddAssistant(fmt.Sprintf("⏭️ **Redid %d file edit(s)**", len(changes)))
 		m.refreshViewport()
 		return m, nil
 
