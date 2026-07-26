@@ -4,13 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/Nithwin/WindMist/internal/ai"
 )
 
-// sendMessage starts running the agent request.
 func (m Model) sendMessage(ctx context.Context, prompt string) {
 	go func() {
+		startTime := time.Now()
 		initialMessages := m.getInitialMessages()
 		res, err := m.agent.Run(ctx, initialMessages, prompt, func(s string) {
 			program.Send(StreamingMsg{
@@ -26,10 +27,14 @@ func (m Model) sendMessage(ctx context.Context, prompt string) {
 			return
 		}
 
+		duration := time.Since(startTime)
+		
 		// Agent loop completed
 		program.Send(StreamingMsg{
-			Text: "\n\n(Finished in " + fmt.Sprintf("%d turns", res.Turns) + ")",
-			Done: true,
+			Text:     "\n\n(Finished in " + fmt.Sprintf("%d turns", res.Turns) + ")",
+			Done:     true,
+			Usage:    res.Usage,
+			Duration: duration,
 		})
 	}()
 }
