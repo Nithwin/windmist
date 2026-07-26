@@ -143,3 +143,44 @@ func (c *Config) AddCustomModel(providerName, model string) {
 	}
 	c.CustomModels[providerName] = append(c.CustomModels[providerName], model)
 }
+
+// ActiveSubAgentProvider returns the provider to use for sub-agents.
+// If the user hasn't explicitly set one, it falls back to the main AI provider.
+func (c *Config) ActiveSubAgentProvider() string {
+	if c.SubAgent.Provider != "" {
+		return c.SubAgent.Provider
+	}
+	return c.AI.Provider
+}
+
+// ActiveSubAgentModel returns the model to use for sub-agents.
+// If the user hasn't explicitly set one, it attempts to use a fast default for the active provider.
+// If no fast default exists, it falls back to the main AI model.
+func (c *Config) ActiveSubAgentModel() string {
+	if c.SubAgent.Model != "" {
+		return c.SubAgent.Model
+	}
+
+	provider := c.ActiveSubAgentProvider()
+
+	// Hardcoded cheap/fast models for known providers
+	switch provider {
+	case "openai":
+		return "gpt-4o-mini"
+	case "anthropic":
+		return "claude-3-5-haiku-latest"
+	case "gemini":
+		return "gemini-2.5-flash"
+	case "groq":
+		return "llama-3.1-8b-instant"
+	}
+
+	// Fallback to the main model if using the main provider
+	if provider == c.AI.Provider {
+		if m, err := c.ActiveModel(); err == nil {
+			return m
+		}
+	}
+
+	return ""
+}

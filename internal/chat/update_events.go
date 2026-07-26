@@ -173,7 +173,7 @@ func (m Model) handleEventMsg(msg tea.Msg) (Model, tea.Cmd) {
 				ch := make(chan bool)
 				program.Send(ApprovalRequestMsg{Command: cmd, ResponseChan: ch})
 				return <-ch
-			})
+			}, m.cfg)
 			m.agent = agent.New(provider, manager, agent.Config{})
 		}
 
@@ -197,7 +197,7 @@ func (m Model) handleEventMsg(msg tea.Msg) (Model, tea.Cmd) {
 				ch := make(chan bool)
 				program.Send(ApprovalRequestMsg{Command: cmd, ResponseChan: ch})
 				return <-ch
-			})
+			}, m.cfg)
 			m.agent = agent.New(provider, manager, agent.Config{})
 		}
 

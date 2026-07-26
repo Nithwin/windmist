@@ -52,7 +52,7 @@ var chatCmd = &cobra.Command{
 			var ans string
 			fmt.Scanln(&ans)
 			return ans == "y" || ans == "Y"
-		})
+		}, cfg)
 
 		ag := agent.New(provider, manager, agent.Config{})
 

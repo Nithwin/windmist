@@ -1,6 +1,7 @@
 package defaults
 
 import (
+	"github.com/Nithwin/WindMist/internal/config"
 	"github.com/Nithwin/WindMist/internal/tools"
 	"github.com/Nithwin/WindMist/internal/tools/agent"
 	"github.com/Nithwin/WindMist/internal/tools/editing"
@@ -10,7 +11,7 @@ import (
 )
 
 // RegisterAll registers all built-in filesystem and editing tools onto the manager.
-func RegisterAll(m *tools.Manager, approvalCb system.ApprovalCallback) {
+func RegisterAll(m *tools.Manager, approvalCb system.ApprovalCallback, cfg *config.Config) {
 	if m == nil {
 		return
 	}
@@ -47,4 +48,7 @@ func RegisterAll(m *tools.Manager, approvalCb system.ApprovalCallback) {
 
 	// Agent tools
 	m.Register(agent.NewTodoTool())
+	if cfg != nil {
+		m.Register(agent.NewSubAgentTool(cfg))
+	}
 }
