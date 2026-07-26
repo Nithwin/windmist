@@ -3,6 +3,7 @@ package agent
 import (
 	"context"
 	"fmt"
+	"sync"
 
 	"github.com/Nithwin/WindMist/internal/ai"
 	"github.com/Nithwin/WindMist/internal/tools"
@@ -10,54 +11,61 @@ import (
 
 // execute runs a slice of tool calls against the tool manager and returns their results.
 func (a *Agent) execute(ctx context.Context, calls []ai.ToolCall, onChunk func(string)) []ai.ToolResult {
-	results := make([]ai.ToolResult, 0, len(calls))
+	results := make([]ai.ToolResult, len(calls))
+	var wg sync.WaitGroup
 
-	for _, call := range calls {
-		tool, ok := a.manager.Get(call.Name)
-		if !ok {
-			results = append(results, ai.ToolResult{
+	for i, call := range calls {
+		wg.Add(1)
+		go func(i int, call ai.ToolCall) {
+			defer wg.Done()
+
+			tool, ok := a.manager.Get(call.Name)
+			if !ok {
+				results[i] = ai.ToolResult{
+					ID:      call.ID,
+					Name:    call.Name,
+					Content: fmt.Sprintf("error: tool %q not found or not registered", call.Name),
+					IsError: true,
+				}
+				return
+			}
+
+			if onChunk != nil {
+				onChunk(fmt.Sprintf("\n\n> ⏳ **Executing tool**: `%s`...", call.Name))
+			}
+
+			// Execute the tool.
+			res := tool.Run(ctx, tools.Call{
+				Name: call.Name,
+				Args: call.Args,
+			})
+
+			if onChunk != nil {
+				onChunk(fmt.Sprintf(" ✅ Done (`%s`).\n\n", call.Name))
+			}
+
+			content := ""
+			isError := false
+
+			if res.Error != nil {
+				content = fmt.Sprintf("error executing tool %s: %v", call.Name, res.Error)
+				isError = true
+			} else if res.Output != nil {
+				content = fmt.Sprintf("%v", res.Output)
+			} else {
+				content = "success"
+			}
+
+			results[i] = ai.ToolResult{
 				ID:      call.ID,
 				Name:    call.Name,
-				Content: fmt.Sprintf("error: tool %q not found or not registered", call.Name),
-				IsError: true,
-			})
-			continue
-		}
-
-		if onChunk != nil {
-			onChunk(fmt.Sprintf("\n\n> ⏳ **Executing tool**: `%s`...", call.Name))
-		}
-
-		// Execute the tool.
-		res := tool.Run(ctx, tools.Call{
-			Name: call.Name,
-			Args: call.Args,
-		})
-
-		if onChunk != nil {
-			onChunk(" ✅ Done.\n\n")
-		}
-
-		content := ""
-		isError := false
-
-		if res.Error != nil {
-			content = fmt.Sprintf("error executing tool %s: %v", call.Name, res.Error)
-			isError = true
-		} else if res.Output != nil {
-			content = fmt.Sprintf("%v", res.Output)
-		} else {
-			content = "success"
-		}
-
-		results = append(results, ai.ToolResult{
-			ID:      call.ID,
-			Name:    call.Name,
-			Content: content,
-			IsError: isError,
-		})
+				Content: content,
+				IsError: isError,
+			}
+		}(i, call)
 	}
 
+	wg.Wait()
 	return results
 }
 
