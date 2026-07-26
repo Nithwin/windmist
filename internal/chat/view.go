@@ -30,13 +30,13 @@ func (m Model) View() string {
 	}
 
 	if m.waitingApproval {
-		approvalBox := ui.BaseStyle.Copy().
+		approvalBox := ui.BaseStyle.
 			Border(lipgloss.RoundedBorder()).
 			BorderForeground(lipgloss.Color("220")).
 			Padding(1, 2).
 			Render(
-				ui.BaseStyle.Copy().Foreground(lipgloss.Color("220")).Bold(true).Render(fmt.Sprintf("⚠️ Agent wants to run: %s", m.approvalCommand)) + "\n\n" +
-					ui.BaseStyle.Copy().Render("Allow execution? (y/N)"),
+				ui.BaseStyle.Foreground(lipgloss.Color("220")).Bold(true).Render(fmt.Sprintf("⚠️ Agent wants to run: %s", m.approvalCommand)) + "\n\n" +
+					ui.BaseStyle.Render("Allow execution? (y/N)"),
 			)
 		b.WriteString(approvalBox)
 		b.WriteString("\n")
@@ -45,7 +45,7 @@ func (m Model) View() string {
 		promptLabel := lipgloss.JoinHorizontal(
 			lipgloss.Center,
 			ui.PromptStyle.Render(" user"),
-			ui.BaseStyle.Copy().Foreground(ui.Muted).Render("  ›  "),
+			ui.BaseStyle.Foreground(ui.Muted).Render("  ›  "),
 		)
 
 		inputRow := lipgloss.JoinHorizontal(

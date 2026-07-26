@@ -15,9 +15,9 @@ func renderConversation(m Model) string {
 		lipgloss.Left,
 		ui.AssistantLabelStyle.Render("🌀 WindMist v0.5 is ready"),
 		ui.MutedStyle.Render("Type a message below, or try:"),
-		ui.BaseStyle.Copy().Render(""),
-		ui.BaseStyle.Copy().Render("  "+ui.LabelStyle.Render("/help")+"  "+ui.MutedLightStyle.Render("→  show all commands")),
-		ui.BaseStyle.Copy().Render("  "+ui.LabelStyle.Render("/exit")+"  "+ui.MutedLightStyle.Render("→  quit")),
+		ui.BaseStyle.Render(""),
+		ui.BaseStyle.Render("  "+ui.LabelStyle.Render("/help")+"  "+ui.MutedLightStyle.Render("→  show all commands")),
+		ui.BaseStyle.Render("  "+ui.LabelStyle.Render("/exit")+"  "+ui.MutedLightStyle.Render("→  quit")),
 	)
 	b.WriteString(hint)
 	b.WriteString("\n\n")
@@ -39,15 +39,15 @@ func renderConversation(m Model) string {
 		case "user":
 			label := ui.UserLabelStyle.Render("  you")
 			b.WriteString(label)
-			b.WriteString(ui.BaseStyle.Copy().Render("\n"))
+			b.WriteString(ui.BaseStyle.Render("\n"))
 			content := ui.UserBubbleStyle.Width(maxWidth).Render(msg.Content)
 			b.WriteString(content)
-			b.WriteString(ui.BaseStyle.Copy().Render("\n"))
+			b.WriteString(ui.BaseStyle.Render("\n"))
 
 		case "assistant":
 			label := ui.AssistantLabelStyle.Render("🌀 WindMist v0.5")
 			b.WriteString(label)
-			b.WriteString(ui.BaseStyle.Copy().Render("\n"))
+			b.WriteString(ui.BaseStyle.Render("\n"))
 			contentStr := msg.Content
 			if contentStr == "" && m.loading && i == len(m.conversation.Messages)-1 {
 				contentStr = ui.MutedStyle.Render("Thinking...")
@@ -57,13 +57,13 @@ func renderConversation(m Model) string {
 				contentStr = ui.AssistantBubbleStyle.Render(rendered)
 			}
 			b.WriteString(contentStr)
-			b.WriteString(ui.BaseStyle.Copy().Render("\n"))
+			b.WriteString(ui.BaseStyle.Render("\n"))
 		}
 
 		// subtle divider between exchanges (not after last msg)
 		if i < len(m.conversation.Messages)-1 {
 			b.WriteString(divider)
-			b.WriteString(ui.BaseStyle.Copy().Render("\n"))
+			b.WriteString(ui.BaseStyle.Render("\n"))
 		}
 	}
 
