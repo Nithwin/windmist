@@ -4,6 +4,8 @@ import (
 	"time"
 
 	"github.com/Nithwin/WindMist/internal/ai"
+	"github.com/Nithwin/WindMist/internal/ui/selector"
+	tea "github.com/charmbracelet/bubbletea"
 )
 
 // ResponseMsg is sent when the AI finishes generating a response.
@@ -91,4 +93,19 @@ type ApprovalRequestMsg struct {
 // WorkspaceFilesMsg contains the list of files found in the workspace
 type WorkspaceFilesMsg struct {
 	Files []string
+}
+
+// showInlineSelectorMsg tells the UI to show an inline list selector.
+type showInlineSelectorMsg struct {
+	Title    string
+	Options  []selector.Option
+	OnSelect func(selector.Option) tea.Cmd
+	OnCancel func() tea.Cmd
+}
+
+// showInlinePromptMsg tells the UI to show an inline text input prompt.
+type showInlinePromptMsg struct {
+	Prompt     string
+	IsPassword bool
+	OnSubmit   func(string) tea.Cmd
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"strings"
 
+	"github.com/Nithwin/WindMist/internal/ui/selector"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -166,10 +167,49 @@ func (m Model) handleKeyMsg(msg tea.KeyMsg) (Model, tea.Cmd) {
 		}
 	}
 
+	// Handle Inline Prompt escape
+	if m.onPromptSubmit != nil && msg.String() == "esc" {
+		m.onPromptSubmit = nil
+		m.inlinePrompt = ""
+		m.isPassword = false
+		m.input.SetValue("")
+		return m, nil
+	}
+
+	// Handle Inline Selector keys
+	if m.showSelector {
+		switch msg.String() {
+		case "esc", "ctrl+c":
+			m.showSelector = false
+			if m.onCancel != nil {
+				return m, m.onCancel()
+			}
+			return m, nil
+		case "enter":
+			m.showSelector = false
+			if i, ok := m.selectorList.SelectedItem().(selector.Option); ok {
+				if m.onSelect != nil {
+					return m, m.onSelect(i)
+				}
+			}
+			return m, nil
+		}
+	}
+
 	switch msg.String() {
 
 	case "enter":
 		prompt := strings.TrimSpace(m.input.Value())
+
+		// Execute inline prompt submit
+		if m.onPromptSubmit != nil {
+			m.input.SetValue("")
+			cmd := m.onPromptSubmit(prompt)
+			m.onPromptSubmit = nil
+			m.inlinePrompt = ""
+			m.isPassword = false
+			return m, cmd
+		}
 
 		if prompt == "" {
 			return m, nil
@@ -204,7 +244,7 @@ func (m Model) handleKeyMsg(msg tea.KeyMsg) (Model, tea.Cmd) {
 				m.input.SetValue(newValue)
 				m.input.CursorEnd()
 			}
-			
+
 			// Don't send the message yet
 			return m, nil
 		}
@@ -248,7 +288,7 @@ func (m Model) handleKeyMsg(msg tea.KeyMsg) (Model, tea.Cmd) {
 
 	var cmd tea.Cmd
 	m.input, cmd = m.input.Update(msg)
-	
+
 	// Update slash command suggestions (check first line only).
 	value := m.input.Value()
 	firstLine := strings.SplitN(value, "\n", 2)[0]
@@ -261,7 +301,7 @@ func (m Model) handleKeyMsg(msg tea.KeyMsg) (Model, tea.Cmd) {
 		m.showCommands = false
 		m.filteredCommands = nil
 		m.selectedCommand = 0
-		
+
 		// Check for file picker trigger (@) anywhere in the text
 		// Don't trigger if there's a trailing space
 		if strings.HasSuffix(value, " ") || strings.HasSuffix(value, "\n") {
@@ -285,6 +325,6 @@ func (m Model) handleKeyMsg(msg tea.KeyMsg) (Model, tea.Cmd) {
 		}
 	}
 	m.updateViewportSize()
-	
+
 	return m, cmd
 }

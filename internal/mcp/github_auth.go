@@ -24,7 +24,7 @@ type AccessTokenResponse struct {
 }
 
 // PerformGithubOAuth starts the device authorization flow and polls until the user approves.
-func PerformGithubOAuth() (string, error) {
+func PerformGithubOAuth(onDeviceCode func(uri, code string)) (string, error) {
 	// 1. Request device code
 	reqBody := []byte(fmt.Sprintf("client_id=%s&scope=repo read:org", GithubClientID))
 	req, err := http.NewRequest("POST", "https://github.com/login/device/code", bytes.NewBuffer(reqBody))
@@ -51,11 +51,10 @@ func PerformGithubOAuth() (string, error) {
 		return "", fmt.Errorf("invalid response from GitHub")
 	}
 
-	// 2. Prompt user
-	fmt.Printf("\n🔒 GitHub Authentication Required\n")
-	fmt.Printf("1. Please open: %s\n", deviceRes.VerificationURI)
-	fmt.Printf("2. Enter the code: %s\n", deviceRes.UserCode)
-	fmt.Printf("\nWaiting for you to authorize (polling)... ")
+	// 2. Notify caller
+	if onDeviceCode != nil {
+		onDeviceCode(deviceRes.VerificationURI, deviceRes.UserCode)
+	}
 
 	// 3. Poll for access token
 	pollInterval := time.Duration(deviceRes.Interval) * time.Second
@@ -84,7 +83,6 @@ func PerformGithubOAuth() (string, error) {
 		_ = json.Unmarshal(tokenBody, &accessRes)
 
 		if accessRes.AccessToken != "" {
-			fmt.Printf("✅ Success!\n")
 			return accessRes.AccessToken, nil
 		}
 

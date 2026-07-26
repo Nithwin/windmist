@@ -31,7 +31,7 @@ func (m Model) handleEventMsg(msg tea.Msg) (Model, tea.Cmd) {
 		if m.store != nil {
 			_ = m.store.UpdateSession(m.session)
 		}
-		
+
 		// Update Agent config mode
 		m.agent = agent.New(m.provider, m.agent.Manager(), agent.Config{
 			Store:     m.store,
@@ -118,7 +118,7 @@ func (m Model) handleEventMsg(msg tea.Msg) (Model, tea.Cmd) {
 				_ = os.WriteFile(change.FilePath, []byte(change.AfterContent), 0644)
 			}
 		}
-		
+
 		_ = m.store.SetBatchUndoneState(m.session.ID, changes[0].BatchID, false)
 
 		m.conversation.AddAssistant(fmt.Sprintf("⏭️ **Redid %d file edit(s)**", len(changes)))
@@ -238,7 +238,7 @@ func (m Model) handleEventMsg(msg tea.Msg) (Model, tea.Cmd) {
 		} else {
 			m.conversation.AddAssistant(fmt.Sprintf("✨ Sub-Agent switched to **%s** (model: `%s`)", msg.Provider, msg.Model))
 		}
-		
+
 		m.refreshViewport()
 		m.loading = false
 		return m, nil

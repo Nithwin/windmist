@@ -46,7 +46,7 @@ func (m Model) sendMessage(ctx context.Context, prompt string) {
 		}
 
 		duration := time.Since(startTime)
-		
+
 		// Agent loop completed
 		program.Send(StreamingMsg{
 			Text:     "\n\n(Finished in " + fmt.Sprintf("%d turns", res.Turns) + ")",
