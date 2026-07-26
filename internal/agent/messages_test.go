@@ -7,31 +7,33 @@ import (
 )
 
 func TestPruneMessages(t *testing.T) {
-	// Case 1: History is smaller or equal to maxKeep + 1 -> Should not prune
+	// Case 1: History is smaller or equal to budget -> Should not prune
 	shortHistory := []ai.Message{
-		{Role: ai.RoleUser, Content: "Initial prompt"},
-		{Role: ai.RoleAssistant, Content: "Step 1"},
-		{Role: ai.RoleTool, Content: "Result 1"},
+		{Role: ai.RoleUser, Content: "Initial prompt"}, // 14/4 = 3 tokens
+		{Role: ai.RoleAssistant, Content: "Step 1"},    // 6/4 = 1 token
+		{Role: ai.RoleTool, Content: "Result 1"},       // 8/4 = 2 tokens
 	}
-	pruned := pruneMessages(shortHistory, 4)
+	pruned := pruneMessages(shortHistory, 100)
 	if len(pruned) != 3 {
 		t.Errorf("expected length 3, got %d", len(pruned))
 	}
 
-	// Case 2: History is large -> Should keep index 0 + last maxKeep messages
+	// Case 2: History is large -> Should keep index 0 + last fitting messages
 	longHistory := []ai.Message{
-		{Role: ai.RoleUser, Content: "Initial task goal"},     // index 0 (MUST BE KEPT)
-		{Role: ai.RoleAssistant, Content: "Turn 1 Assistant"}, // dropped
-		{Role: ai.RoleTool, Content: "Turn 1 Tool"},           // dropped
-		{Role: ai.RoleAssistant, Content: "Turn 2 Assistant"}, // dropped
-		{Role: ai.RoleTool, Content: "Turn 2 Tool"},           // dropped
-		{Role: ai.RoleAssistant, Content: "Turn 3 Assistant"}, // kept (last 4 starts here)
-		{Role: ai.RoleTool, Content: "Turn 3 Tool"},           // kept
-		{Role: ai.RoleAssistant, Content: "Turn 4 Assistant"}, // kept
-		{Role: ai.RoleTool, Content: "Turn 4 Tool"},           // kept
+		{Role: ai.RoleUser, Content: "Initial task goal"},     // 17/4 = 4 tokens (always kept)
+		{Role: ai.RoleAssistant, Content: "Turn 1 Assistant"}, // 16/4 = 4 tokens
+		{Role: ai.RoleTool, Content: "Turn 1 Tool"},           // 11/4 = 2 tokens
+		{Role: ai.RoleAssistant, Content: "Turn 2 Assistant"}, // 16/4 = 4 tokens
+		{Role: ai.RoleTool, Content: "Turn 2 Tool"},           // 11/4 = 2 tokens
+		{Role: ai.RoleAssistant, Content: "Turn 3 Assistant"}, // 16/4 = 4 tokens
+		{Role: ai.RoleTool, Content: "Turn 3 Tool"},           // 11/4 = 2 tokens
+		{Role: ai.RoleAssistant, Content: "Turn 4 Assistant"}, // 16/4 = 4 tokens
+		{Role: ai.RoleTool, Content: "Turn 4 Tool"},           // 11/4 = 2 tokens
 	}
 
-	prunedLong := pruneMessages(longHistory, 4)
+	// budget = 16 - 4 (first) = 12 tokens
+	// Turn 4 = 6 tokens, Turn 3 = 6 tokens. Both fit exactly (12 tokens).
+	prunedLong := pruneMessages(longHistory, 16)
 	if len(prunedLong) != 5 { // 1 initial + 4 recent = 5 total
 		t.Fatalf("expected 5 messages after pruning, got %d", len(prunedLong))
 	}
@@ -48,11 +50,18 @@ func TestPruneMessages(t *testing.T) {
 		t.Errorf("expected last kept message to be 'Turn 4 Tool', got %q", prunedLong[4].Content)
 	}
 
-	// Verify the preserved slice matches exact expected order
-	expectedRoles := []ai.Role{ai.RoleUser, ai.RoleAssistant, ai.RoleTool, ai.RoleAssistant, ai.RoleTool}
-	for i, msg := range prunedLong {
-		if msg.Role != expectedRoles[i] {
-			t.Errorf("at index %d: expected role %s, got %s", i, expectedRoles[i], msg.Role)
-		}
+	// Case 3: Dangling Tool Result
+	// budget = 14 - 4 (first) = 10 tokens
+	// Turn 4 = 6 tokens. Remaining budget = 4.
+	// Turn 3 Tool = 2 tokens. Remaining budget = 2.
+	// Turn 3 Assistant = 4 tokens. Exceeds budget (2 < 4)! Break.
+	// Keep list starts with "Turn 3 Tool", which is dangling. It should be stripped.
+	// Final expected: First message + Turn 4 = 3 messages.
+	prunedDangling := pruneMessages(longHistory, 14)
+	if len(prunedDangling) != 3 {
+		t.Fatalf("expected 3 messages after pruning dangling tool, got %d", len(prunedDangling))
+	}
+	if prunedDangling[1].Content != "Turn 4 Assistant" {
+		t.Errorf("expected dangling tool to be removed and start with 'Turn 4 Assistant', got %q", prunedDangling[1].Content)
 	}
 }

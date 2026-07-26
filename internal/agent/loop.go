@@ -19,7 +19,7 @@ func (a *Agent) runLoop(ctx context.Context, messages []ai.Message, userPrompt s
 			return nil, err
 		}
 
-		prunedHistory := pruneMessages(messages, 8)
+		prunedHistory := pruneMessages(messages, a.config.MaxContextTokens)
 
 		req := &ai.GenerateRequest{
 			System:   a.systemPrompt,
