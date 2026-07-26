@@ -31,12 +31,32 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if !m.showCommands {
 			switch msg.String() {
 
-			case "up":
+			case "ctrl+up", "shift+up":
 				m.viewport.ScrollUp(1)
 				return m, nil
 
-			case "down":
+			case "ctrl+down", "shift+down":
 				m.viewport.ScrollDown(1)
+				return m, nil
+
+			case "up":
+				if len(m.inputHistory) > 0 && m.historyIndex > 0 {
+					m.historyIndex--
+					m.input.SetValue(m.inputHistory[m.historyIndex])
+					m.input.CursorEnd()
+				}
+				return m, nil
+
+			case "down":
+				if len(m.inputHistory) > 0 && m.historyIndex < len(m.inputHistory) {
+					m.historyIndex++
+					if m.historyIndex == len(m.inputHistory) {
+						m.input.SetValue("")
+					} else {
+						m.input.SetValue(m.inputHistory[m.historyIndex])
+						m.input.CursorEnd()
+					}
+				}
 				return m, nil
 
 			case "pgup":
@@ -171,6 +191,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			// Execute typed slash command.
 			if strings.HasPrefix(prompt, "/") {
+				m.inputHistory = append(m.inputHistory, prompt)
+				m.historyIndex = len(m.inputHistory)
+
 				if command, ok := FindCommand(prompt); ok {
 					m.input.SetValue("")
 					return m, command.Execute(&m)
@@ -182,6 +205,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 			// Normal AI message.
+			m.inputHistory = append(m.inputHistory, prompt)
+			m.historyIndex = len(m.inputHistory)
+
 			m.conversation.AddUser(prompt)
 			m.refreshViewport()
 			m.loading = true

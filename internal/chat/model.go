@@ -25,7 +25,9 @@ type Model struct {
 
 	conversation Conversation
 
-	input textarea.Model
+	input        textarea.Model
+	inputHistory []string
+	historyIndex int
 
 	showSplash bool
 
@@ -108,6 +110,8 @@ func New() (Model, error) {
 		agent:        ag,
 		conversation: Conversation{},
 		input:        ta,
+		inputHistory: make([]string, 0),
+		historyIndex: 0,
 
 		showSplash: true,
 
