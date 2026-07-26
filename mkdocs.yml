@@ -1,0 +1,40 @@
+site_name: WindMist Documentation
+site_url: https://windmist.dev
+repo_url: https://github.com/Nithwin/WindMist
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: custom
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: custom
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - search.suggest
+    - search.highlight
+
+nav:
+  - Home: index.md
+  - Getting Started: getting-started.md
+  - Configuration: configuration.md
+  - Providers:
+    - OpenAI: providers/openai.md
+    - Anthropic: providers/anthropic.md
+    - Gemini: providers/gemini.md
+    - Ollama (Local): providers/ollama.md
+  - Features:
+    - Tools: tools.md
+    - Sub-Agents: agents.md
+    - RAG & Memory: memory.md
+    - MCP Servers: mcp.md
+  - FAQ: faq.md
+  - Troubleshooting: troubleshooting.md

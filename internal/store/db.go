@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/jmoiron/sqlx"
-	_ "github.com/mattn/go-sqlite3"
+	_ "modernc.org/sqlite"
 )
 
 var schema = `
@@ -70,7 +70,7 @@ func NewStore() (*Store, error) {
 	dbPath := filepath.Join(windmistDir, "sessions.db")
 
 	// Enable foreign keys
-	db, err := sqlx.Connect("sqlite3", dbPath+"?_fk=1")
+	db, err := sqlx.Connect("sqlite", dbPath+"?_pragma=foreign_keys(1)")
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to db: %w", err)
 	}
@@ -94,7 +94,7 @@ func (s *Store) Close() error {
 // NewStoreForTest creates a new Store with a specific path for testing
 func NewStoreForTest(dbPath string) (*Store, error) {
 	// Enable foreign keys
-	db, err := sqlx.Connect("sqlite3", dbPath+"?_fk=1")
+	db, err := sqlx.Connect("sqlite", dbPath+"?_pragma=foreign_keys(1)")
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to db: %w", err)
 	}

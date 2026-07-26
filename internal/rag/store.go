@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/jmoiron/sqlx"
-	_ "github.com/mattn/go-sqlite3"
+	_ "modernc.org/sqlite"
 )
 
 // DocumentStore manages the storage and retrieval of RAG chunks and vectors.
@@ -40,7 +40,7 @@ CREATE INDEX IF NOT EXISTS idx_rag_chunks_file_path ON rag_chunks(file_path);
 
 // NewDocumentStore creates or opens the RAG SQLite database.
 func NewDocumentStore(dbPath string) (*DocumentStore, error) {
-	db, err := sqlx.Connect("sqlite3", dbPath)
+	db, err := sqlx.Connect("sqlite", dbPath)
 	if err != nil {
 		return nil, fmt.Errorf("connect rag db: %w", err)
 	}

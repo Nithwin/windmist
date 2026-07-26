@@ -1,0 +1,33 @@
+{
+  "name": "windmist-cli",
+  "version": "2.0.0",
+  "description": "AI coding agent for the terminal",
+  "main": "index.js",
+  "bin": {
+    "windmist": "./bin/windmist"
+  },
+  "scripts": {
+    "postinstall": "node ./scripts/install.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nithwin/WindMist.git"
+  },
+  "keywords": [
+    "ai",
+    "cli",
+    "agent",
+    "coding"
+  ],
+  "author": "Nithwin",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Nithwin/WindMist/issues"
+  },
+  "homepage": "https://github.com/Nithwin/WindMist#readme",
+  "dependencies": {
+    "axios": "^1.6.8",
+    "tar": "^6.2.1",
+    "unzipper": "^0.10.14"
+  }
+}

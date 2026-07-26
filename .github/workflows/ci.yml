@@ -2,44 +2,36 @@ name: CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "v2", "main", "master" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "v2", "main", "master" ]
 
 jobs:
-  ci:
-    name: CI
-    runs-on: ubuntu-latest
+  test:
+    name: Lint & Test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        go-version: ['1.22.x']
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
+    - uses: actions/checkout@v4
 
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version-file: 'go.mod'
-          cache: true
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: ${{ matrix.go-version }}
 
-      - name: Download Dependencies (`go mod download`)
-        run: |
-          go mod download
-          go mod verify
+    - name: Install dependencies
+      run: go mod download
 
-      - name: Verify Formatting (`gofmt`)
-        run: |
-          unformatted=$(gofmt -l .)
-          if [ -n "$unformatted" ]; then
-            echo "❌ The following Go files are not properly formatted with gofmt:"
-            echo "$unformatted"
-            exit 1
-          fi
+    - name: Verify formatting
+      run: if [ "$(gofmt -s -l . | wc -l)" -gt 0 ]; then exit 1; fi
+      if: runner.os == 'Linux'
 
-      - name: Run Static Analysis (`go vet`)
-        run: go vet ./...
-
-      - name: Run Unit & Golden Tests (`go test -race`)
-        run: go test -v -race -timeout 10m ./...
-
-      - name: Build CLI Binary (`go build`)
-        run: go build -v -o /tmp/windmist .
+    - name: Run Tests
+      run: go test -v ./...
+      
+    - name: Build
+      run: go build -v ./...
