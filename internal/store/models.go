@@ -32,9 +32,11 @@ type FileChange struct {
 	ID            int       `db:"id"`
 	SessionID     string    `db:"session_id"`
 	MessageID     int       `db:"message_id"`
+	BatchID       string    `db:"batch_id"`
 	FilePath      string    `db:"file_path"`
 	ChangeType    string    `db:"change_type"` // create, edit, delete
 	BeforeContent string    `db:"before_content"`
 	AfterContent  string    `db:"after_content"`
+	Undone        bool      `db:"undone"`
 	CreatedAt     time.Time `db:"created_at"`
 }

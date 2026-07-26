@@ -10,6 +10,24 @@ import (
 )
 
 func (m Model) sendMessage(ctx context.Context, prompt string) {
+	// Auto-title the session if it's the first message
+	if m.session != nil && m.session.Title == "New Session" && m.store != nil {
+		go func() {
+			titleReq := &ai.GenerateRequest{
+				System: "You are an AI that creates extremely short, 2-4 word titles for chat sessions based on the user's first prompt. Do not use punctuation. Do not use quotes. Keep it lowercase.",
+				Messages: []ai.Message{
+					{Role: ai.RoleUser, Content: prompt},
+				},
+				MaxTokens: 20,
+			}
+			resp, err := m.provider.Generate(context.Background(), titleReq)
+			if err == nil && resp.Text != "" {
+				m.session.Title = resp.Text
+				_ = m.store.UpdateSession(m.session)
+			}
+		}()
+	}
+
 	go func() {
 		startTime := time.Now()
 		initialMessages := m.getInitialMessages()

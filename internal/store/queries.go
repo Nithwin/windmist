@@ -83,8 +83,8 @@ func (s *Store) SaveFileChange(change *FileChange) error {
 	change.CreatedAt = time.Now()
 
 	query := `
-		INSERT INTO file_changes (session_id, message_id, file_path, change_type, before_content, after_content, created_at)
-		VALUES (:session_id, :message_id, :file_path, :change_type, :before_content, :after_content, :created_at)
+		INSERT INTO file_changes (session_id, message_id, batch_id, file_path, change_type, before_content, after_content, undone, created_at)
+		VALUES (:session_id, :message_id, :batch_id, :file_path, :change_type, :before_content, :after_content, :undone, :created_at)
 	`
 	res, err := s.db.NamedExec(query, change)
 	if err != nil {
@@ -114,6 +114,44 @@ func (s *Store) GetLastFileChange(sessionID string) (*FileChange, error) {
 		return nil, err
 	}
 	return &change, nil
+}
+
+// GetLastBatchForUndo gets the most recent batch of changes that haven't been undone
+func (s *Store) GetLastBatchForUndo(sessionID string) ([]FileChange, error) {
+	var batchID string
+	err := s.db.Get(&batchID, "SELECT batch_id FROM file_changes WHERE session_id = ? AND undone = 0 ORDER BY id DESC LIMIT 1", sessionID)
+	if err != nil {
+		return nil, err
+	}
+	
+	var changes []FileChange
+	err = s.db.Select(&changes, "SELECT * FROM file_changes WHERE session_id = ? AND batch_id = ? ORDER BY id DESC", sessionID, batchID)
+	return changes, err
+}
+
+// GetNextBatchForRedo gets the oldest batch of changes that are currently undone
+func (s *Store) GetNextBatchForRedo(sessionID string) ([]FileChange, error) {
+	var batchID string
+	err := s.db.Get(&batchID, "SELECT batch_id FROM file_changes WHERE session_id = ? AND undone = 1 ORDER BY id ASC LIMIT 1", sessionID)
+	if err != nil {
+		return nil, err
+	}
+	
+	var changes []FileChange
+	err = s.db.Select(&changes, "SELECT * FROM file_changes WHERE session_id = ? AND batch_id = ? ORDER BY id ASC", sessionID, batchID)
+	return changes, err
+}
+
+// SetBatchUndoneState updates the undone status of a batch
+func (s *Store) SetBatchUndoneState(sessionID string, batchID string, undone bool) error {
+	_, err := s.db.Exec("UPDATE file_changes SET undone = ? WHERE session_id = ? AND batch_id = ?", undone, sessionID, batchID)
+	return err
+}
+
+// ClearRedoHistory removes all file changes that are currently undone for a session
+func (s *Store) ClearRedoHistory(sessionID string) error {
+	_, err := s.db.Exec("DELETE FROM file_changes WHERE session_id = ? AND undone = 1", sessionID)
+	return err
 }
 
 // DeleteSession completely deletes a session and all cascading data
