@@ -29,7 +29,11 @@ func renderHeader(m Model) string {
 		Foreground(ui.MutedLight).
 		Render(model)
 
-	right := providerTag + ui.BaseStyle.Render(" ") + ui.BaseStyle.Foreground(ui.Muted).Render("›") + ui.BaseStyle.Render(" ") + modelTag
+	themeTag := ui.BaseStyle.
+		Foreground(ui.Purple).
+		Render(ui.CurrentThemeName)
+
+	right := providerTag + ui.BaseStyle.Render(" ") + ui.BaseStyle.Foreground(ui.Muted).Render("›") + ui.BaseStyle.Render(" ") + modelTag + ui.BaseStyle.Render(" ") + ui.BaseStyle.Foreground(ui.Muted).Render("›") + ui.BaseStyle.Render(" ") + themeTag
 
 	// ── padded spacer fills remaining width ──────────────────────
 	const totalWidth = 78

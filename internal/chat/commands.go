@@ -404,7 +404,7 @@ func selectThemeCmd(m *Model) tea.Cmd {
 			})
 		}
 
-		opt, err := selector.Run("Select Theme", "Choose a UI theme:", options)
+		opt, err := selector.RunWithDefault("Select Theme", "Choose a UI theme:", options, ui.CurrentThemeName)
 		if err != nil {
 			return switchCancelMsg{}
 		}
