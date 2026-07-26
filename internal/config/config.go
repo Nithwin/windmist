@@ -6,23 +6,27 @@ import (
 )
 
 const (
-	EnvGeminiAPIKey    = "GEMINI_API_KEY"
-	EnvGroqAPIKey      = "GROQ_API_KEY"
-	EnvOpenAIAPIKey    = "OPENAI_API_KEY"
-	EnvAnthropicAPIKey = "ANTHROPIC_API_KEY"
-	EnvDeepSeekAPIKey  = "DEEPSEEK_API_KEY"
-	EnvMistralAPIKey   = "MISTRAL_API_KEY"
-	EnvMoonshotAPIKey  = "MOONSHOT_API_KEY"
+	EnvGeminiAPIKey     = "GEMINI_API_KEY"
+	EnvGroqAPIKey       = "GROQ_API_KEY"
+	EnvOpenAIAPIKey     = "OPENAI_API_KEY"
+	EnvAnthropicAPIKey  = "ANTHROPIC_API_KEY"
+	EnvDeepSeekAPIKey   = "DEEPSEEK_API_KEY"
+	EnvMistralAPIKey    = "MISTRAL_API_KEY"
+	EnvMoonshotAPIKey   = "MOONSHOT_API_KEY"
+	EnvPerplexityAPIKey = "PERPLEXITY_API_KEY"
+	EnvTogetherAPIKey   = "TOGETHER_API_KEY"
 )
 
 var envKeys = map[string]string{
-	"gemini":    EnvGeminiAPIKey,
-	"groq":      EnvGroqAPIKey,
-	"openai":    EnvOpenAIAPIKey,
-	"anthropic": EnvAnthropicAPIKey,
-	"deepseek":  EnvDeepSeekAPIKey,
-	"mistral":   EnvMistralAPIKey,
-	"kimi":      EnvMoonshotAPIKey,
+	"gemini":     EnvGeminiAPIKey,
+	"groq":       EnvGroqAPIKey,
+	"openai":     EnvOpenAIAPIKey,
+	"anthropic":  EnvAnthropicAPIKey,
+	"deepseek":   EnvDeepSeekAPIKey,
+	"mistral":    EnvMistralAPIKey,
+	"kimi":       EnvMoonshotAPIKey,
+	"perplexity": EnvPerplexityAPIKey,
+	"together":   EnvTogetherAPIKey,
 }
 
 // ActiveProvider returns the active provider configuration.

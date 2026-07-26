@@ -9,6 +9,8 @@ import (
 	_ "github.com/Nithwin/WindMist/internal/providers/mistral"
 	_ "github.com/Nithwin/WindMist/internal/providers/ollama"
 	_ "github.com/Nithwin/WindMist/internal/providers/openai"
+	_ "github.com/Nithwin/WindMist/internal/providers/perplexity"
+	_ "github.com/Nithwin/WindMist/internal/providers/together"
 
 	"github.com/Nithwin/WindMist/internal/chat"
 	"github.com/spf13/cobra"
