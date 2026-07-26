@@ -16,7 +16,7 @@ func renderBanner(m Model) string {
 ╚███╔███╔╝██║██║ ╚████║██████╔╝██║ ╚═╝ ██║██║███████║   ██║   
  ╚══╝╚══╝ ╚═╝╚═╝  ╚═══╝╚═════╝ ╚═╝     ╚═╝╚══════╝   ╚═╝`
 
-	cyanStyle := ui.BaseStyle.Foreground(ui.Cyan)
+	cyanStyle := ui.BaseStyle.Foreground(ui.BrandCyan)
 
 	b.WriteString(cyanStyle.Bold(true).Render(wordmark))
 	b.WriteString("\n")
