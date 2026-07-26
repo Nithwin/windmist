@@ -52,6 +52,11 @@ type switchModelSuccessMsg struct {
 	Model string
 }
 
+// switchThemeSuccessMsg represents a successful theme change.
+type switchThemeSuccessMsg struct {
+	Theme string
+}
+
 // switchCancelMsg represents a user cancellation of the menu.
 type switchCancelMsg struct{}
 

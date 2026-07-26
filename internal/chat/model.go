@@ -3,6 +3,7 @@ package chat
 import (
 	"context"
 	"fmt"
+	"path/filepath"
 	"time"
 
 	"github.com/Nithwin/WindMist/internal/agent"
@@ -62,6 +63,13 @@ func New() (Model, error) {
 	if err != nil {
 		return Model{}, fmt.Errorf("failed to load configuration: %w", err)
 	}
+
+	customDir := ""
+	cfgDir, err := config.ConfigDir()
+	if err == nil {
+		customDir = filepath.Join(cfgDir, "themes")
+	}
+	_ = ui.LoadTheme(cfg.UI.Theme, customDir)
 
 	provider, err := ai.New(cfg)
 	if err != nil {

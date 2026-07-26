@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/Nithwin/WindMist/internal/config"
+	"github.com/Nithwin/WindMist/internal/ui"
 	"github.com/Nithwin/WindMist/internal/ui/selector"
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -34,6 +35,7 @@ var Registry = []Command{
 /mode       Change agent mode
 /provider   Change provider
 /subagent   Configure sub-agent (cheaper background model)
+/theme      Change UI theme
 /exit       Exit WindMist`,
 			)
 			return nil
@@ -99,6 +101,13 @@ var Registry = []Command{
 		Description: "Configure sub-agent (cheaper background model)",
 		Execute: func(m *Model) tea.Cmd {
 			return selectSubagentCmd(m)
+		},
+	},
+	{
+		Name:        "/theme",
+		Description: "Change UI theme",
+		Execute: func(m *Model) tea.Cmd {
+			return selectThemeCmd(m)
 		},
 	},
 	{
@@ -373,4 +382,35 @@ func FindCommand(name string) (Command, bool) {
 	}
 
 	return Command{}, false
+}
+
+func selectThemeCmd(m *Model) tea.Cmd {
+	return func() tea.Msg {
+		if program == nil {
+			return switchErrorMsg{Err: fmt.Errorf("program instance not initialized")}
+		}
+
+		if err := program.ReleaseTerminal(); err != nil {
+			return switchErrorMsg{Err: fmt.Errorf("failed to release terminal: %w", err)}
+		}
+		defer program.RestoreTerminal()
+
+		themes := ui.AvailableThemes()
+		var options []selector.Option
+		for _, t := range themes {
+			options = append(options, selector.Option{
+				Label: t,
+				Value: t,
+			})
+		}
+
+		opt, err := selector.Run("Select Theme", "Choose a UI theme:", options)
+		if err != nil {
+			return switchCancelMsg{}
+		}
+
+		return switchThemeSuccessMsg{
+			Theme: opt.Value,
+		}
+	}
 }
