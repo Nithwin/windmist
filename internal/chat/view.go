@@ -26,6 +26,9 @@ func (m Model) View() string {
 		if m.showCommands {
 			b.WriteString(renderCommandPalette(m))
 			b.WriteString("\n")
+		} else if m.showFilePicker {
+			b.WriteString(renderFilePicker(m))
+			b.WriteString("\n")
 		}
 	}
 
