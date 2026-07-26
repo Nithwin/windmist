@@ -19,6 +19,7 @@ var (
 	Selection  = lipgloss.Color("#3B3551")
 
 	// ── Typography ──────────────────────────────────────────────────
+	BaseStyle       lipgloss.Style
 	TitleStyle      lipgloss.Style
 	SubtitleStyle   lipgloss.Style
 	LabelStyle      lipgloss.Style
@@ -46,60 +47,62 @@ func init() {
 
 // UpdateStyles re-evaluates all lipgloss styles based on the current color variables.
 func UpdateStyles() {
-	TitleStyle = lipgloss.NewStyle().
+	BaseStyle = lipgloss.NewStyle().Background(Surface)
+
+	TitleStyle = BaseStyle.
 		Bold(true).
 		Foreground(Purple)
 
-	SubtitleStyle = lipgloss.NewStyle().
+	SubtitleStyle = BaseStyle.
 		Bold(true).
 		Foreground(Green)
 
-	LabelStyle = lipgloss.NewStyle().
+	LabelStyle = BaseStyle.
 		Bold(true).
 		Foreground(Cyan)
 
-	MutedStyle = lipgloss.NewStyle().
+	MutedStyle = BaseStyle.
 		Foreground(Muted)
 
-	MutedLightStyle = lipgloss.NewStyle().
+	MutedLightStyle = BaseStyle.
 		Foreground(MutedLight)
 
-	PromptStyle = lipgloss.NewStyle().
+	PromptStyle = BaseStyle.
 		Bold(true).
 		Foreground(Amber)
 
-	SuccessStyle = lipgloss.NewStyle().
+	SuccessStyle = BaseStyle.
 		Foreground(Green)
 
-	ErrorStyle = lipgloss.NewStyle().
+	ErrorStyle = BaseStyle.
 		Bold(true).
 		Foreground(Red)
 
-	DividerStyle = lipgloss.NewStyle().
+	DividerStyle = BaseStyle.
 		Foreground(Border)
 
-	UserLabelStyle = lipgloss.NewStyle().
+	UserLabelStyle = BaseStyle.
 		Bold(true).
 		Foreground(Amber)
 
-	UserBubbleStyle = lipgloss.NewStyle().
+	UserBubbleStyle = BaseStyle.
 		Foreground(White).
 		PaddingLeft(2)
 
-	AssistantLabelStyle = lipgloss.NewStyle().
+	AssistantLabelStyle = BaseStyle.
 		Bold(true).
 		Foreground(Purple)
 
-	AssistantBubbleStyle = lipgloss.NewStyle().
+	AssistantBubbleStyle = BaseStyle.
 		Foreground(White).
 		PaddingLeft(2)
 
-	InputBoxStyle = lipgloss.NewStyle().
+	InputBoxStyle = BaseStyle.
 		Border(lipgloss.RoundedBorder()).
 		BorderForeground(Border).
 		Padding(0, 1)
 
-	InputBoxFocusStyle = lipgloss.NewStyle().
+	InputBoxFocusStyle = BaseStyle.
 		Border(lipgloss.RoundedBorder()).
 		BorderForeground(Purple).
 		Padding(0, 1)

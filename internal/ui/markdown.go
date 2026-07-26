@@ -1,12 +1,16 @@
 package ui
 
-import "github.com/charmbracelet/glamour"
+import (
+	"fmt"
+	"github.com/charmbracelet/glamour"
+)
 
 // windmistStyle is a minimal, clean Glamour style for WindMist.
 // Plain white text, bold headings, bordered code blocks, no flashy colors.
-var windmistStyle = []byte(`{
+var windmistStyleTemplate = `{
 	"document": {
-		"margin": 0
+		"margin": 0,
+		"background_color": "%s"
 	},
 	"block_quote": {
 		"indent": 2,
@@ -156,7 +160,12 @@ var windmistStyle = []byte(`{
 	},
 	"html_block": {},
 	"html_span": {}
-}`)
+}`
+
+func getGlamourStyle() []byte {
+	// Surface is a lipgloss.Color, which is a string holding the hex code
+	return []byte(fmt.Sprintf(windmistStyleTemplate, string(Surface)))
+}
 
 type MarkdownRenderer struct {
 	renderer *glamour.TermRenderer
@@ -164,7 +173,7 @@ type MarkdownRenderer struct {
 
 func NewMarkdownRenderer() (*MarkdownRenderer, error) {
 	r, err := glamour.NewTermRenderer(
-		glamour.WithStylesFromJSONBytes(windmistStyle),
+		glamour.WithStylesFromJSONBytes(getGlamourStyle()),
 		glamour.WithWordWrap(0),
 	)
 
@@ -198,7 +207,7 @@ func (m *MarkdownRenderer) RenderWithWidth(text string, width int) string {
 		width = 120
 	}
 	r, err := glamour.NewTermRenderer(
-		glamour.WithStylesFromJSONBytes(windmistStyle),
+		glamour.WithStylesFromJSONBytes(getGlamourStyle()),
 		glamour.WithWordWrap(width),
 	)
 	if err != nil {

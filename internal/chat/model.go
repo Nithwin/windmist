@@ -16,7 +16,6 @@ import (
 	"github.com/charmbracelet/bubbles/textarea"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 )
 
 // Model represents the WindMist application.
@@ -182,7 +181,7 @@ func (m Model) MaxContentWidth() int {
 
 // UpdateInputStyles applies the current UI colors to the textarea input.
 func (m *Model) UpdateInputStyles() {
-	plain := lipgloss.NewStyle()
+	plain := ui.BaseStyle.Copy()
 	m.input.FocusedStyle.Base = plain.Foreground(ui.White)
 	m.input.FocusedStyle.CursorLine = plain.Foreground(ui.White)
 	m.input.FocusedStyle.Placeholder = plain.Foreground(ui.Muted)

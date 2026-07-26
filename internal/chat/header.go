@@ -15,24 +15,24 @@ func renderHeader(m Model) string {
 	}
 
 	// ── left: brand name ──────────────────────────────────────────
-	logo := lipgloss.NewStyle().
+	logo := ui.BaseStyle.Copy().
 		Bold(true).
 		Foreground(ui.Purple).
 		Render("🌀 WindMist v0.5")
 
 	// ── right: provider badge ────────────────────────────────────
-	providerTag := lipgloss.NewStyle().
+	providerTag := ui.BaseStyle.Copy().
 		Bold(true).
 		Foreground(ui.Cyan).
 		Render(m.cfg.AI.Provider)
 
-	modelTag := lipgloss.NewStyle().
+	modelTag := ui.BaseStyle.Copy().
 		Foreground(ui.MutedLight).
 		Render(model)
 
 	right := fmt.Sprintf("%s %s %s",
 		providerTag,
-		lipgloss.NewStyle().Foreground(ui.Muted).Render("›"),
+		ui.BaseStyle.Copy().Foreground(ui.Muted).Render("›"),
 		modelTag,
 	)
 
@@ -48,11 +48,11 @@ func renderHeader(m Model) string {
 	row := lipgloss.JoinHorizontal(
 		lipgloss.Center,
 		logo,
-		strings.Repeat(" ", gap),
+		ui.BaseStyle.Copy().Render(strings.Repeat(" ", gap)),
 		right,
 	)
 
-	box := lipgloss.NewStyle().
+	box := ui.BaseStyle.Copy().
 		Border(lipgloss.RoundedBorder()).
 		BorderForeground(ui.PurpleDark).
 		Padding(0, 1).
