@@ -55,7 +55,7 @@ func New(
 }
 
 // Run executes a single user request.
-func (a *Agent) Run(ctx context.Context, userPrompt string) (*Result, error) {
+func (a *Agent) Run(ctx context.Context, userPrompt string, onChunk func(string)) (*Result, error) {
 	messages := make([]ai.Message, 0, 8)
-	return a.runLoop(ctx, messages, userPrompt)
+	return a.runLoop(ctx, messages, userPrompt, onChunk)
 }

@@ -72,12 +72,11 @@ func (p *Provider) Generate(
 	return translateResponse(candidate, p.model, geminiResp), nil
 }
 
-// Stream streams a response from Gemini.
 func (p *Provider) Stream(
 	ctx context.Context,
 	req *ai.GenerateRequest,
 	onChunk func(string),
-) error {
+) (*ai.GenerateResponse, error) {
 
 	geminiReq := &GenerateContentRequest{
 		Contents: translateMessages(req.Messages),
@@ -101,22 +100,45 @@ func (p *Provider) Stream(
 		}
 	}
 
-	return p.client.StreamContent(
+	finalResp := &ai.GenerateResponse{
+		Model: p.model,
+	}
+
+	err := p.client.StreamContent(
 		ctx,
 		geminiReq,
 		func(resp *GenerateContentResponse) {
-
 			if len(resp.Candidates) == 0 {
 				return
 			}
-
 			candidate := resp.Candidates[0]
-
 			if len(candidate.Content.Parts) == 0 {
 				return
 			}
 
-			onChunk(candidate.Content.Parts[0].Text)
+			translated := translateResponse(candidate, p.model, resp)
+
+			if translated.Text != "" {
+				finalResp.Text += translated.Text
+				if onChunk != nil {
+					onChunk(translated.Text)
+				}
+			}
+
+			if len(translated.ToolCalls) > 0 {
+				finalResp.ToolCalls = append(finalResp.ToolCalls, translated.ToolCalls...)
+			}
+
+			if translated.Finish != "" {
+				finalResp.Finish = translated.Finish
+			}
+
+			// Accumulate usage (Gemini sends total usage in chunks usually, we'll just take the latest)
+			if translated.Usage.TotalTokens > 0 {
+				finalResp.Usage = translated.Usage
+			}
 		},
 	)
+
+	return finalResp, err
 }

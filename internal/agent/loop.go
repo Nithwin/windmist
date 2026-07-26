@@ -7,7 +7,7 @@ import (
 )
 
 // runLoop executes the iterative reasoning and tool execution loop for the agent.
-func (a *Agent) runLoop(ctx context.Context, messages []ai.Message, userPrompt string) (*Result, error) {
+func (a *Agent) runLoop(ctx context.Context, messages []ai.Message, userPrompt string, onChunk func(string)) (*Result, error) {
 	if len(messages) == 0 {
 		messages = appendUser(messages, userPrompt)
 	}
@@ -27,7 +27,12 @@ func (a *Agent) runLoop(ctx context.Context, messages []ai.Message, userPrompt s
 			Tools:    a.toolDefinitions(),
 		}
 
-		resp, err := a.provider.Generate(ctx, req)
+		var resp *ai.GenerateResponse
+		var err error
+		
+		// Use stream only for the first turn (to show the user something is happening)
+		// Or always stream. Since we patched providers to return GenerateResponse, we can always Stream!
+		resp, err = a.provider.Stream(ctx, req, onChunk)
 		if err != nil {
 			return nil, err
 		}

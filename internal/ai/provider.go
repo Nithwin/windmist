@@ -13,5 +13,5 @@ type Provider interface {
 		ctx context.Context,
 		req *GenerateRequest,
 		onChunk func(string),
-	) error
+	) (*GenerateResponse, error)
 }
