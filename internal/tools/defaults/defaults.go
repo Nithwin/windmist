@@ -4,6 +4,7 @@ import (
 	"github.com/Nithwin/WindMist/internal/tools"
 	"github.com/Nithwin/WindMist/internal/tools/editing"
 	"github.com/Nithwin/WindMist/internal/tools/filesystem"
+	"github.com/Nithwin/WindMist/internal/tools/system"
 )
 
 // RegisterAll registers all built-in filesystem and editing tools onto the manager.
@@ -30,4 +31,7 @@ func RegisterAll(m *tools.Manager) {
 	m.Register(editing.NewReadContextTool())
 	m.Register(editing.NewInsertTextTool())
 	m.Register(editing.NewSearchTool())
+
+	// System tools
+	m.Register(system.NewCommandTool())
 }
