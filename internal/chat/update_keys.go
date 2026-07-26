@@ -80,6 +80,9 @@ func (m Model) handleKeyMsg(msg tea.KeyMsg) (Model, tea.Cmd) {
 				m.approvalChan <- false
 			}
 			m.waitingApproval = false
+			if m.agent != nil {
+				m.agent.Close()
+			}
 			return m, tea.Quit
 		}
 		// Block other inputs
@@ -94,6 +97,9 @@ func (m Model) handleKeyMsg(msg tea.KeyMsg) (Model, tea.Cmd) {
 			m.conversation.AddAssistant("\n\n*(Cancelled by user)*")
 			m.refreshViewport()
 			return m, nil
+		}
+		if m.agent != nil {
+			m.agent.Close()
 		}
 		return m, tea.Quit
 	}
