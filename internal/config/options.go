@@ -29,27 +29,27 @@ func GetProviderOptions() []selector.Option {
 	return []selector.Option{
 		{
 			Label:       "gemini",
-			Description: "Google Gemini — Fast, highly capable multimodal AI (Default)",
+			Desc: "Google Gemini — Fast, highly capable multimodal AI (Default)",
 			Value:       "gemini",
 		},
 		{
 			Label:       "openai",
-			Description: "OpenAI — Flagship models like GPT-4o, o1, o3-mini",
+			Desc: "OpenAI — Flagship models like GPT-4o, o1, o3-mini",
 			Value:       "openai",
 		},
 		{
 			Label:       "anthropic",
-			Description: "Anthropic — Claude 3.5 Sonnet, Haiku, Opus models",
+			Desc: "Anthropic — Claude 3.5 Sonnet, Haiku, Opus models",
 			Value:       "anthropic",
 		},
 		{
 			Label:       "groq",
-			Description: "Groq — Ultra-fast Llama 3 and Mixtral inference",
+			Desc: "Groq — Ultra-fast Llama 3 and Mixtral inference",
 			Value:       "groq",
 		},
 		{
 			Label:       "ollama",
-			Description: "Ollama — Run open-source models locally on your system",
+			Desc: "Ollama — Run open-source models locally on your system",
 			Value:       "ollama",
 		},
 	}
@@ -73,7 +73,7 @@ func (c *Config) GetModelOptions(providerName, ollamaBaseURL string) []selector.
 			for _, e := range entries {
 				options = append(options, selector.Option{
 					Label:       e.Label,
-					Description: e.Description,
+					Desc: e.Description,
 					Value:       e.Value,
 				})
 			}
@@ -85,7 +85,7 @@ func (c *Config) GetModelOptions(providerName, ollamaBaseURL string) []selector.
 		for _, m := range c.CustomModels[providerName] {
 			options = append(options, selector.Option{
 				Label:       fmt.Sprintf("%s (Custom)", m),
-				Description: "Saved custom model",
+				Desc: "Saved custom model",
 				Value:       m,
 			})
 		}
@@ -94,7 +94,7 @@ func (c *Config) GetModelOptions(providerName, ollamaBaseURL string) []selector.
 	// Always append custom model escape hatch
 	options = append(options, selector.Option{
 		Label:       "Custom model ID...",
-		Description: "Enter any model name or identifier manually",
+		Desc: "Enter any model name or identifier manually",
 		Value:       "__CUSTOM__",
 	})
 
@@ -107,7 +107,7 @@ func ensureOllamaReadyAndGetModels(baseURL string) []selector.Option {
 		return []selector.Option{
 			{
 				Label:       "❌ Ollama CLI not installed",
-				Description: "Please install Ollama from https://ollama.com first",
+				Desc: "Please install Ollama from https://ollama.com first",
 				Value:       "__CUSTOM__",
 			},
 		}
@@ -121,8 +121,8 @@ func ensureOllamaReadyAndGetModels(baseURL string) []selector.Option {
 			"Ollama Daemon Not Running",
 			fmt.Sprintf("Ollama server is offline at %s.\nWould you like WindMist to automatically start 'ollama serve' in the background?", baseURL),
 			[]selector.Option{
-				{Label: "Yes (Start 'ollama serve' right now and retry)", Description: "Launch Ollama background service automatically", Value: "yes"},
-				{Label: "No (Skip auto-start)", Description: "Enter model ID manually or start Ollama yourself later", Value: "no"},
+				{Label: "Yes (Start 'ollama serve' right now and retry)", Desc: "Launch Ollama background service automatically", Value: "yes"},
+				{Label: "No (Skip auto-start)", Desc: "Enter model ID manually or start Ollama yourself later", Value: "no"},
 			},
 		)
 		if runErr == nil && opt.Value == "yes" {
@@ -149,8 +149,8 @@ func ensureOllamaReadyAndGetModels(baseURL string) []selector.Option {
 			"No Local Models Downloaded",
 			"Ollama is running, but you have 0 models pulled to your system.\nWould you like WindMist to automatically pull 'qwen2.5:8b' right now?",
 			[]selector.Option{
-				{Label: "Yes (Run 'ollama pull qwen2.5:8b' right now)", Description: "Download recommended 8B local model (shows live progress)", Value: "yes"},
-				{Label: "No (Skip and pull later)", Description: "Enter model ID manually or run 'ollama pull' yourself", Value: "no"},
+				{Label: "Yes (Run 'ollama pull qwen2.5:8b' right now)", Desc: "Download recommended 8B local model (shows live progress)", Value: "yes"},
+				{Label: "No (Skip and pull later)", Desc: "Enter model ID manually or run 'ollama pull' yourself", Value: "no"},
 			},
 		)
 		if runErr == nil && opt.Value == "yes" {
@@ -175,7 +175,7 @@ func ensureOllamaReadyAndGetModels(baseURL string) []selector.Option {
 	return []selector.Option{
 		{
 			Label:       "⚠️ Ollama offline or empty",
-			Description: fmt.Sprintf("Run 'ollama serve' and 'ollama pull <model>' at %s", baseURL),
+			Desc: fmt.Sprintf("Run 'ollama serve' and 'ollama pull <model>' at %s", baseURL),
 			Value:       "__CUSTOM__",
 		},
 	}
@@ -236,7 +236,7 @@ func fetchOllamaModels(baseURL string) ([]selector.Option, error) {
 		}
 		options = append(options, selector.Option{
 			Label:       m.Name,
-			Description: desc,
+			Desc: desc,
 			Value:       m.Name,
 		})
 	}

@@ -263,6 +263,47 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		return m, nil
 
+	case switchSessionSuccessMsg:
+		sess, err := m.store.GetSession(msg.SessionID)
+		if err != nil {
+			m.conversation.AddAssistant(fmt.Sprintf("❌ Error loading session: %v", err))
+			m.refreshViewport()
+			return m, nil
+		}
+
+		m.session = sess
+		m.agent = agent.New(m.provider, m.agent.Manager(), agent.Config{
+			Store:     m.store,
+			SessionID: sess.ID,
+		})
+
+		m.conversation.Clear()
+		initialMessages := m.getInitialMessages()
+		for _, msg := range initialMessages {
+			if msg.Role == ai.RoleUser {
+				m.conversation.AddUser(msg.Content)
+			} else if msg.Role == ai.RoleAssistant {
+				content := msg.Content
+				if len(msg.ToolCalls) > 0 {
+					for _, tc := range msg.ToolCalls {
+						content += fmt.Sprintf("\n*(Tool Call: %s)*", tc.Name)
+					}
+				}
+				m.conversation.AddAssistant(content)
+			} else if msg.Role == ai.RoleTool {
+				content := ""
+				for _, tr := range msg.ToolResults {
+					content += fmt.Sprintf("\n*(Tool Result: %s)*", tr.Name)
+				}
+				m.conversation.AddAssistant(content)
+			}
+		}
+
+		m.conversation.AddAssistant(fmt.Sprintf("✨ Loaded session: **%s**", sess.Title))
+		m.refreshViewport()
+		m.loading = false
+		return m, nil
+
 	case switchProviderSuccessMsg:
 		m.cfg.SetProvider(msg.Provider)
 		m.cfg.SetModel(msg.Provider, msg.Model)

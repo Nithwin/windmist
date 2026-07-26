@@ -62,6 +62,11 @@ func New(
 	}
 }
 
+// Manager returns the tools manager associated with the agent.
+func (a *Agent) Manager() *tools.Manager {
+	return a.manager
+}
+
 // Run executes a single user request.
 func (a *Agent) Run(ctx context.Context, initialMessages []ai.Message, userPrompt string, onChunk func(string)) (*Result, error) {
 	if initialMessages == nil {
