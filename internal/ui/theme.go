@@ -136,16 +136,16 @@ var BuiltinThemes = map[string]Theme{
 	"windmist": {
 		Name: "windmist",
 		Colors: ThemeColors{
-			Background: "#0F172A", // Deep premium slate
+			Background: "#161122", // Deep Premium Amethyst
 			Foreground: "#F8FAFC", // Crisp white
-			Accent:     "#00E5FF", // Neon Cyan (Main)
-			Success:    "#00FF87", // Neon Spring Green
-			Error:      "#FF3366", // Neon Rose
-			Warning:    "#FF9900", // Neon Orange
-			Info:       "#D946EF", // Vibrant Fuchsia/Purple
-			Muted:      "#64748B", // Slate 500
-			Border:     "#1E293B", // Slate 800
-			Selection:  "#1E293B",
+			Accent:     "#00F0FF", // Neon Cyan (Main)
+			Success:    "#00FF9D", // Neon Mint
+			Error:      "#FF006A", // Neon Crimson
+			Warning:    "#FFB800", // Neon Gold
+			Info:       "#D946EF", // Vibrant Fuchsia
+			Muted:      "#6B6282", // Muted purple/gray
+			Border:     "#2D243F", // Deep purple border
+			Selection:  "#2D243F",
 		},
 	},
 }

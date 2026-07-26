@@ -102,3 +102,43 @@ func Run(title, description string, options []Option) (Option, error) {
 	return *m.selected, nil
 }
 
+// RunWithDefault displays an interactive arrow-key list and pre-selects the defaultValue.
+func RunWithDefault(title, description string, options []Option, defaultValue string) (Option, error) {
+	if len(options) == 0 {
+		return Option{}, fmt.Errorf("no options provided")
+	}
+
+	items := make([]list.Item, len(options))
+	selectedIndex := 0
+	for i, opt := range options {
+		items[i] = opt
+		if opt.Value == defaultValue {
+			selectedIndex = i
+		}
+	}
+
+	d := list.NewDefaultDelegate()
+	d.Styles.SelectedTitle = d.Styles.SelectedTitle.Foreground(ui.Cyan).BorderForeground(ui.Cyan)
+	d.Styles.SelectedDesc = d.Styles.SelectedDesc.Foreground(ui.Cyan).BorderForeground(ui.Cyan)
+
+	l := list.New(items, d, 80, 20)
+	l.Title = title
+	l.SetShowStatusBar(false)
+	l.SetFilteringEnabled(true)
+	l.Styles.Title = lipgloss.NewStyle().Background(ui.Purple).Foreground(ui.White).Padding(0, 1)
+	l.Select(selectedIndex)
+
+	p := tea.NewProgram(model{list: l}, tea.WithAltScreen())
+
+	finalModel, err := p.Run()
+	if err != nil {
+		return Option{}, fmt.Errorf("error running selector: %w", err)
+	}
+
+	m, ok := finalModel.(model)
+	if !ok || m.cancelled || m.selected == nil {
+		return Option{}, ErrCancelled
+	}
+
+	return *m.selected, nil
+}
