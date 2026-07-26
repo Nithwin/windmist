@@ -74,6 +74,9 @@ type mcpInstallSuccessMsg struct {
 // indexWorkspaceMsg triggers indexing of the codebase for RAG.
 type indexWorkspaceMsg struct{}
 
+// compactConversationMsg triggers manual summarization of the conversation context.
+type compactConversationMsg struct{}
+
 // setAPIKeySuccessMsg represents a successful API key update.
 type setAPIKeySuccessMsg struct {
 	Provider string

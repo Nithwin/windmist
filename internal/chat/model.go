@@ -71,6 +71,9 @@ type Model struct {
 	// RAG components
 	ragIndexer *rag.Indexer
 
+	// Memory components
+	summarizer *agent.Summarizer
+
 	// Inline Selector state
 	showSelector bool
 	selectorList list.Model
@@ -212,6 +215,7 @@ func New() (Model, error) {
 		markdown: renderer,
 
 		ragIndexer: ragIndexer,
+		summarizer: agent.NewSummarizer(provider, 8000),
 	}
 
 	model.UpdateInputStyles()

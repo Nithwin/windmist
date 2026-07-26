@@ -78,6 +78,12 @@ func (s *Store) GetMessagesBySession(sessionID string) ([]Message, error) {
 	return messages, err
 }
 
+// DeleteMessagesBySession deletes all messages for a session.
+func (s *Store) DeleteMessagesBySession(sessionID string) error {
+	_, err := s.db.Exec("DELETE FROM messages WHERE session_id = ?", sessionID)
+	return err
+}
+
 // SaveFileChange logs a file change for undo/redo
 func (s *Store) SaveFileChange(change *FileChange) error {
 	change.CreatedAt = time.Now()

@@ -64,7 +64,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// All other custom events (Session, Agent Mode, Undo/Redo, Models)
 	case ApprovalRequestMsg, switchModeSuccessMsg, createNewSessionMsg,
 		undoFileChangeMsg, redoFileChangeMsg, switchSessionSuccessMsg,
-		switchProviderSuccessMsg, switchModelSuccessMsg, switchSubagentSuccessMsg, switchThemeSuccessMsg, mcpInstallSuccessMsg, setAPIKeySuccessMsg, switchCancelMsg, switchErrorMsg, indexWorkspaceMsg:
+		switchProviderSuccessMsg, switchModelSuccessMsg, switchSubagentSuccessMsg, switchThemeSuccessMsg, mcpInstallSuccessMsg, setAPIKeySuccessMsg, switchCancelMsg, switchErrorMsg, indexWorkspaceMsg, compactConversationMsg:
 
 		var evtCmd tea.Cmd
 		m, evtCmd = m.handleEventMsg(msg)

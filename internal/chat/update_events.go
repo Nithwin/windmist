@@ -1,6 +1,8 @@
 package chat
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -298,6 +300,59 @@ func (m Model) handleEventMsg(msg tea.Msg) (Model, tea.Cmd) {
 				return switchErrorMsg{Err: fmt.Errorf("indexing failed: %w", err)}
 			}
 			return ResponseMsg{Text: fmt.Sprintf("✅ Workspace indexed successfully! %d code chunks embedded.", count)}
+		}
+
+	case compactConversationMsg:
+		if m.summarizer == nil || m.store == nil || m.session == nil {
+			m.conversation.AddAssistant("❌ Summarizer or persistence not initialized.")
+			m.refreshViewport()
+			return m, nil
+		}
+
+		initialMessages := m.getInitialMessages()
+		
+		// If it's too short, let user know
+		if len(initialMessages) <= 6 {
+			m.conversation.AddAssistant("ℹ️ Conversation is already short. Compaction not needed.")
+			m.refreshViewport()
+			return m, nil
+		}
+
+		m.conversation.AddAssistant("⏳ *Compacting conversation to save tokens...*")
+		m.refreshViewport()
+
+		// Run compaction in background
+		return m, func() tea.Msg {
+			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+			defer cancel()
+
+			compacted, err := m.summarizer.Compact(ctx, initialMessages, 4) // Keep last 4 messages intact
+			if err != nil {
+				return switchErrorMsg{Err: fmt.Errorf("compaction failed: %w", err)}
+			}
+
+			// Save to DB: Delete old messages, insert new ones
+			_ = m.store.DeleteMessagesBySession(m.session.ID)
+
+			for _, aiMsg := range compacted {
+				sMsg := &store.Message{
+					SessionID: m.session.ID,
+					Role:      string(aiMsg.Role),
+					Content:   aiMsg.Content,
+				}
+				if len(aiMsg.ToolCalls) > 0 {
+					b, _ := json.Marshal(aiMsg.ToolCalls)
+					sMsg.ToolCalls = string(b)
+				}
+				if len(aiMsg.ToolResults) > 0 {
+					b, _ := json.Marshal(aiMsg.ToolResults)
+					sMsg.ToolResults = string(b)
+				}
+				_ = m.store.SaveMessage(sMsg)
+			}
+
+			// Reload session
+			return switchSessionSuccessMsg{SessionID: m.session.ID}
 		}
 
 	case switchErrorMsg:

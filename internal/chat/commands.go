@@ -31,6 +31,7 @@ var Registry = []Command{
 /provider   Change provider
 /subagent   Configure sub-agent (cheaper background model)
 /theme      Change UI theme
+/compact    Summarize old messages to save tokens
 /exit       Exit WindMist`,
 			)
 			return nil
@@ -118,6 +119,15 @@ var Registry = []Command{
 		Execute: func(m *Model) tea.Cmd {
 			return func() tea.Msg {
 				return indexWorkspaceMsg{}
+			}
+		},
+	},
+	{
+		Name:        "/compact",
+		Description: "Summarize old messages to save tokens",
+		Execute: func(m *Model) tea.Cmd {
+			return func() tea.Msg {
+				return compactConversationMsg{}
 			}
 		},
 	},

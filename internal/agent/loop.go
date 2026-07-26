@@ -13,10 +13,12 @@ import (
 
 // runLoop executes the iterative reasoning and tool execution loop for the agent.
 func (a *Agent) runLoop(ctx context.Context, messages []ai.Message, userPrompt string, onChunk func(string)) (*Result, error) {
-	if len(messages) == 0 {
-		messages = appendUser(messages, userPrompt)
-		a.saveMessage(messages[len(messages)-1])
-	}
+	cwd, _ := os.Getwd()
+	injector := NewReferenceInjector(cwd)
+	processedPrompt := injector.Inject(userPrompt)
+
+	messages = appendUser(messages, processedPrompt)
+	a.saveMessage(messages[len(messages)-1])
 
 	var totalUsage ai.Usage
 
