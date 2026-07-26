@@ -45,14 +45,23 @@ func translateTools(tools []ai.ToolDefinition) []Tool {
 			}
 		}
 
-		funcDecls = append(funcDecls, FunctionDeclaration{
-			Name:        tool.Name,
-			Description: tool.Description,
-			Parameters: &Schema{
+		if len(required) == 0 {
+			required = nil
+		}
+		
+		var paramsSchema *Schema
+		if len(properties) > 0 {
+			paramsSchema = &Schema{
 				Type:       "OBJECT",
 				Properties: properties,
 				Required:   required,
-			},
+			}
+		}
+
+		funcDecls = append(funcDecls, FunctionDeclaration{
+			Name:        tool.Name,
+			Description: tool.Description,
+			Parameters:  paramsSchema,
 		})
 	}
 
