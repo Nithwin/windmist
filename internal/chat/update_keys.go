@@ -8,8 +8,8 @@ import (
 )
 
 func (m Model) handleKeyMsg(msg tea.KeyMsg) (Model, tea.Cmd) {
-	// Scroll conversation when command palette is closed.
-	if !m.showCommands {
+	// Scroll conversation when command palette or file picker is closed.
+	if !m.showCommands && !m.showFilePicker {
 		switch msg.String() {
 
 		case "ctrl+up", "shift+up":
@@ -119,10 +119,26 @@ func (m Model) handleKeyMsg(msg tea.KeyMsg) (Model, tea.Cmd) {
 	if strings.HasPrefix(firstLine, "/") {
 		m.showCommands = true
 		m.filteredCommands = FilterCommands(firstLine)
+		m.showFilePicker = false
 	} else {
 		m.showCommands = false
 		m.filteredCommands = nil
 		m.selectedCommand = 0
+		
+		// Check for file picker trigger (@) anywhere in the text
+		words := strings.Fields(value)
+		if len(words) > 0 && strings.HasPrefix(words[len(words)-1], "@") {
+			m.showFilePicker = true
+			query := words[len(words)-1][1:]
+			m.filteredFiles = FilterFiles(m.workspaceFiles, query)
+			if m.selectedFile >= len(m.filteredFiles) {
+				m.selectedFile = 0
+			}
+		} else {
+			m.showFilePicker = false
+			m.filteredFiles = nil
+			m.selectedFile = 0
+		}
 	}
 	m.updateViewportSize()
 
@@ -149,6 +165,31 @@ func (m Model) handleKeyMsg(msg tea.KeyMsg) (Model, tea.Cmd) {
 			return m, nil
 		}
 	}
+
+	// Navigate the file picker.
+	if m.showFilePicker {
+		switch msg.String() {
+
+		case "up":
+			if m.selectedFile > 0 {
+				m.selectedFile--
+			}
+			return m, nil
+
+		case "down":
+			if m.selectedFile < len(m.filteredFiles)-1 {
+				m.selectedFile++
+			}
+			return m, nil
+
+		case "esc":
+			m.showFilePicker = false
+			m.filteredFiles = nil
+			m.selectedFile = 0
+			return m, nil
+		}
+	}
+
 	switch msg.String() {
 
 	case "enter":
@@ -168,6 +209,28 @@ func (m Model) handleKeyMsg(msg tea.KeyMsg) (Model, tea.Cmd) {
 			m.input.SetValue("")
 
 			return m, cmd.Execute(&m)
+		}
+
+		// Execute selected file from picker.
+		if m.showFilePicker && len(m.filteredFiles) > 0 {
+			file := m.filteredFiles[m.selectedFile]
+
+			m.showFilePicker = false
+			m.filteredFiles = nil
+			m.selectedFile = 0
+
+			// Replace the @query with the filename
+			value := m.input.Value()
+			words := strings.Fields(value)
+			if len(words) > 0 {
+				words[len(words)-1] = file + " "
+				newValue := strings.Join(words, " ")
+				m.input.SetValue(newValue)
+				m.input.CursorEnd()
+			}
+			
+			// Don't send the message yet
+			return m, nil
 		}
 
 		// Execute typed slash command.

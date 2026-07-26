@@ -39,6 +39,11 @@ type Model struct {
 	filteredCommands []Command
 	selectedCommand  int
 
+	showFilePicker bool
+	workspaceFiles []string
+	filteredFiles  []string
+	selectedFile   int
+
 	loading   bool
 	streaming bool
 
@@ -156,6 +161,15 @@ func New() (Model, error) {
 	}
 
 	model.UpdateInputStyles()
+
+	model.updateViewportSize()
+
+	// Async load files so startup is fast
+	go func() {
+		files := getWorkspaceFiles()
+		// We'd ideally send a Msg, but this is fine for now
+		model.workspaceFiles = files
+	}()
 
 	return model, nil
 
