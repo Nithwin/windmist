@@ -24,13 +24,13 @@ func renderHeader(m Model) string {
 	tokens := 0
 	cost := 0.0
 	mode := "build"
-	
+
 	if m.session != nil {
 		tokens = m.session.TokenCount
 		cost = m.session.CostEstimate
 		mode = m.session.AgentMode
 	}
-	
+
 	if mode == "" {
 		mode = "build"
 	}
@@ -42,14 +42,14 @@ func renderHeader(m Model) string {
 
 	modelTag := ui.BaseStyle.Foreground(ui.Cyan).Bold(true).Render(model)
 	tokenTag := ui.BaseStyle.Foreground(ui.MutedLight).Render(fmt.Sprintf("%d tok", tokens))
-	
+
 	// Only show cost if it's > 0 (to avoid showing $0.000 for free APIs like Ollama/Groq)
 	costStr := ""
 	if cost > 0 {
 		costStr = fmt.Sprintf("$%.3f", cost)
 	}
 	costTag := ui.BaseStyle.Foreground(ui.MutedLight).Render(costStr)
-	
+
 	modeTag := ui.BaseStyle.Foreground(ui.MutedLight).Render(strings.ToUpper(mode))
 	timeTag := ui.BaseStyle.Foreground(ui.MutedLight).Render(duration)
 	themeTag := ui.BaseStyle.Foreground(ui.BrandCyan).Render(ui.CurrentThemeName)
@@ -59,14 +59,14 @@ func renderHeader(m Model) string {
 		tags = append(tags, costTag)
 	}
 	tags = append(tags, modeTag, timeTag, themeTag)
-	
+
 	right := strings.Join(tags, ui.BaseStyle.Foreground(ui.Muted).Render(" │ "))
 
 	// ── padded spacer fills remaining width ──────────────────────
 	totalWidth := m.MaxContentWidth()
 	leftLen := lipgloss.Width(logo)
 	rightLen := lipgloss.Width(right)
-	
+
 	// Subtract 4 for left/right borders and padding (1+1+1+1)
 	gap := totalWidth - 4 - leftLen - rightLen
 	if gap < 1 {

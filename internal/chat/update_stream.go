@@ -28,12 +28,12 @@ func (m Model) handleStreamMsg(msg StreamingMsg) (Model, tea.Cmd) {
 	if msg.Done {
 		m.loading = false
 		m.responseTime = msg.Duration
-		
+
 		if m.session != nil {
 			m.session.TokenCount += msg.Usage.TotalTokens
 			// Rough cost estimation logic could go here or in a separate function
 			// m.session.CostEstimate += calculateCost(...)
-			
+
 			// Save to DB
 			if m.store != nil {
 				_ = m.store.UpdateSession(m.session)

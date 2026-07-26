@@ -11,6 +11,10 @@ import (
 func (m Model) View() string {
 	var b strings.Builder
 
+	if m.showSelector {
+		return lipgloss.NewStyle().Margin(1, 2).Render(m.selectorList.View())
+	}
+
 	if m.showSplash {
 		b.WriteString(renderBanner(m))
 	} else {
@@ -44,10 +48,14 @@ func (m Model) View() string {
 		b.WriteString(approvalBox)
 		b.WriteString("\n")
 	} else {
-		// Input row (label and textarea joined horizontally at Top so cursor is next to user ›)
+		promptLabelText := " user"
+		if m.inlinePrompt != "" {
+			promptLabelText = " " + m.inlinePrompt
+		}
+
 		promptLabel := lipgloss.JoinHorizontal(
 			lipgloss.Center,
-			ui.PromptStyle.Render(" user"),
+			ui.PromptStyle.Render(promptLabelText),
 			ui.BaseStyle.Foreground(ui.Muted).Render("  ›  "),
 		)
 
@@ -69,4 +77,3 @@ func (m Model) View() string {
 
 	return appStyle.Render(b.String())
 }
-

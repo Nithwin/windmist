@@ -13,6 +13,8 @@ import (
 	"github.com/Nithwin/WindMist/internal/tools"
 	"github.com/Nithwin/WindMist/internal/tools/defaults"
 	"github.com/Nithwin/WindMist/internal/ui"
+	"github.com/Nithwin/WindMist/internal/ui/selector"
+	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/textarea"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
@@ -55,6 +57,17 @@ type Model struct {
 	viewport viewport.Model
 
 	markdown *ui.MarkdownRenderer
+
+	// Inline Selector state
+	showSelector bool
+	selectorList list.Model
+	onSelect     func(selector.Option) tea.Cmd
+	onCancel     func() tea.Cmd
+
+	// Inline Prompt state
+	inlinePrompt   string
+	onPromptSubmit func(string) tea.Cmd
+	isPassword     bool
 
 	width  int
 	height int
@@ -131,9 +144,9 @@ func New() (Model, error) {
 	ta.SetHeight(3)
 	ta.ShowLineNumbers = false
 	ta.Prompt = ""
-	
+
 	vp := viewport.New(0, 0)
-	
+
 	model := Model{
 		cfg:          cfg,
 		provider:     provider,

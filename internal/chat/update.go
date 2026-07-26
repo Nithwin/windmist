@@ -1,7 +1,10 @@
 package chat
 
 import (
+	"github.com/Nithwin/WindMist/internal/ui"
+	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 )
 
 // Update handles all user interactions and routes them to specific handlers.
@@ -30,13 +33,53 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case ApprovalRequestMsg, switchModeSuccessMsg, createNewSessionMsg,
 		undoFileChangeMsg, redoFileChangeMsg, switchSessionSuccessMsg,
 		switchProviderSuccessMsg, switchModelSuccessMsg, switchSubagentSuccessMsg, switchThemeSuccessMsg, mcpInstallSuccessMsg, setAPIKeySuccessMsg, switchCancelMsg, switchErrorMsg:
-		
+
 		var evtCmd tea.Cmd
 		m, evtCmd = m.handleEventMsg(msg)
 		return m, evtCmd
-	}
+
+	case showInlineSelectorMsg:
+		m.showSelector = true
+		m.onSelect = msg.OnSelect
+		m.onCancel = msg.OnCancel
+
+		items := make([]list.Item, len(msg.Options))
+		for i, opt := range msg.Options {
+			items[i] = opt
+		}
+
+		d := list.NewDefaultDelegate()
+		d.Styles.SelectedTitle = d.Styles.SelectedTitle.Foreground(ui.Cyan).BorderForeground(ui.Cyan)
+		d.Styles.SelectedDesc = d.Styles.SelectedDesc.Foreground(ui.Cyan).BorderForeground(ui.Cyan)
+
+		m.selectorList = list.New(items, d, 80, 20)
+		m.selectorList.Title = msg.Title
+		m.selectorList.SetShowStatusBar(false)
+		m.selectorList.SetFilteringEnabled(true)
+		m.selectorList.Styles.Title = lipgloss.NewStyle().Background(ui.Purple).Foreground(ui.White).Padding(0, 1)
+
+		// Set size
+		h, v := lipgloss.NewStyle().Margin(1, 2).GetFrameSize()
+		m.selectorList.SetSize(m.width-h, m.height-v)
+
+		return m, nil
+
+	case showInlinePromptMsg:
+		m.inlinePrompt = msg.Prompt
+		m.isPassword = msg.IsPassword
+		m.onPromptSubmit = msg.OnSubmit
+		m.input.Reset()
+		return m, nil
 
 	// Update text input for other key events that don't match the main handler
-	m.input, cmd = m.input.Update(msg)
-	return m, cmd
+	default:
+		if m.showSelector {
+			var listCmd tea.Cmd
+			m.selectorList, listCmd = m.selectorList.Update(msg)
+			return m, listCmd
+		}
+
+		m.input, cmd = m.input.Update(msg)
+		return m, cmd
+	}
 }

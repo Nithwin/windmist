@@ -1,10 +1,10 @@
 package chat
 
 import (
-	"os/exec"
-	"strings"
-	"path/filepath"
 	"os"
+	"os/exec"
+	"path/filepath"
+	"strings"
 )
 
 // getWorkspaceFiles returns a list of files in the workspace.
