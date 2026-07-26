@@ -8,6 +8,14 @@ type Config struct {
 	Cache        CacheConfig               `yaml:"cache"`
 	SubAgent     SubAgentConfig            `yaml:"subagent,omitempty"`
 	CustomModels map[string][]string       `yaml:"custom_models,omitempty"`
+	MCPServers   map[string]MCPServerConfig `yaml:"mcp_servers,omitempty"`
+}
+
+// MCPServerConfig stores the configuration for an MCP server.
+type MCPServerConfig struct {
+	Command string            `yaml:"command"`
+	Args    []string          `yaml:"args,omitempty"`
+	Env     map[string]string `yaml:"env,omitempty"`
 }
 
 // SubAgentConfig stores the provider and model for sub-agents.

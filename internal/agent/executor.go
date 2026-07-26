@@ -32,6 +32,28 @@ func (a *Agent) execute(ctx context.Context, calls []ai.ToolCall, onChunk func(s
 		wg.Add(1)
 		go func(i int, call ai.ToolCall) {
 			defer wg.Done()
+			
+			// Route to MCP Manager if it's an MCP tool
+			if strings.HasPrefix(call.Name, "mcp_") && a.mcpManager != nil {
+				res, err := a.mcpManager.ExecuteTool(ctx, call.Name, call.Args)
+				
+				content := ""
+				isError := false
+				if err != nil {
+					content = fmt.Sprintf("MCP error: %v", err)
+					isError = true
+				} else {
+					content = fmt.Sprintf("%v", res)
+				}
+				
+				results[i] = ai.ToolResult{
+					ID:      call.ID,
+					Name:    call.Name,
+					Content: content,
+					IsError: isError,
+				}
+				return
+			}
 
 			tool, ok := a.manager.Get(call.Name)
 			if !ok {
@@ -189,5 +211,10 @@ func (a *Agent) toolDefinitions(modeConfig ModeConfig) []ai.ToolDefinition {
 			Parameters:  params,
 		})
 	}
+	
+	if a.mcpManager != nil {
+		defs = append(defs, a.mcpManager.GetTools()...)
+	}
+	
 	return defs
 }
