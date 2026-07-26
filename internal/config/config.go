@@ -10,6 +10,9 @@ const (
 	EnvGroqAPIKey      = "GROQ_API_KEY"
 	EnvOpenAIAPIKey    = "OPENAI_API_KEY"
 	EnvAnthropicAPIKey = "ANTHROPIC_API_KEY"
+	EnvDeepSeekAPIKey  = "DEEPSEEK_API_KEY"
+	EnvMistralAPIKey   = "MISTRAL_API_KEY"
+	EnvMoonshotAPIKey  = "MOONSHOT_API_KEY"
 )
 
 var envKeys = map[string]string{
@@ -17,6 +20,9 @@ var envKeys = map[string]string{
 	"groq":      EnvGroqAPIKey,
 	"openai":    EnvOpenAIAPIKey,
 	"anthropic": EnvAnthropicAPIKey,
+	"deepseek":  EnvDeepSeekAPIKey,
+	"mistral":   EnvMistralAPIKey,
+	"kimi":      EnvMoonshotAPIKey,
 }
 
 // ActiveProvider returns the active provider configuration.

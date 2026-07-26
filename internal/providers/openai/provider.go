@@ -19,7 +19,10 @@ type Provider struct {
 
 // New creates a new OpenAI provider instance.
 func New(cfg config.ProviderConfig) ai.Provider {
-	baseURL := "https://api.openai.com/v1"
+	baseURL := cfg.BaseURL
+	if baseURL == "" {
+		baseURL = "https://api.openai.com/v1"
+	}
 
 	model := cfg.Model
 	if model == "" {
