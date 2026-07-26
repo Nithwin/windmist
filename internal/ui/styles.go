@@ -15,65 +15,92 @@ var (
 	MutedLight = lipgloss.Color("#9CA3AF")
 	Surface    = lipgloss.Color("#1E1B2E")
 	White      = lipgloss.Color("#F8FAFC")
+	Border     = lipgloss.Color("#3B3551")
+	Selection  = lipgloss.Color("#3B3551")
 
 	// ── Typography ──────────────────────────────────────────────────
-	TitleStyle = lipgloss.NewStyle().
-			Bold(true).
-			Foreground(Purple)
-
-	SubtitleStyle = lipgloss.NewStyle().
-			Bold(true).
-			Foreground(Green)
-
-	LabelStyle = lipgloss.NewStyle().
-			Bold(true).
-			Foreground(Cyan)
-
-	MutedStyle = lipgloss.NewStyle().
-			Foreground(Muted)
-
-	MutedLightStyle = lipgloss.NewStyle().
-			Foreground(MutedLight)
-
-	PromptStyle = lipgloss.NewStyle().
-			Bold(true).
-			Foreground(Amber)
-
-	SuccessStyle = lipgloss.NewStyle().
-			Foreground(Green)
-
-	ErrorStyle = lipgloss.NewStyle().
-			Bold(true).
-			Foreground(Red)
-
-	DividerStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#3B3551"))
+	TitleStyle      lipgloss.Style
+	SubtitleStyle   lipgloss.Style
+	LabelStyle      lipgloss.Style
+	MutedStyle      lipgloss.Style
+	MutedLightStyle lipgloss.Style
+	PromptStyle     lipgloss.Style
+	SuccessStyle    lipgloss.Style
+	ErrorStyle      lipgloss.Style
+	DividerStyle    lipgloss.Style
 
 	// ── Chat bubbles ────────────────────────────────────────────────
-	UserLabelStyle = lipgloss.NewStyle().
-			Bold(true).
-			Foreground(Amber)
-
-	UserBubbleStyle = lipgloss.NewStyle().
-			Foreground(White).
-			PaddingLeft(2)
-
-	AssistantLabelStyle = lipgloss.NewStyle().
-				Bold(true).
-				Foreground(Purple)
-
-	AssistantBubbleStyle = lipgloss.NewStyle().
-				Foreground(MutedLight).
-				PaddingLeft(2)
+	UserLabelStyle       lipgloss.Style
+	UserBubbleStyle      lipgloss.Style
+	AssistantLabelStyle  lipgloss.Style
+	AssistantBubbleStyle lipgloss.Style
 
 	// ── Input area ──────────────────────────────────────────────────
+	InputBoxStyle      lipgloss.Style
+	InputBoxFocusStyle lipgloss.Style
+)
+
+func init() {
+	UpdateStyles()
+}
+
+// UpdateStyles re-evaluates all lipgloss styles based on the current color variables.
+func UpdateStyles() {
+	TitleStyle = lipgloss.NewStyle().
+		Bold(true).
+		Foreground(Purple)
+
+	SubtitleStyle = lipgloss.NewStyle().
+		Bold(true).
+		Foreground(Green)
+
+	LabelStyle = lipgloss.NewStyle().
+		Bold(true).
+		Foreground(Cyan)
+
+	MutedStyle = lipgloss.NewStyle().
+		Foreground(Muted)
+
+	MutedLightStyle = lipgloss.NewStyle().
+		Foreground(MutedLight)
+
+	PromptStyle = lipgloss.NewStyle().
+		Bold(true).
+		Foreground(Amber)
+
+	SuccessStyle = lipgloss.NewStyle().
+		Foreground(Green)
+
+	ErrorStyle = lipgloss.NewStyle().
+		Bold(true).
+		Foreground(Red)
+
+	DividerStyle = lipgloss.NewStyle().
+		Foreground(Border)
+
+	UserLabelStyle = lipgloss.NewStyle().
+		Bold(true).
+		Foreground(Amber)
+
+	UserBubbleStyle = lipgloss.NewStyle().
+		Foreground(White).
+		PaddingLeft(2)
+
+	AssistantLabelStyle = lipgloss.NewStyle().
+		Bold(true).
+		Foreground(Purple)
+
+	AssistantBubbleStyle = lipgloss.NewStyle().
+		Foreground(White).
+		PaddingLeft(2)
+
 	InputBoxStyle = lipgloss.NewStyle().
-			Border(lipgloss.RoundedBorder()).
-			BorderForeground(lipgloss.Color("#3B3551")).
-			Padding(0, 1)
+		Border(lipgloss.RoundedBorder()).
+		BorderForeground(Border).
+		Padding(0, 1)
 
 	InputBoxFocusStyle = lipgloss.NewStyle().
-				Border(lipgloss.RoundedBorder()).
-				BorderForeground(Purple).
-				Padding(0, 1)
-)
+		Border(lipgloss.RoundedBorder()).
+		BorderForeground(Purple).
+		Padding(0, 1)
+}

@@ -3,6 +3,7 @@ package chat
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -12,6 +13,7 @@ import (
 	"github.com/Nithwin/WindMist/internal/store"
 	"github.com/Nithwin/WindMist/internal/tools"
 	"github.com/Nithwin/WindMist/internal/tools/defaults"
+	"github.com/Nithwin/WindMist/internal/ui"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -229,6 +231,27 @@ func (m Model) handleEventMsg(msg tea.Msg) (Model, tea.Cmd) {
 			m.conversation.AddAssistant(fmt.Sprintf("✨ Sub-Agent switched to **%s** (model: `%s`)", msg.Provider, msg.Model))
 		}
 		
+		m.refreshViewport()
+		m.loading = false
+		return m, nil
+
+	case switchThemeSuccessMsg:
+		m.cfg.SetTheme(msg.Theme)
+		_ = config.Save(m.cfg)
+
+		customDir := ""
+		cfgDir, err := config.ConfigDir()
+		if err == nil {
+			customDir = filepath.Join(cfgDir, "themes")
+		}
+
+		err = ui.LoadTheme(msg.Theme, customDir)
+		if err != nil {
+			m.conversation.AddAssistant(fmt.Sprintf("❌ Failed to load theme: %v", err))
+		} else {
+			m.conversation.AddAssistant(fmt.Sprintf("✨ Theme switched to **%s**", msg.Theme))
+		}
+
 		m.refreshViewport()
 		m.loading = false
 		return m, nil
