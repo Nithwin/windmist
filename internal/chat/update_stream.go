@@ -3,6 +3,7 @@ package chat
 import (
 	"context"
 
+	"github.com/Nithwin/WindMist/internal/ai"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -11,7 +12,6 @@ func (m Model) handleStreamMsg(msg StreamingMsg) (Model, tea.Cmd) {
 		m.loading = false
 		m.streaming = false
 		m.spinnerFrame = 0
-		m.streamTokens = m.streamTokens // preserve for display
 
 		if len(m.conversation.Messages) > 0 {
 			m.conversation.Messages[len(m.conversation.Messages)-1].Content =
@@ -83,7 +83,7 @@ func (m *Model) processQueuedMessage() tea.Cmd {
 	m.refreshViewport()
 	m.loading = true
 	m.streaming = true
-	m.streamTokens = m.streamTokens // Reset for new request
+	m.streamTokens = ai.Usage{}
 
 	// Create an empty assistant message for streaming
 	m.conversation.AddAssistant("")
