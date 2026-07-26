@@ -6,9 +6,9 @@ import (
 )
 
 // sendMessage starts running the agent request.
-func (m Model) sendMessage(prompt string) {
+func (m Model) sendMessage(ctx context.Context, prompt string) {
 	go func() {
-		res, err := m.agent.Run(context.Background(), prompt, func(s string) {
+		res, err := m.agent.Run(ctx, prompt, func(s string) {
 			program.Send(StreamingMsg{
 				Text: s,
 			})

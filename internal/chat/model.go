@@ -1,6 +1,7 @@
 package chat
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/Nithwin/WindMist/internal/agent"
@@ -45,6 +46,8 @@ type Model struct {
 
 	width  int
 	height int
+
+	cancel context.CancelFunc
 }
 
 // New creates a new Bubble Tea model.
