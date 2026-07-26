@@ -13,4 +13,8 @@ const (
 	// MaxToolCallsPerTurn is the maximum number of tool calls the
 	// agent will execute from a single model response.
 	MaxToolCallsPerTurn = 32
+
+	// DefaultMaxContextTokens is the maximum number of tokens to keep in
+	// the conversation history sliding window.
+	DefaultMaxContextTokens = 15000
 )
