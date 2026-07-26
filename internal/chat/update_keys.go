@@ -95,6 +95,8 @@ func (m Model) handleKeyMsg(msg tea.KeyMsg) (Model, tea.Cmd) {
 		if m.loading && m.cancel != nil {
 			m.cancel()
 			m.loading = false
+			m.streaming = false
+			m.spinnerFrame = 0
 			m.conversation.AddAssistant("\n\n*(Cancelled by user)*")
 			m.refreshViewport()
 			return m, nil
@@ -265,12 +267,21 @@ func (m Model) handleKeyMsg(msg tea.KeyMsg) (Model, tea.Cmd) {
 		}
 
 		// Normal AI message.
+		// Block new AI messages while a request is in-flight.
+		if m.loading {
+			// Don't fire another request — just show feedback.
+			m.conversation.AddAssistant("⏳ *Please wait — a request is still in progress. Press `Ctrl+C` to cancel it.*")
+			m.refreshViewport()
+			return m, nil
+		}
+
 		m.inputHistory = append(m.inputHistory, prompt)
 		m.historyIndex = len(m.inputHistory)
 
 		m.conversation.AddUser(prompt)
 		m.refreshViewport()
 		m.loading = true
+		m.streaming = true
 
 		m.input.SetValue("")
 
@@ -279,11 +290,15 @@ func (m Model) handleKeyMsg(msg tea.KeyMsg) (Model, tea.Cmd) {
 		m.conversation.AddAssistant("")
 		m.refreshViewport()
 
+		// Cancel any previous in-flight request before starting a new one.
+		if m.cancel != nil {
+			m.cancel()
+		}
+
 		ctx, cancel := context.WithCancel(context.Background())
 		m.cancel = cancel
-		m.sendMessage(ctx, prompt)
 
-		return m, nil
+		return m, m.sendMessageCmd(ctx, prompt)
 	}
 
 	var cmd tea.Cmd

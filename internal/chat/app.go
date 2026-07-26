@@ -14,6 +14,7 @@ func Run() error {
 	p := tea.NewProgram(
 		model,
 		tea.WithAltScreen(),
+		tea.WithMouseCellMotion(),
 	)
 
 	program = p

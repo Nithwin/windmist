@@ -48,6 +48,7 @@ type Model struct {
 
 	loading      bool
 	streaming    bool
+	spinnerFrame int
 	responseTime time.Duration
 
 	waitingApproval bool
@@ -146,6 +147,8 @@ func New() (Model, error) {
 	ta.Prompt = ""
 
 	vp := viewport.New(0, 0)
+	vp.MouseWheelEnabled = true
+	vp.MouseWheelDelta = 3
 
 	model := Model{
 		cfg:          cfg,

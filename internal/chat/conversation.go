@@ -1,11 +1,15 @@
 package chat
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/Nithwin/WindMist/internal/ui"
 	"github.com/charmbracelet/lipgloss"
 )
+
+// spinnerFrames defines the animation frames for the loading spinner.
+var spinnerFrames = []string{"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"}
 
 func renderConversation(m Model) string {
 	var b strings.Builder
@@ -50,7 +54,11 @@ func renderConversation(m Model) string {
 			b.WriteString(ui.BaseStyle.Render("\n"))
 			contentStr := msg.Content
 			if contentStr == "" && m.loading && i == len(m.conversation.Messages)-1 {
-				contentStr = ui.MutedStyle.Render("Thinking...")
+				// Animated spinner
+				frame := spinnerFrames[m.spinnerFrame%len(spinnerFrames)]
+				contentStr = ui.BaseStyle.Foreground(ui.Cyan).Bold(true).Render(
+					fmt.Sprintf("  %s  Thinking...", frame),
+				)
 			} else {
 				rendered := m.markdown.RenderWithWidth(contentStr, maxWidth)
 
@@ -70,3 +78,4 @@ func renderConversation(m Model) string {
 	b.WriteString("\n")
 	return b.String()
 }
+

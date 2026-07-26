@@ -5,6 +5,8 @@ import tea "github.com/charmbracelet/bubbletea"
 func (m Model) handleStreamMsg(msg StreamingMsg) (Model, tea.Cmd) {
 	if msg.Err != nil {
 		m.loading = false
+		m.streaming = false
+		m.spinnerFrame = 0
 
 		if len(m.conversation.Messages) > 0 {
 			m.conversation.Messages[len(m.conversation.Messages)-1].Content =
@@ -27,6 +29,8 @@ func (m Model) handleStreamMsg(msg StreamingMsg) (Model, tea.Cmd) {
 
 	if msg.Done {
 		m.loading = false
+		m.streaming = false
+		m.spinnerFrame = 0
 		m.responseTime = msg.Duration
 
 		if m.session != nil {

@@ -22,6 +22,16 @@ func (m Model) View() string {
 		b.WriteString(m.viewport.View())
 		b.WriteString("\n")
 
+		// Show scroll indicator if viewport is scrollable
+		if m.viewport.TotalLineCount() > m.viewport.Height {
+			scrollPct := int(m.viewport.ScrollPercent() * 100)
+			scrollHint := ui.BaseStyle.Foreground(ui.Muted).Render(
+				fmt.Sprintf("  ↕ Scroll: %d%%  (mouse wheel, Ctrl+↑/↓, PgUp/PgDn)", scrollPct),
+			)
+			b.WriteString(scrollHint)
+			b.WriteString("\n")
+		}
+
 		// Separator above input area
 		b.WriteString(ui.DividerStyle.Render(strings.Repeat("─", m.MaxContentWidth()+4)))
 		b.WriteString("\n\n")
@@ -53,11 +63,22 @@ func (m Model) View() string {
 			promptLabelText = " " + m.inlinePrompt
 		}
 
-		promptLabel := lipgloss.JoinHorizontal(
-			lipgloss.Center,
-			ui.PromptStyle.Render(promptLabelText),
-			ui.BaseStyle.Foreground(ui.Muted).Render("  ›  "),
-		)
+		// Dim the prompt label when loading to show input is blocked
+		var promptLabel string
+		if m.loading {
+			frame := spinnerFrames[m.spinnerFrame%len(spinnerFrames)]
+			promptLabel = lipgloss.JoinHorizontal(
+				lipgloss.Center,
+				ui.BaseStyle.Foreground(ui.Cyan).Bold(true).Render(fmt.Sprintf(" %s working", frame)),
+				ui.BaseStyle.Foreground(ui.Muted).Render("  ›  "),
+			)
+		} else {
+			promptLabel = lipgloss.JoinHorizontal(
+				lipgloss.Center,
+				ui.PromptStyle.Render(promptLabelText),
+				ui.BaseStyle.Foreground(ui.Muted).Render("  ›  "),
+			)
+		}
 
 		inputRow := lipgloss.JoinHorizontal(
 			lipgloss.Top,

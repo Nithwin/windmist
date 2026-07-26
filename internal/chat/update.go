@@ -25,6 +25,28 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case StreamingMsg:
 		return m.handleStreamMsg(msg)
 
+	case spinnerTickMsg:
+		if m.loading {
+			m.spinnerFrame++
+			m.refreshViewport()
+			return m, spinnerTickCmd()
+		}
+		return m, nil
+
+	case tea.MouseMsg:
+		// Route mouse wheel events to the viewport for scrolling
+		if !m.showSplash && !m.showSelector {
+			switch msg.Button {
+			case tea.MouseButtonWheelUp:
+				m.viewport.ScrollUp(3)
+				return m, nil
+			case tea.MouseButtonWheelDown:
+				m.viewport.ScrollDown(3)
+				return m, nil
+			}
+		}
+		return m, nil
+
 	case WorkspaceFilesMsg:
 		m.workspaceFiles = msg.Files
 		return m, nil
