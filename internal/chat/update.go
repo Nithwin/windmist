@@ -1,6 +1,7 @@
 package chat
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -86,6 +87,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		switch msg.String() {
 		case "ctrl+c", "esc":
+			if m.loading && m.cancel != nil {
+				m.cancel()
+				m.loading = false
+				m.conversation.AddAssistant("\n\n*(Cancelled by user)*")
+				m.refreshViewport()
+				return m, nil
+			}
 			return m, tea.Quit
 		}
 
@@ -185,7 +193,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.conversation.AddAssistant("")
 			m.refreshViewport()
 
-			m.sendMessage(prompt)
+			ctx, cancel := context.WithCancel(context.Background())
+			m.cancel = cancel
+			m.sendMessage(ctx, prompt)
 
 			return m, nil
 		}
