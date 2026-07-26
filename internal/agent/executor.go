@@ -9,7 +9,7 @@ import (
 )
 
 // execute runs a slice of tool calls against the tool manager and returns their results.
-func (a *Agent) execute(ctx context.Context, calls []ai.ToolCall) []ai.ToolResult {
+func (a *Agent) execute(ctx context.Context, calls []ai.ToolCall, onChunk func(string)) []ai.ToolResult {
 	results := make([]ai.ToolResult, 0, len(calls))
 
 	for _, call := range calls {
@@ -24,11 +24,19 @@ func (a *Agent) execute(ctx context.Context, calls []ai.ToolCall) []ai.ToolResul
 			continue
 		}
 
+		if onChunk != nil {
+			onChunk(fmt.Sprintf("\n\n> ⏳ **Executing tool**: `%s`...", call.Name))
+		}
+
 		// Execute the tool.
 		res := tool.Run(ctx, tools.Call{
 			Name: call.Name,
 			Args: call.Args,
 		})
+
+		if onChunk != nil {
+			onChunk(" ✅ Done.\n\n")
+		}
 
 		content := ""
 		isError := false

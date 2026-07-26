@@ -81,7 +81,7 @@ func (a *Agent) runLoop(ctx context.Context, messages []ai.Message, userPrompt s
 			}, nil
 		}
 
-		results := a.execute(ctx, resp.ToolCalls)
+		results := a.execute(ctx, resp.ToolCalls, onChunk)
 		messages = appendToolResults(messages, results)
 	}
 
