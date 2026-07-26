@@ -118,8 +118,8 @@ var setCmd = &cobra.Command{
 		case "theme":
 			if value == "" {
 				opt, err := selector.Run("Select UI Theme", "Choose visual theme:", []selector.Option{
-					{Label: "dark", Description: "Dark theme with purple & cyan accents", Value: "dark"},
-					{Label: "light", Description: "Light theme", Value: "light"},
+					{Label: "dark", Desc: "Dark theme with purple & cyan accents", Value: "dark"},
+					{Label: "light", Desc: "Light theme", Value: "light"},
 				})
 				if err != nil {
 					log.Fatal(err)

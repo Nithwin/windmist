@@ -2,6 +2,7 @@ package chat
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/Nithwin/WindMist/internal/config"
@@ -26,6 +27,7 @@ var Registry = []Command{
 
 /help       Show available commands
 /new        Start a new conversation
+/sessions   Load a previous session
 /model      Change model
 /provider   Change provider
 /clear      Clear conversation
@@ -41,6 +43,13 @@ var Registry = []Command{
 			m.conversation.Clear()
 			m.refreshViewport()
 			return nil
+		},
+	},
+	{
+		Name:        "/sessions",
+		Description: "Load a previous session",
+		Execute: func(m *Model) tea.Cmd {
+			return selectSessionCmd(m)
 		},
 	},
 	{
@@ -80,6 +89,51 @@ var Registry = []Command{
 			return tea.Quit
 		},
 	},
+}
+
+func selectSessionCmd(m *Model) tea.Cmd {
+	return func() tea.Msg {
+		if program == nil {
+			return switchErrorMsg{Err: fmt.Errorf("program instance not initialized")}
+		}
+		if m.store == nil {
+			return switchErrorMsg{Err: fmt.Errorf("database not initialized")}
+		}
+
+		cwd, _ := os.Getwd()
+		sessions, err := m.store.ListSessionsByProject(cwd)
+		if err != nil {
+			return switchErrorMsg{Err: fmt.Errorf("failed to fetch sessions: %w", err)}
+		}
+
+		if len(sessions) == 0 {
+			return switchErrorMsg{Err: fmt.Errorf("no past sessions found in this project")}
+		}
+
+		if err := program.ReleaseTerminal(); err != nil {
+			return switchErrorMsg{Err: fmt.Errorf("failed to release terminal: %w", err)}
+		}
+		defer program.RestoreTerminal()
+
+		var options []selector.Option
+		for _, s := range sessions {
+			desc := fmt.Sprintf("%s | Tokens: %d | Cost: $%.3f", s.UpdatedAt.Format("Jan 02 15:04"), s.TokenCount, s.CostEstimate)
+			options = append(options, selector.Option{
+				Label: s.Title,
+				Desc:  desc,
+				Value: s.ID,
+			})
+		}
+
+		opt, err := selector.Run("Select Session", "Choose a previous session to resume:", options)
+		if err != nil {
+			return switchCancelMsg{}
+		}
+
+		return switchSessionSuccessMsg{
+			SessionID: opt.Value,
+		}
+	}
 }
 
 func selectProviderCmd(m *Model) tea.Cmd {

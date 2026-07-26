@@ -22,6 +22,11 @@ type switchProviderSuccessMsg struct {
 	Model    string
 }
 
+// switchSessionSuccessMsg represents a successful session change.
+type switchSessionSuccessMsg struct {
+	SessionID string
+}
+
 // switchModelSuccessMsg represents a successful model change.
 type switchModelSuccessMsg struct {
 	Model string
