@@ -2,9 +2,11 @@ package defaults
 
 import (
 	"github.com/Nithwin/WindMist/internal/tools"
+	"github.com/Nithwin/WindMist/internal/tools/agent"
 	"github.com/Nithwin/WindMist/internal/tools/editing"
 	"github.com/Nithwin/WindMist/internal/tools/filesystem"
 	"github.com/Nithwin/WindMist/internal/tools/system"
+	"github.com/Nithwin/WindMist/internal/tools/web"
 )
 
 // RegisterAll registers all built-in filesystem and editing tools onto the manager.
@@ -23,6 +25,8 @@ func RegisterAll(m *tools.Manager, approvalCb system.ApprovalCallback) {
 	m.Register(filesystem.NewCreateTool())
 	m.Register(filesystem.NewInfoTool())
 	m.Register(filesystem.NewExistsTool())
+	m.Register(filesystem.NewGlobTool())
+	m.Register(filesystem.NewGrepTool())
 
 	// Editing tools
 	m.Register(editing.NewReplaceTextTool())
@@ -34,4 +38,11 @@ func RegisterAll(m *tools.Manager, approvalCb system.ApprovalCallback) {
 
 	// System tools
 	m.Register(system.NewCommandTool(approvalCb))
+
+	// Web tools
+	m.Register(web.NewWebSearchTool())
+	m.Register(web.NewFetchTool())
+
+	// Agent tools
+	m.Register(agent.NewTodoTool())
 }
