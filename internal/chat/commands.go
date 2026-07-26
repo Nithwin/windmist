@@ -3,9 +3,11 @@ package chat
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/Nithwin/WindMist/internal/config"
+	"github.com/Nithwin/WindMist/internal/mcp"
 	"github.com/Nithwin/WindMist/internal/ui"
 	"github.com/Nithwin/WindMist/internal/ui/selector"
 	tea "github.com/charmbracelet/bubbletea"
@@ -108,6 +110,13 @@ var Registry = []Command{
 		Description: "Change UI theme",
 		Execute: func(m *Model) tea.Cmd {
 			return selectThemeCmd(m)
+		},
+	},
+	{
+		Name:        "/mcp",
+		Description: "Install an MCP server (e.g. GitHub, Postgres)",
+		Execute: func(m *Model) tea.Cmd {
+			return selectMCPCmd(m)
 		},
 	},
 	{
@@ -417,6 +426,61 @@ func selectThemeCmd(m *Model) tea.Cmd {
 
 		return switchThemeSuccessMsg{
 			Theme: opt.Value,
+		}
+	}
+}
+
+func selectMCPCmd(m *Model) tea.Cmd {
+	return func() tea.Msg {
+		if program == nil {
+			return switchErrorMsg{Err: fmt.Errorf("program instance not initialized")}
+		}
+
+		if err := program.ReleaseTerminal(); err != nil {
+			return switchErrorMsg{Err: fmt.Errorf("failed to release terminal: %w", err)}
+		}
+		defer program.RestoreTerminal()
+
+		var options []selector.Option
+		for i, name := range mcp.GetCatalogList() {
+			options = append(options, selector.Option{
+				Label: name,
+				Value: fmt.Sprintf("%d", i), // Use index as value
+			})
+		}
+
+		opt, err := selector.Run("Select MCP Server", "Choose an MCP Server to install:", options)
+		if err != nil {
+			return switchCancelMsg{}
+		}
+
+		// Show prompts for required env vars
+		idx, _ := strconv.Atoi(opt.Value)
+		entry, ok := mcp.GetCatalogEntry(idx)
+		if !ok {
+			return switchErrorMsg{Err: fmt.Errorf("invalid MCP selection")}
+		}
+
+		envValues := make(map[string]string)
+		for _, envKey := range entry.RequiredEnv {
+			prompt := fmt.Sprintf("Enter %s:", envKey)
+			if entry.EnvPrompt != nil && entry.EnvPrompt[envKey] != "" {
+				prompt = entry.EnvPrompt[envKey]
+			}
+			
+			// Simple fallback prompt via terminal since we released the TUI
+			fmt.Printf("\n%s\n> ", prompt)
+			var val string
+			fmt.Scanln(&val)
+			envValues[envKey] = strings.TrimSpace(val)
+		}
+
+		if err := mcp.Install(entry, envValues); err != nil {
+			return switchErrorMsg{Err: fmt.Errorf("failed to save config: %w", err)}
+		}
+
+		return mcpInstallSuccessMsg{
+			Name: entry.Name,
 		}
 	}
 }

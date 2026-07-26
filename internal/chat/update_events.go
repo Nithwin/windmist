@@ -243,6 +243,11 @@ func (m Model) handleEventMsg(msg tea.Msg) (Model, tea.Cmd) {
 		m.loading = false
 		return m, nil
 
+	case mcpInstallSuccessMsg:
+		m.conversation.AddAssistant(fmt.Sprintf("🔌 Successfully installed and configured MCP Server: **%s**.\nPlease restart WindMist (using `/exit`) to automatically discover the new tools from this server.", msg.Name))
+		m.refreshViewport()
+		return m, nil
+
 	case switchThemeSuccessMsg:
 		m.cfg.SetTheme(msg.Theme)
 		_ = config.Save(m.cfg)

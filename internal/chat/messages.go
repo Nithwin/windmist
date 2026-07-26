@@ -64,6 +64,11 @@ type switchThemeSuccessMsg struct {
 	Theme string
 }
 
+// mcpInstallSuccessMsg represents a successful MCP installation.
+type mcpInstallSuccessMsg struct {
+	Name string
+}
+
 // switchCancelMsg represents a user cancellation of the menu.
 type switchCancelMsg struct{}
 
