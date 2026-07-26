@@ -13,6 +13,7 @@ import (
 func (a *Agent) runLoop(ctx context.Context, messages []ai.Message, userPrompt string, onChunk func(string)) (*Result, error) {
 	if len(messages) == 0 {
 		messages = appendUser(messages, userPrompt)
+		a.saveMessage(messages[len(messages)-1])
 	}
 
 	var totalUsage ai.Usage
@@ -72,6 +73,7 @@ func (a *Agent) runLoop(ctx context.Context, messages []ai.Message, userPrompt s
 		totalUsage.TotalTokens += resp.Usage.TotalTokens
 
 		messages = appendAssistant(messages, resp.Text, resp.ToolCalls)
+		a.saveMessage(messages[len(messages)-1])
 
 		if len(resp.ToolCalls) == 0 {
 			return &Result{
@@ -83,6 +85,7 @@ func (a *Agent) runLoop(ctx context.Context, messages []ai.Message, userPrompt s
 
 		results := a.execute(ctx, resp.ToolCalls, onChunk)
 		messages = appendToolResults(messages, results)
+		a.saveMessage(messages[len(messages)-1])
 	}
 
 	return nil, ErrMaxTurnsExceeded

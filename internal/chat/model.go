@@ -3,10 +3,12 @@ package chat
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/Nithwin/WindMist/internal/agent"
 	"github.com/Nithwin/WindMist/internal/ai"
 	"github.com/Nithwin/WindMist/internal/config"
+	"github.com/Nithwin/WindMist/internal/store"
 	"github.com/Nithwin/WindMist/internal/tools"
 	"github.com/Nithwin/WindMist/internal/tools/defaults"
 	"github.com/Nithwin/WindMist/internal/ui"
@@ -22,6 +24,8 @@ type Model struct {
 
 	provider ai.Provider
 	agent    *agent.Agent
+	store    *store.Store
+	session  *store.Session
 
 	conversation Conversation
 
@@ -76,7 +80,29 @@ func New() (Model, error) {
 		})
 		return <-ch
 	})
-	ag := agent.New(provider, manager, agent.Config{})
+	dbStore, err := store.NewStore()
+	if err != nil {
+		return Model{}, fmt.Errorf("failed to initialize db store: %w", err)
+	}
+
+	// For now, create a new session on startup
+	// Later we can implement logic to load an existing session
+	// using the /session commands
+	activeModel, _ := cfg.ActiveModel()
+	sess := &store.Session{
+		ID:          fmt.Sprintf("sess_%d", time.Now().Unix()),
+		Title:       "New Session",
+		ProjectPath: ".",
+		Provider:    cfg.AI.Provider,
+		Model:       activeModel,
+		AgentMode:   "build",
+	}
+	_ = dbStore.CreateSession(sess)
+
+	ag := agent.New(provider, manager, agent.Config{
+		Store:     dbStore,
+		SessionID: sess.ID,
+	})
 
 	renderer, err := ui.NewMarkdownRenderer()
 	if err != nil {
@@ -108,6 +134,8 @@ func New() (Model, error) {
 		cfg:          cfg,
 		provider:     provider,
 		agent:        ag,
+		store:        dbStore,
+		session:      sess,
 		conversation: Conversation{},
 		input:        ta,
 		inputHistory: make([]string, 0),
