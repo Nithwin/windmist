@@ -92,16 +92,25 @@ func (i *ReferenceInjector) fetchURL(url string) (string, error) {
 }
 
 func (i *ReferenceInjector) fetchFile(path string) (string, error) {
-	// Prevent directory traversal attacks
-	cleanPath := filepath.Clean(path)
-	if strings.Contains(cleanPath, "..") {
+	// Resolve the absolute path to prevent directory traversal attacks
+	fullPath := filepath.Join(i.workspaceDir, filepath.Clean(path))
+	absPath, err := filepath.Abs(fullPath)
+	if err != nil {
 		return "", fmt.Errorf("invalid path")
 	}
 
-	fullPath := filepath.Join(i.workspaceDir, cleanPath)
+	absWorkspace, err := filepath.Abs(i.workspaceDir)
+	if err != nil {
+		return "", fmt.Errorf("invalid workspace")
+	}
+
+	// Verify the resolved path stays within the workspace
+	if !strings.HasPrefix(absPath, absWorkspace+string(filepath.Separator)) && absPath != absWorkspace {
+		return "", fmt.Errorf("path escapes workspace boundary")
+	}
 
 	// Check if it's a directory
-	info, err := os.Stat(fullPath)
+	info, err := os.Stat(absPath)
 	if err != nil {
 		return "", err
 	}
@@ -110,7 +119,7 @@ func (i *ReferenceInjector) fetchFile(path string) (string, error) {
 	}
 
 	// Read file
-	content, err := os.ReadFile(fullPath)
+	content, err := os.ReadFile(absPath)
 	if err != nil {
 		return "", err
 	}

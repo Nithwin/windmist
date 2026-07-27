@@ -26,15 +26,22 @@ var Registry = []Command{
 
 /help       Show available commands
 /new        Start a new conversation
+/clear      Clear the conversation display
 /sessions   Load a previous session
 /undo       Undo the last AI file edit
 /redo       Redo the last undone file edit
 /model      Change model
-/mode       Change agent mode
+/mode       Change agent mode (auto/build/plan)
 /provider   Change provider
 /subagent   Configure sub-agent (cheaper background model)
 /theme      Change UI theme
+/apikey     Set API Key for the current provider
+/index      Index workspace for semantic search (RAG)
 /compact    Summarize old messages to save tokens
+/export     Export the conversation to a markdown file
+/remote     Configure remote control (Telegram)
+/mcp        Install an MCP server
+/status     Show current configuration
 /exit       Exit WindMist`,
 			)
 			return nil
@@ -47,6 +54,15 @@ var Registry = []Command{
 			return func() tea.Msg {
 				return createNewSessionMsg{}
 			}
+		},
+	},
+	{
+		Name:        "/clear",
+		Description: "Clear the conversation display",
+		Execute: func(m *Model) tea.Cmd {
+			m.conversation.Clear()
+			m.conversation.AddAssistant("🧹 Conversation display cleared. Session history is preserved in the database.")
+			return nil
 		},
 	},
 	{
@@ -174,11 +190,49 @@ var Registry = []Command{
 		},
 	},
 	{
+		Name:        "/status",
+		Description: "Show current configuration",
+		Execute: func(m *Model) tea.Cmd {
+			model := "—"
+			if provider, err := m.cfg.ActiveProvider(); err == nil {
+				model = provider.Model
+			}
+			mode := "build"
+			sessionTitle := "—"
+			tokens := 0
+			if m.session != nil {
+				mode = m.session.AgentMode
+				sessionTitle = m.session.Title
+				tokens = m.session.TokenCount
+			}
+			if mode == "" {
+				mode = "build"
+			}
+
+			status := fmt.Sprintf(`**Current Configuration**
+
+| Setting       | Value               |
+|:------------- |:------------------- |
+| Provider      | %s                  |
+| Model         | %s                  |
+| Agent Mode    | %s                  |
+| Session       | %s                  |
+| Total Tokens  | %d                  |
+| Theme         | %s                  |`, m.cfg.AI.Provider, model, mode, sessionTitle, tokens, m.cfg.UI.Theme)
+
+			m.conversation.AddAssistant(status)
+			return nil
+		},
+	},
+	{
 		Name:        "/exit",
 		Description: "Exit WindMist",
 		Execute: func(m *Model) tea.Cmd {
 			if m.agent != nil {
 				m.agent.Close()
+			}
+			if m.store != nil {
+				m.store.Close()
 			}
 			return tea.Quit
 		},
@@ -189,6 +243,9 @@ var Registry = []Command{
 		Execute: func(m *Model) tea.Cmd {
 			if m.agent != nil {
 				m.agent.Close()
+			}
+			if m.store != nil {
+				m.store.Close()
 			}
 			return tea.Quit
 		},

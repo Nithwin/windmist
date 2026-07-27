@@ -119,6 +119,9 @@ func (m Model) handleKeyMsg(msg tea.KeyMsg) (Model, tea.Cmd) {
 		if m.agent != nil {
 			m.agent.Close()
 		}
+		if m.store != nil {
+			m.store.Close()
+		}
 		return m, tea.Quit
 	}
 

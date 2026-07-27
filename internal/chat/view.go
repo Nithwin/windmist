@@ -12,7 +12,16 @@ func (m Model) View() string {
 	var b strings.Builder
 
 	if m.showSelector {
-		return lipgloss.NewStyle().Margin(1, 2).Render(m.selectorList.View())
+		b.WriteString(renderHeader(m))
+		b.WriteString(lipgloss.NewStyle().MarginLeft(2).Render(m.selectorList.View()))
+
+		appStyle := lipgloss.NewStyle().
+			Width(m.width).
+			Height(m.height).
+			Background(ui.Surface).
+			Foreground(ui.White)
+
+		return appStyle.Render(b.String())
 	}
 
 	if m.showSplash {

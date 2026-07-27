@@ -1,3 +1,6 @@
+// Package ai defines the provider-agnostic interfaces and types for interacting
+// with AI language models. It includes the Provider interface, request/response types,
+// tool definitions, and a registry for dynamically loading provider implementations.
 package ai
 
 import "context"

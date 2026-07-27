@@ -186,7 +186,11 @@ func (m Model) handleEventMsg(msg tea.Msg) (Model, tea.Cmd) {
 				program.Send(ApprovalRequestMsg{Command: cmd, ResponseChan: ch})
 				return <-ch
 			}, m.cfg)
-			m.agent = agent.New(provider, manager, agent.Config{})
+			m.agent = agent.New(provider, manager, agent.Config{
+				Store:     m.store,
+				SessionID: m.session.ID,
+				Mode:      m.session.AgentMode,
+			})
 		}
 
 		m.conversation.AddAssistant(fmt.Sprintf("✨ Provider switched to **%s** (model: `%s`)", msg.Provider, msg.Model))
@@ -210,7 +214,11 @@ func (m Model) handleEventMsg(msg tea.Msg) (Model, tea.Cmd) {
 				program.Send(ApprovalRequestMsg{Command: cmd, ResponseChan: ch})
 				return <-ch
 			}, m.cfg)
-			m.agent = agent.New(provider, manager, agent.Config{})
+			m.agent = agent.New(provider, manager, agent.Config{
+				Store:     m.store,
+				SessionID: m.session.ID,
+				Mode:      m.session.AgentMode,
+			})
 		}
 
 		m.conversation.AddAssistant(fmt.Sprintf("✨ Model switched to `%s`", msg.Model))
@@ -233,7 +241,11 @@ func (m Model) handleEventMsg(msg tea.Msg) (Model, tea.Cmd) {
 			program.Send(ApprovalRequestMsg{Command: cmd, ResponseChan: ch})
 			return <-ch
 		}, m.cfg)
-		m.agent = agent.New(m.provider, manager, agent.Config{})
+		m.agent = agent.New(m.provider, manager, agent.Config{
+			Store:     m.store,
+			SessionID: m.session.ID,
+			Mode:      m.session.AgentMode,
+		})
 
 		if msg.Provider == "" {
 			m.conversation.AddAssistant("✨ Sub-Agent reset to Auto (will use fast fallback or main model).")

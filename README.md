@@ -9,7 +9,7 @@
 
 [![Version: v2.0.0](https://img.shields.io/badge/Version-v2.0.0-8B5CF6?style=for-the-badge)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
-[![Go Version](https://img.shields.io/badge/Go-1.25+-00ADD8?style=for-the-badge&logo=go)](https://golang.org)
+[![Go Version](https://img.shields.io/badge/Go-1.26+-00ADD8?style=for-the-badge&logo=go)](https://golang.org)
 [![Discord](https://img.shields.io/badge/Discord-Join-7289DA?style=for-the-badge&logo=discord)](https://discord.gg/9hNxQdHYX)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-10B981?style=for-the-badge)](CONTRIBUTING.md)
 
@@ -36,16 +36,16 @@ Experience an interactive AI pair programming session directly in your terminal:
 
 ## ⚙️ Installation
 
-To install `windmist` (`v2.0.0`) using the Go toolchain (`Go 1.25+` required):
+To install `windmist` (`v2.0.0`) using the Go toolchain (`Go 1.26+` required):
 
 ```bash
-go install github.com/your-username/windmist/cmd/windmist@latest
+go install github.com/Nithwin/windmist/cmd/windmist@latest
 ```
 
 Or clone and build directly from source:
 
 ```bash
-git clone https://github.com/your-username/windmist.git
+git clone https://github.com/Nithwin/windmist.git
 cd windmist
 go build -o windmist ./cmd/windmist
 ```

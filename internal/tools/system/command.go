@@ -39,7 +39,7 @@ func NewCommandTool(cb ApprovalCallback) *CommandTool {
 func (t *CommandTool) Definition() tools.Definition {
 	return tools.Definition{
 		Name:        "run_command",
-		Description: "Execute a bash command in the terminal. Use this to run tests, compile code, execute git commands, or check system state.",
+		Description: "Execute a bash command in the terminal. Use this to run tests, compile code, execute git commands, or check system state. Commands have a default timeout of 120 seconds.",
 		Category:    tools.CategorySystem,
 		Permission:  tools.PermDangerous,
 		Parameters: []tools.Parameter{
@@ -48,6 +48,12 @@ func (t *CommandTool) Definition() tools.Definition {
 				Type:        "string",
 				Description: "The shell command to execute",
 				Required:    true,
+			},
+			{
+				Name:        "timeout_seconds",
+				Type:        "integer",
+				Description: "Optional timeout in seconds (default: 120, max: 600). Use higher values for long-running builds or test suites.",
+				Required:    false,
 			},
 		},
 	}
@@ -67,12 +73,23 @@ func (t *CommandTool) Run(ctx context.Context, call tools.Call) tools.Result {
 		}
 	}
 
-	// Apply a timeout to prevent hanging commands (e.g., waiting for input)
-	ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
+	// Parse optional timeout (default 120s, max 600s)
+	timeout := 120 * time.Second
+	if t, ok := call.Args["timeout_seconds"]; ok {
+		if ts, ok := t.(float64); ok && ts > 0 {
+			timeout = time.Duration(ts) * time.Second
+			if timeout > 600*time.Second {
+				timeout = 600 * time.Second
+			}
+		}
+	}
+
+	// Apply a timeout to prevent hanging commands
+	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
 	cmd := exec.CommandContext(ctx, "bash", "-c", cmdStr)
-	
+
 	sw := &streamWriter{callback: call.OnChunk}
 	cmd.Stdout = sw
 	cmd.Stderr = sw
@@ -83,7 +100,7 @@ func (t *CommandTool) Run(ctx context.Context, call tools.Call) tools.Result {
 	// If it timed out, append a notice
 	if ctx.Err() == context.DeadlineExceeded {
 		return tools.Result{
-			Output: string(output) + "\nCommand timed out after 30 seconds.",
+			Output: string(output) + fmt.Sprintf("\nCommand timed out after %d seconds.", int(timeout.Seconds())),
 		}
 	}
 

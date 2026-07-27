@@ -20,6 +20,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.width = msg.Width
 		m.height = msg.Height
 		m.input.SetWidth(m.MaxContentWidth())
+
+		if m.showSelector {
+			h, v := lipgloss.NewStyle().Margin(1, 2).GetFrameSize()
+			m.selectorList.SetSize(m.width-h, m.height-v-5)
+		}
+
 		m.refreshViewport()
 		return m, nil
 
@@ -168,9 +174,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.selectorList.SetFilteringEnabled(true)
 		m.selectorList.Styles.Title = lipgloss.NewStyle().Background(ui.Purple).Foreground(ui.White).Padding(0, 1)
 
-		// Set size
+		// Set size: subtract v (margin) and 5 (header height)
 		h, v := lipgloss.NewStyle().Margin(1, 2).GetFrameSize()
-		m.selectorList.SetSize(m.width-h, m.height-v)
+		m.selectorList.SetSize(m.width-h, m.height-v-5)
 
 		return m, nil
 

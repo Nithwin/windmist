@@ -63,7 +63,8 @@ var chatCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		fmt.Println("\n\n" + res.Content)
+		fmt.Printf("\n\n--- Completed in %d turn(s) | Tokens: %d in / %d out ---\n",
+			res.Turns, res.Usage.InputTokens, res.Usage.OutputTokens)
 	},
 }
 

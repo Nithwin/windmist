@@ -21,7 +21,7 @@ func Build(cwd string, modeSystemPrompt string) string {
 
 	if cwd != "" {
 		sections = append(sections, RepoMap(cwd))
-		
+
 		// Look for custom AGENTS.md or .windmist/prompt.md conventions
 		if custom := loadCustomPrompt(cwd); custom != "" {
 			sections = append(sections, "## Workspace Conventions\n\nThe following rules apply specifically to this workspace:\n\n"+custom)

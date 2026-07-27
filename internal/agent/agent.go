@@ -1,3 +1,7 @@
+// Package agent implements the autonomous multi-turn reasoning loop that coordinates
+// an AI language model with a set of local tools to solve software engineering tasks.
+// It manages conversation history, context window pruning, tool execution, retry logic,
+// and session persistence.
 package agent
 
 import (
@@ -80,7 +84,7 @@ func New(
 		lspManager: lsp.NewManager(),
 		mcpManager: mcp.NewManager(),
 		// Rate limit: 20 requests per minute with a burst of 5
-		limiter:    rate.NewLimiter(rate.Every(time.Minute/20), 5),
+		limiter: rate.NewLimiter(rate.Every(time.Minute/20), 5),
 	}
 
 	// Start MCP servers asynchronously so it doesn't block UI load

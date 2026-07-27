@@ -37,8 +37,9 @@ func (a *Agent) runLoop(ctx context.Context, messages []ai.Message, userPrompt s
 		}
 
 		prunedHistory := a.config.Memory.Prune(messages, a.config.MaxContextTokens)
-		// Build dynamic system prompt based on mode
-		cwd, _ := os.Getwd()
+		// Build dynamic system prompt based on mode.
+		// Re-read cwd each turn in case a tool changed directory.
+		cwd, _ = os.Getwd()
 		modeConfig := GetModeConfig(Mode(effectiveMode))
 		dynamicSystemPrompt := prompt.Build(cwd, modeConfig.SystemPrompt)
 
@@ -74,11 +75,15 @@ func (a *Agent) runLoop(ctx context.Context, messages []ai.Message, userPrompt s
 				break
 			}
 
-			// Wait before retrying
+			// Wait before retrying with exponential backoff
+			timer := time.NewTimer(backoff)
 			select {
 			case <-ctx.Done():
+				timer.Stop()
+			case <-timer.C:
+			}
+			if ctx.Err() != nil {
 				break
-			case <-time.After(backoff):
 			}
 			backoff *= 2
 		}
@@ -102,7 +107,16 @@ func (a *Agent) runLoop(ctx context.Context, messages []ai.Message, userPrompt s
 			}, nil
 		}
 
-		results := a.execute(ctx, resp.ToolCalls, onChunk)
+		// Enforce MaxToolCallsPerTurn to prevent runaway tool execution
+		calls := resp.ToolCalls
+		if len(calls) > MaxToolCallsPerTurn {
+			if onChunk != nil {
+				onChunk(fmt.Sprintf("\n> ⚠️ **Warning**: Truncated tool calls from %d to %d (max per turn).\n\n", len(calls), MaxToolCallsPerTurn))
+			}
+			calls = calls[:MaxToolCallsPerTurn]
+		}
+
+		results := a.execute(ctx, calls, onChunk)
 		messages = appendToolResults(messages, results)
 		a.saveMessage(messages[len(messages)-1])
 	}
