@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/jmoiron/sqlx"
-	_ "github.com/mattn/go-sqlite3"
+	_ "modernc.org/sqlite"
 )
 
 var schema = `
@@ -38,10 +38,12 @@ CREATE TABLE IF NOT EXISTS file_changes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     session_id TEXT REFERENCES sessions(id) ON DELETE CASCADE,
     message_id INTEGER REFERENCES messages(id) ON DELETE CASCADE,
+    batch_id TEXT DEFAULT '',
     file_path TEXT,
     change_type TEXT,
     before_content TEXT,
     after_content TEXT,
+    undone BOOLEAN DEFAULT 0,
     created_at DATETIME
 );
 
@@ -49,6 +51,7 @@ CREATE TABLE IF NOT EXISTS file_changes (
 CREATE INDEX IF NOT EXISTS idx_messages_session_id ON messages(session_id);
 CREATE INDEX IF NOT EXISTS idx_file_changes_session_id ON file_changes(session_id);
 CREATE INDEX IF NOT EXISTS idx_file_changes_message_id ON file_changes(message_id);
+CREATE INDEX IF NOT EXISTS idx_file_changes_batch_id ON file_changes(batch_id);
 `
 
 type Store struct {
@@ -70,7 +73,7 @@ func NewStore() (*Store, error) {
 	dbPath := filepath.Join(windmistDir, "sessions.db")
 
 	// Enable foreign keys
-	db, err := sqlx.Connect("sqlite3", dbPath+"?_fk=1")
+	db, err := sqlx.Connect("sqlite", dbPath+"?_pragma=foreign_keys(1)")
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to db: %w", err)
 	}
@@ -94,7 +97,7 @@ func (s *Store) Close() error {
 // NewStoreForTest creates a new Store with a specific path for testing
 func NewStoreForTest(dbPath string) (*Store, error) {
 	// Enable foreign keys
-	db, err := sqlx.Connect("sqlite3", dbPath+"?_fk=1")
+	db, err := sqlx.Connect("sqlite", dbPath+"?_pragma=foreign_keys(1)")
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to db: %w", err)
 	}

@@ -3,14 +3,19 @@ package chat
 import (
 	"context"
 	"fmt"
+	"os"
 	"path/filepath"
 	"time"
 
 	"github.com/Nithwin/WindMist/internal/agent"
 	"github.com/Nithwin/WindMist/internal/ai"
 	"github.com/Nithwin/WindMist/internal/config"
+	"github.com/Nithwin/WindMist/internal/rag"
+	"github.com/Nithwin/WindMist/internal/remote"
+	"github.com/Nithwin/WindMist/internal/remote/telegram"
 	"github.com/Nithwin/WindMist/internal/store"
 	"github.com/Nithwin/WindMist/internal/tools"
+	toolagent "github.com/Nithwin/WindMist/internal/tools/agent"
 	"github.com/Nithwin/WindMist/internal/tools/defaults"
 	"github.com/Nithwin/WindMist/internal/ui"
 	"github.com/Nithwin/WindMist/internal/ui/selector"
@@ -65,6 +70,12 @@ type Model struct {
 
 	markdown *ui.MarkdownRenderer
 
+	// RAG components
+	ragIndexer *rag.Indexer
+
+	// Memory components
+	summarizer *agent.Summarizer
+
 	// Inline Selector state
 	showSelector bool
 	selectorList list.Model
@@ -118,14 +129,44 @@ func New() (Model, error) {
 		return Model{}, fmt.Errorf("failed to initialize db store: %w", err)
 	}
 
+	// Initialize RAG System
+	home, _ := os.UserHomeDir()
+	ragDbPath := filepath.Join(home, ".windmist", "rag.db")
+	ragStore, err := rag.NewDocumentStore(ragDbPath)
+	if err != nil {
+		return Model{}, fmt.Errorf("failed to initialize RAG store: %w", err)
+	}
+	ragEmbedder := rag.NewTFIDFEmbedder(512)
+	ragSearcher := rag.NewSearcher(ragStore, ragEmbedder)
+	ragIndexer := rag.NewIndexer(ragStore, ragEmbedder)
+
+	// Rebuild vocabulary on startup if we have indexed chunks (run in background to avoid UI lag)
+	go func() {
+		if chunks, err := ragStore.GetAllChunks(); err == nil && len(chunks) > 0 {
+			docs := make([]string, len(chunks))
+			for i, c := range chunks {
+				docs[i] = c.Content
+			}
+			ragEmbedder.BuildVocabulary(docs)
+		}
+	}()
+
+	// Register Semantic Search Tool
+	manager.Register(toolagent.NewSemanticSearchTool(ragSearcher))
+
 	// For now, create a new session on startup
 	// Later we can implement logic to load an existing session
 	// using the /session commands
+	cwd, err := os.Getwd()
+	if err != nil {
+		cwd = "."
+	}
+
 	activeModel, _ := cfg.ActiveModel()
 	sess := &store.Session{
 		ID:          fmt.Sprintf("sess_%d", time.Now().Unix()),
 		Title:       "New Session",
-		ProjectPath: ".",
+		ProjectPath: cwd,
 		Provider:    cfg.AI.Provider,
 		Model:       activeModel,
 		AgentMode:   "auto",
@@ -181,6 +222,9 @@ func New() (Model, error) {
 		viewport: vp,
 
 		markdown: renderer,
+
+		ragIndexer: ragIndexer,
+		summarizer: agent.NewSummarizer(provider, 8000),
 	}
 
 	model.UpdateInputStyles()
@@ -192,12 +236,27 @@ func New() (Model, error) {
 
 // Init initializes the application.
 func (m Model) Init() tea.Cmd {
-	return tea.Batch(
-		textarea.Blink,
-		func() tea.Msg {
-			return WorkspaceFilesMsg{Files: getWorkspaceFiles()}
-		},
-	)
+	var cmds []tea.Cmd
+	cmds = append(cmds, textarea.Blink)
+	cmds = append(cmds, func() tea.Msg {
+		return WorkspaceFilesMsg{Files: getWorkspaceFiles()}
+	})
+
+	if m.cfg.Remote.Telegram.Enabled && m.cfg.Remote.Telegram.BotToken != "" {
+		if remote.GetHub() == nil {
+			remote.InitHub(&m.cfg.Remote)
+		}
+
+		tController, err := telegram.New(m.cfg.Remote.Telegram)
+		if err == nil {
+			err = remote.GetHub().Register(tController)
+			if err == nil {
+				cmds = append(cmds, listenRemoteCmd())
+			}
+		}
+	}
+
+	return tea.Batch(cmds...)
 }
 
 // MaxContentWidth calculates the maximum width for the UI content based on the window size.

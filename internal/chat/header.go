@@ -2,6 +2,8 @@ package chat
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/Nithwin/WindMist/internal/ui"
@@ -25,11 +27,21 @@ func renderHeader(m Model) string {
 		model = provider.Model
 	}
 
-	// ── left: brand name ──────────────────────────────────────────
+	// ── left: brand name & path ────────────────────────────────────
 	logo := ui.BaseStyle.
 		Bold(true).
 		Foreground(ui.BrandCyan).
-		Render("🌀 WindMist v0.5")
+		Render("🌀 WindMist v2.0")
+
+	cwd, err := os.Getwd()
+	if err != nil {
+		cwd = "."
+	}
+
+	cwdDisplay := filepath.Base(cwd)
+	dirTag := ui.BaseStyle.Foreground(ui.Muted).Render(fmt.Sprintf(" [%s]", cwdDisplay))
+
+	left := lipgloss.JoinHorizontal(lipgloss.Center, logo, dirTag)
 
 	// ── right: status tags ────────────────────────────────────
 	tokens := 0
@@ -103,7 +115,7 @@ func renderHeader(m Model) string {
 
 	// ── padded spacer fills remaining width ──────────────────────
 	totalWidth := m.MaxContentWidth()
-	leftLen := lipgloss.Width(logo)
+	leftLen := lipgloss.Width(left)
 	rightLen := lipgloss.Width(right)
 
 	// Subtract 4 for left/right borders and padding (1+1+1+1)
@@ -114,7 +126,7 @@ func renderHeader(m Model) string {
 
 	row := lipgloss.JoinHorizontal(
 		lipgloss.Center,
-		logo,
+		left,
 		ui.BaseStyle.Render(strings.Repeat(" ", gap)),
 		right,
 	)

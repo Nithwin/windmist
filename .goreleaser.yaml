@@ -1,16 +1,11 @@
 version: 2
 
-before:
-  hooks:
-    - go mod tidy
-    - go mod verify
+project_name: windmist
 
 builds:
   - id: windmist
-    main: ./
     binary: windmist
-    env:
-      - CGO_ENABLED=0
+    main: ./main.go
     goos:
       - linux
       - darwin
@@ -18,29 +13,43 @@ builds:
     goarch:
       - amd64
       - arm64
+    env:
+      - CGO_ENABLED=0
     ldflags:
-      - -s -w -X github.com/Nithwin/WindMist/cmd.Version={{.Version}} -X github.com/Nithwin/WindMist/cmd.Commit={{.Commit}} -X github.com/Nithwin/WindMist/cmd.Date={{.Date}}
+      - -s -w
+      - -X main.version={{.Version}}
+      - -X main.commit={{.ShortCommit}}
+      - -X main.date={{.Date}}
+      - -X main.builtBy=goreleaser
 
 archives:
-  - formats: ["tar.gz"]
-    name_template: >-
-      {{ .ProjectName }}_{{ .Version }}_{{ if eq .Os "darwin" }}macOS{{ else }}{{ title .Os }}{{ end }}_{{ if eq .Arch "amd64" }}x86_64{{ else if eq .Arch "386" }}i386{{ else }}{{ .Arch }}{{ end }}{{ if .Arm }}v{{ .Arm }}{{ end }}
+  - format: tar.gz
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
     format_overrides:
       - goos: windows
-        formats: ["binary", "zip"]
+        format: zip
 
 checksum:
-  name_template: 'checksums.txt'
+  name_template: "checksums.txt"
 
 snapshot:
-  version_template: "{{ incpatch .Version }}-next"
+  name_template: "{{ incpatch .Version }}-next"
 
 changelog:
   sort: asc
   filters:
     exclude:
-      - '^docs:'
-      - '^test:'
-      - '^chore:'
-      - 'Merge pull request'
-      - 'Merge branch'
+      - "^docs:"
+      - "^test:"
+
+brews:
+  - repository:
+      owner: Nithwin
+      name: homebrew-tap
+    commit_author:
+      name: Nithwin
+      email: contact@windmist.dev
+    homepage: "https://github.com/Nithwin/WindMist"
+    description: "AI coding agent for the terminal."
+    test: |
+      system "#{bin}/windmist --version"

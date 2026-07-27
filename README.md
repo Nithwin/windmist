@@ -1,20 +1,20 @@
 <div align="center">
 
-# 🌀 WindMist `v1.0.0`
+# 🌀 WindMist `v2.0.0`
 ### Autonomous AI Software Engineer Running Directly in Your Terminal
 
 <img src="images/Gemini_Generated_Image_4fucu04fucu04fuc.png?v=2" alt="WindMist Hero Banner" width="860" />
 
 <br/>
 
-[![Version: v1.0.0](https://img.shields.io/badge/Version-v1.0.0-8B5CF6?style=for-the-badge)](CHANGELOG.md)
+[![Version: v2.0.0](https://img.shields.io/badge/Version-v2.0.0-8B5CF6?style=for-the-badge)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
-[![Go Version](https://img.shields.io/badge/Go-1.25+-00ADD8?style=for-the-badge&logo=go)](https://golang.org)
+[![Go Version](https://img.shields.io/badge/Go-1.26+-00ADD8?style=for-the-badge&logo=go)](https://golang.org)
 [![Discord](https://img.shields.io/badge/Discord-Join-7289DA?style=for-the-badge&logo=discord)](https://discord.gg/9hNxQdHYX)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-10B981?style=for-the-badge)](CONTRIBUTING.md)
 
 **A modern open-source AI coding assistant running right inside your terminal.**  
-WindMist (`v1.0.0`) is built in high-performance Go to inspect code, edit files atomically across your workspace, and engage in multi-turn reasoning loops with local tools.
+WindMist (`v2.0.0`) is built in high-performance Go to inspect code, edit files atomically across your workspace, and engage in multi-turn reasoning loops with local tools.
 
 > **🌐 Official Website:** [windmist.vercel.app](https://windmist.vercel.app/) &nbsp;|&nbsp; **💻 Website Repo:** [`windmist-site`](https://github.com/Nithwin/windmist-site) &nbsp;|&nbsp; **💬 Community:** [Discord](https://discord.gg/9hNxQdHYX)
 
@@ -36,16 +36,16 @@ Experience an interactive AI pair programming session directly in your terminal:
 
 ## ⚙️ Installation
 
-To install `windmist` (`v1.0.0`) using the Go toolchain (`Go 1.25+` required):
+To install `windmist` (`v2.0.0`) using the Go toolchain (`Go 1.26+` required):
 
 ```bash
-go install github.com/your-username/windmist/cmd/windmist@latest
+go install github.com/Nithwin/windmist/cmd/windmist@latest
 ```
 
 Or clone and build directly from source:
 
 ```bash
-git clone https://github.com/your-username/windmist.git
+git clone https://github.com/Nithwin/windmist.git
 cd windmist
 go build -o windmist ./cmd/windmist
 ```
@@ -71,10 +71,13 @@ go build -o windmist ./cmd/windmist
 
 ## ✨ Features & Capabilities
 
-WindMist (`v1.0.0`) provides a robust, native engineering environment inside your terminal:
+WindMist (`v2.0.0`) provides a robust, native engineering environment inside your terminal:
 
 * ✅ **Interactive AI Chat & TUI:** Rich Bubble Tea and Lip Gloss interface with real-time streaming, markdown rendering, and syntax coloring.
-* ✅ **Native Gemini Provider (`internal/providers/gemini`):** Full multi-turn conversation support with native `OBJECT` schema translation and function calling (`v1beta`).
+* ✅ **Multi-Agent Orchestration:** Delegate background research to cheaper, faster Sub-agents while keeping your main context clean.
+* ✅ **RAG & Context Memory:** A lightweight, pure-Go TF-IDF vector database that semantically indexes your workspace so the agent never hallucinates.
+* ✅ **Extensibility via MCP:** Full support for the Model Context Protocol, enabling dynamic external tools (e.g., GitHub Auth, database connectors).
+* ✅ **Remote Control Hub:** Connect a Telegram Bot (`/remote`) to actively monitor, steer, and prompt your WindMist agent remotely.
 * ✅ **15 Atomic Filesystem & Editing Tools (`internal/tools/...`):**
   * **Filesystem Operations:** `read`, `write`, `append`, `delete`, `rename`, `list`, `create`, `info`, `exists`.
   * **Precision Editing:** `replace_text`, `replace_range`, `delete_range`, `read_context`, `insert_text`, `search_text`.
@@ -90,7 +93,7 @@ WindMist (`v1.0.0`) provides a robust, native engineering environment inside you
 | `windmist chat <prompt>` | Run a single-turn or multi-turn agent instruction directly from the command line. |
 | `windmist set <key> <val>` | Configure local environment and provider settings (`~/.windmist/config.yaml`). |
 | `windmist show` | Display current local configuration settings. |
-| `windmist version` | Print current semantic release build version (`v1.0.0`). |
+| `windmist version` | Print current semantic release build version (`v2.0.0`). |
 
 ---
 

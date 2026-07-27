@@ -17,7 +17,7 @@ func renderConversation(m Model) string {
 	// Always render the welcome state at the top of the conversation history
 	hint := lipgloss.JoinVertical(
 		lipgloss.Left,
-		ui.AssistantLabelStyle.Render("🌀 WindMist v0.5 is ready"),
+		ui.AssistantLabelStyle.Render("🌀 WindMist v2.0 is ready"),
 		ui.MutedStyle.Render("Type a message below, or try:"),
 		ui.BaseStyle.Render(""),
 		ui.BaseStyle.Render("  "+ui.LabelStyle.Render("/help")+"  "+ui.MutedLightStyle.Render("→  show all commands")),
@@ -49,7 +49,7 @@ func renderConversation(m Model) string {
 			b.WriteString(ui.BaseStyle.Render("\n"))
 
 		case "assistant":
-			label := ui.AssistantLabelStyle.Render("🌀 WindMist v0.5")
+			label := ui.AssistantLabelStyle.Render("🌀 WindMist v2.0")
 			b.WriteString(label)
 			b.WriteString(ui.BaseStyle.Render("\n"))
 			contentStr := msg.Content

@@ -7,9 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [Unreleased]
+## [v2.0.0] - 2026-07-27
 
 ### Added
+- **Multi-Agent Orchestration**: Sub-agent system to offload heavy background tasks.
+- **RAG & Token-Aware Memory**: Integrated purely local TF-IDF embedding vector database to track workspace context without blowing up token limits.
+- **Extensibility (MCP)**: Full support for the Model Context Protocol, enabling dynamic tools like native GitHub Auth and Postgres.
+- **Remote Control & Telegram Bot**: Introduced a `remote.Hub` to securely broadcast agent output to a fully-interactive Telegram bot (`/remote` to configure).
+- **Session Persistence**: Complete architecture for persisting context states across sessions.
+- **Enhanced TUI UX**: Added multi-line streaming, `ctrl+y` copy support, `/export` conversation command, and resolved terminal blanking issues.
+- **Expanded Provider Modes**: Native support for switching providers and custom models dynamically on the fly.
 - **Repository Infrastructure**: Standardized GitHub issue forms (`bug_report.yml`, `feature_request.yml`, `documentation.yml`, `config.yml`) and `pull_request_template.md`.
 - **Labels Infrastructure**: Automated label specification (`labels.json`) and synchronization script (`sync_labels.sh`).
 - **Automated CI**: Fast, single-purpose PR validation workflow ([`ci.yml`](.github/workflows/ci.yml)) executing `gofmt`, `go vet`, `go test -race -timeout 10m`, and binary compilation checks on Ubuntu Linux.

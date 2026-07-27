@@ -8,11 +8,39 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
+	"sync"
 	"time"
 )
 
+// Global rate limiter for Gemini API
+var (
+	lastRequestTime time.Time
+	rlMutex         sync.Mutex
+)
+
+// enforceRateLimit ensures we do not exceed requests per minute by pacing calls.
+func enforceRateLimit(model string) {
+	rlMutex.Lock()
+	defer rlMutex.Unlock()
+
+	now := time.Now()
+	elapsed := now.Sub(lastRequestTime)
+	minInterval := 4 * time.Second
+
+	if strings.Contains(model, "lite") {
+		minInterval = 2 * time.Second
+	}
+
+	if !lastRequestTime.IsZero() && elapsed < minInterval {
+		time.Sleep(minInterval - elapsed)
+	}
+	lastRequestTime = time.Now()
+}
+
 const (
-	baseURL = "https://generativelanguage.googleapis.com/v1beta"
+	baseURLAlpha = "https://generativelanguage.googleapis.com/v1alpha"
+	baseURLBeta  = "https://generativelanguage.googleapis.com/v1beta"
 )
 
 // Client handles communication with the Gemini API.
@@ -44,10 +72,29 @@ func (c *Client) GenerateContent(
 		return nil, fmt.Errorf("marshal request: %w", err)
 	}
 
+	actualModel := c.model
+
+	// Handle users who have cached -preview models in their config
+	if actualModel == "gemini-3.5-flash-preview" {
+		actualModel = "gemini-3.5-flash"
+	}
+	if actualModel == "gemini-3.6-flash-preview" {
+		actualModel = "gemini-3.6-flash"
+	}
+
+	if actualModel == "gemini-3.5-lite" {
+		actualModel = "gemini-3.5-flash-lite"
+	}
+
+	// 3.1-pro requires -preview
+	if actualModel == "gemini-3.1-pro" {
+		actualModel = "gemini-3.1-pro-preview"
+	}
+
 	endpoint := fmt.Sprintf(
 		"%s/models/%s:generateContent?key=%s",
-		baseURL,
-		c.model,
+		baseURLBeta,
+		actualModel,
 		url.QueryEscape(c.apiKey),
 	)
 
@@ -72,6 +119,8 @@ func (c *Client) GenerateContent(
 	for attempt := 0; attempt < maxRetries; attempt++ {
 		// Reset the request body since it gets consumed on each call
 		httpReq.Body = io.NopCloser(bytes.NewReader(body))
+
+		enforceRateLimit(actualModel)
 
 		resp, err = c.client.Do(httpReq)
 		if err != nil {

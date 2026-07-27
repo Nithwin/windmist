@@ -1,6 +1,8 @@
 package chat
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -184,7 +186,11 @@ func (m Model) handleEventMsg(msg tea.Msg) (Model, tea.Cmd) {
 				program.Send(ApprovalRequestMsg{Command: cmd, ResponseChan: ch})
 				return <-ch
 			}, m.cfg)
-			m.agent = agent.New(provider, manager, agent.Config{})
+			m.agent = agent.New(provider, manager, agent.Config{
+				Store:     m.store,
+				SessionID: m.session.ID,
+				Mode:      m.session.AgentMode,
+			})
 		}
 
 		m.conversation.AddAssistant(fmt.Sprintf("✨ Provider switched to **%s** (model: `%s`)", msg.Provider, msg.Model))
@@ -208,7 +214,11 @@ func (m Model) handleEventMsg(msg tea.Msg) (Model, tea.Cmd) {
 				program.Send(ApprovalRequestMsg{Command: cmd, ResponseChan: ch})
 				return <-ch
 			}, m.cfg)
-			m.agent = agent.New(provider, manager, agent.Config{})
+			m.agent = agent.New(provider, manager, agent.Config{
+				Store:     m.store,
+				SessionID: m.session.ID,
+				Mode:      m.session.AgentMode,
+			})
 		}
 
 		m.conversation.AddAssistant(fmt.Sprintf("✨ Model switched to `%s`", msg.Model))
@@ -231,7 +241,11 @@ func (m Model) handleEventMsg(msg tea.Msg) (Model, tea.Cmd) {
 			program.Send(ApprovalRequestMsg{Command: cmd, ResponseChan: ch})
 			return <-ch
 		}, m.cfg)
-		m.agent = agent.New(m.provider, manager, agent.Config{})
+		m.agent = agent.New(m.provider, manager, agent.Config{
+			Store:     m.store,
+			SessionID: m.session.ID,
+			Mode:      m.session.AgentMode,
+		})
 
 		if msg.Provider == "" {
 			m.conversation.AddAssistant("✨ Sub-Agent reset to Auto (will use fast fallback or main model).")
@@ -249,7 +263,26 @@ func (m Model) handleEventMsg(msg tea.Msg) (Model, tea.Cmd) {
 		return m, nil
 
 	case setAPIKeySuccessMsg:
-		m.conversation.AddAssistant(fmt.Sprintf("🔑 Successfully saved new API key for **%s**.\nRemember to restart WindMist or select the provider again to apply the changes.", msg.Provider))
+		provider, err := ai.New(m.cfg)
+		if err == nil {
+			m.provider = provider
+			manager := tools.NewManager()
+			defaults.RegisterAll(manager, func(cmd string) bool {
+				if program == nil {
+					return false
+				}
+				ch := make(chan bool)
+				program.Send(ApprovalRequestMsg{Command: cmd, ResponseChan: ch})
+				return <-ch
+			}, m.cfg)
+			m.agent = agent.New(provider, manager, agent.Config{
+				Store:     m.store,
+				SessionID: m.session.ID,
+				Mode:      m.session.AgentMode,
+			})
+		}
+
+		m.conversation.AddAssistant(fmt.Sprintf("🔑 Successfully saved and applied new API key for **%s**! You can use it immediately.", msg.Provider))
 		m.refreshViewport()
 		return m, nil
 
@@ -280,6 +313,78 @@ func (m Model) handleEventMsg(msg tea.Msg) (Model, tea.Cmd) {
 		m.refreshViewport()
 		m.loading = false
 		return m, nil
+
+	case indexWorkspaceMsg:
+		if m.ragIndexer == nil {
+			m.conversation.AddAssistant("❌ RAG indexer is not initialized.")
+			m.refreshViewport()
+			return m, nil
+		}
+
+		m.conversation.AddAssistant("⏳ *Indexing workspace for semantic search. This might take a moment...*")
+		m.refreshViewport()
+
+		// Run indexing in background and return a result message when done
+		return m, func() tea.Msg {
+			count, err := m.ragIndexer.IndexProject(".")
+			if err != nil {
+				return switchErrorMsg{Err: fmt.Errorf("indexing failed: %w", err)}
+			}
+			return ResponseMsg{Text: fmt.Sprintf("✅ Workspace indexed successfully! %d code chunks embedded.", count)}
+		}
+
+	case compactConversationMsg:
+		if m.summarizer == nil || m.store == nil || m.session == nil {
+			m.conversation.AddAssistant("❌ Summarizer or persistence not initialized.")
+			m.refreshViewport()
+			return m, nil
+		}
+
+		initialMessages := m.getInitialMessages()
+
+		// If it's too short, let user know
+		if len(initialMessages) <= 6 {
+			m.conversation.AddAssistant("ℹ️ Conversation is already short. Compaction not needed.")
+			m.refreshViewport()
+			return m, nil
+		}
+
+		m.conversation.AddAssistant("⏳ *Compacting conversation to save tokens...*")
+		m.refreshViewport()
+
+		// Run compaction in background
+		return m, func() tea.Msg {
+			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+			defer cancel()
+
+			compacted, err := m.summarizer.Compact(ctx, initialMessages, 4) // Keep last 4 messages intact
+			if err != nil {
+				return switchErrorMsg{Err: fmt.Errorf("compaction failed: %w", err)}
+			}
+
+			// Save to DB: Delete old messages, insert new ones
+			_ = m.store.DeleteMessagesBySession(m.session.ID)
+
+			for _, aiMsg := range compacted {
+				sMsg := &store.Message{
+					SessionID: m.session.ID,
+					Role:      string(aiMsg.Role),
+					Content:   aiMsg.Content,
+				}
+				if len(aiMsg.ToolCalls) > 0 {
+					b, _ := json.Marshal(aiMsg.ToolCalls)
+					sMsg.ToolCalls = string(b)
+				}
+				if len(aiMsg.ToolResults) > 0 {
+					b, _ := json.Marshal(aiMsg.ToolResults)
+					sMsg.ToolResults = string(b)
+				}
+				_ = m.store.SaveMessage(sMsg)
+			}
+
+			// Reload session
+			return switchSessionSuccessMsg{SessionID: m.session.ID}
+		}
 
 	case switchErrorMsg:
 		m.conversation.AddAssistant(fmt.Sprintf("❌ Error: %v", msg.Err))

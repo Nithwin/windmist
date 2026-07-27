@@ -25,13 +25,14 @@ var ignoredDirs = map[string]bool{
 func RepoMap(cwd string) string {
 	var sb strings.Builder
 	sb.WriteString("## Repository Map\n\n")
+	sb.WriteString(fmt.Sprintf("You are currently working in the directory: **%s**\n\n", cwd))
 	sb.WriteString("Below is a tree representation of the files in the current workspace.\n")
 	sb.WriteString("Use this map to understand the project structure and locate files instantly.\n")
 	sb.WriteString("This map is dynamically updated on every turn to reflect the current state of the filesystem.\n\n")
 	sb.WriteString("```\n.\n")
 
 	fileCount := 0
-	maxFiles := 2000 // hard limit to prevent token blowout
+	maxFiles := 250 // hard limit to prevent token blowout
 
 	err := filepath.WalkDir(cwd, func(path string, d os.DirEntry, err error) error {
 		if err != nil {
@@ -51,7 +52,6 @@ func RepoMap(cwd string) string {
 
 		fileCount++
 		if fileCount > maxFiles {
-			// Don't stop WalkDir completely, just skip directories if over limit
 			if d.IsDir() {
 				return filepath.SkipDir
 			}
@@ -61,6 +61,10 @@ func RepoMap(cwd string) string {
 		// Calculate depth
 		relPath, _ := filepath.Rel(cwd, path)
 		depth := strings.Count(relPath, string(os.PathSeparator))
+
+		if depth > 2 && d.IsDir() {
+			return filepath.SkipDir
+		}
 
 		indent := strings.Repeat("  ", depth)
 		prefix := "├── "

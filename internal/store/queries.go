@@ -31,7 +31,7 @@ func (s *Store) GetSession(id string) (*Session, error) {
 // ListSessionsByProject gets all sessions for a specific project
 func (s *Store) ListSessionsByProject(projectPath string) ([]Session, error) {
 	var sessions []Session
-	err := s.db.Select(&sessions, "SELECT * FROM sessions WHERE project_path = ? ORDER BY updated_at DESC", projectPath)
+	err := s.db.Select(&sessions, "SELECT * FROM sessions WHERE project_path = ? OR project_path = '.' ORDER BY updated_at DESC", projectPath)
 	return sessions, err
 }
 
@@ -76,6 +76,12 @@ func (s *Store) GetMessagesBySession(sessionID string) ([]Message, error) {
 	var messages []Message
 	err := s.db.Select(&messages, "SELECT * FROM messages WHERE session_id = ? ORDER BY id ASC", sessionID)
 	return messages, err
+}
+
+// DeleteMessagesBySession deletes all messages for a session.
+func (s *Store) DeleteMessagesBySession(sessionID string) error {
+	_, err := s.db.Exec("DELETE FROM messages WHERE session_id = ?", sessionID)
+	return err
 }
 
 // SaveFileChange logs a file change for undo/redo

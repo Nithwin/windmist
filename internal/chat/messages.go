@@ -71,6 +71,12 @@ type mcpInstallSuccessMsg struct {
 	Name string
 }
 
+// indexWorkspaceMsg triggers indexing of the codebase for RAG.
+type indexWorkspaceMsg struct{}
+
+// compactConversationMsg triggers manual summarization of the conversation context.
+type compactConversationMsg struct{}
+
 // setAPIKeySuccessMsg represents a successful API key update.
 type setAPIKeySuccessMsg struct {
 	Provider string
@@ -108,4 +114,10 @@ type showInlinePromptMsg struct {
 	Prompt     string
 	IsPassword bool
 	OnSubmit   func(string) tea.Cmd
+}
+
+// remoteCommandMsg is sent when a remote controller issues a command.
+type remoteCommandMsg struct {
+	Type string
+	Args []string
 }

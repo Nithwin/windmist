@@ -81,6 +81,7 @@ func translateTools(tools []ai.ToolDefinition) []Tool {
 // translateMessages converts ai.Messages into Gemini Content items.
 func translateMessages(messages []ai.Message) []Content {
 	contents := make([]Content, 0, len(messages))
+	var lastThoughtSig string
 
 	for _, msg := range messages {
 		switch msg.Role {
@@ -95,7 +96,7 @@ func translateMessages(messages []ai.Message) []Content {
 			})
 
 		case ai.RoleAssistant:
-			parts := make([]Part, 0, 1+len(msg.ToolCalls))
+			parts := make([]Part, 0, 1+len(msg.ToolCalls)+1)
 			if msg.Content != "" {
 				parts = append(parts, Part{Text: msg.Content})
 			}
@@ -106,6 +107,12 @@ func translateMessages(messages []ai.Message) []Content {
 						Args: call.Args,
 					},
 				})
+				if !strings.HasPrefix(call.ID, "call_") {
+					lastThoughtSig = call.ID
+				}
+			}
+			if lastThoughtSig != "" {
+				parts = append(parts, Part{ThoughtSignature: lastThoughtSig})
 			}
 			if len(parts) > 0 {
 				contents = append(contents, Content{
@@ -115,7 +122,7 @@ func translateMessages(messages []ai.Message) []Content {
 			}
 
 		case ai.RoleTool:
-			parts := make([]Part, 0, len(msg.ToolResults))
+			parts := make([]Part, 0, len(msg.ToolResults)+1)
 			for _, res := range msg.ToolResults {
 				parts = append(parts, Part{
 					FunctionResponse: &FunctionResponse{
@@ -127,9 +134,12 @@ func translateMessages(messages []ai.Message) []Content {
 					},
 				})
 			}
+			if lastThoughtSig != "" {
+				parts = append(parts, Part{ThoughtSignature: lastThoughtSig})
+			}
 			if len(parts) > 0 {
 				contents = append(contents, Content{
-					Role:  "function",
+					Role:  "user",
 					Parts: parts,
 				})
 			}
@@ -144,16 +154,29 @@ func translateResponse(candidate Candidate, model string, resp *GenerateContentR
 	var textBuilder strings.Builder
 	toolCalls := make([]ai.ToolCall, 0)
 
-	for i, part := range candidate.Content.Parts {
+	var thoughtSig string
+
+	for _, part := range candidate.Content.Parts {
 		if part.Text != "" {
 			textBuilder.WriteString(part.Text)
 		}
+		if part.ThoughtSignature != "" {
+			thoughtSig = part.ThoughtSignature
+		}
 		if part.FunctionCall != nil {
 			toolCalls = append(toolCalls, ai.ToolCall{
-				ID:   fmt.Sprintf("call_%s_%d", part.FunctionCall.Name, i),
+				ID:   "",
 				Name: part.FunctionCall.Name,
 				Args: part.FunctionCall.Args,
 			})
+		}
+	}
+
+	for i := range toolCalls {
+		if thoughtSig != "" {
+			toolCalls[i].ID = thoughtSig
+		} else {
+			toolCalls[i].ID = fmt.Sprintf("call_%s_%d", toolCalls[i].Name, i)
 		}
 	}
 

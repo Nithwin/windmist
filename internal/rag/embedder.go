@@ -3,12 +3,14 @@ package rag
 import (
 	"math"
 	"strings"
+	"sync"
 	"unicode"
 )
 
 // TFIDFEmbedder generates TF-IDF-based embeddings entirely in pure Go.
 // No API calls needed — works fully offline.
 type TFIDFEmbedder struct {
+	mu sync.RWMutex
 	// vocabulary maps tokens to their dimension index.
 	vocabulary map[string]int
 	// idf stores inverse document frequency for each token.
@@ -88,6 +90,7 @@ func (e *TFIDFEmbedder) BuildVocabulary(documents []string) {
 		filtered[i], filtered[maxIdx] = filtered[maxIdx], filtered[i]
 	}
 
+	e.mu.Lock()
 	e.vocabulary = make(map[string]int, dim)
 	for i := 0; i < dim; i++ {
 		e.vocabulary[filtered[i].token] = i
@@ -103,11 +106,15 @@ func (e *TFIDFEmbedder) BuildVocabulary(documents []string) {
 		}
 		e.idf[tok] = math.Log(float64(totalDocs+1) / float64(df+1))
 	}
+	e.mu.Unlock()
 }
 
 // Embed generates a TF-IDF vector for the given text.
 // The vector dimensions correspond to the vocabulary built via BuildVocabulary.
 func (e *TFIDFEmbedder) Embed(text string) Vector {
+	e.mu.RLock()
+	defer e.mu.RUnlock()
+
 	if e.dimensions == 0 {
 		return nil
 	}
@@ -145,6 +152,8 @@ func (e *TFIDFEmbedder) Embed(text string) Vector {
 
 // Dimensions returns the number of dimensions in the embeddings.
 func (e *TFIDFEmbedder) Dimensions() int {
+	e.mu.RLock()
+	defer e.mu.RUnlock()
 	return e.dimensions
 }
 

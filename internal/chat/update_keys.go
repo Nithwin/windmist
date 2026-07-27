@@ -5,12 +5,14 @@ import (
 	"strings"
 
 	"github.com/Nithwin/WindMist/internal/ui/selector"
+	"github.com/atotto/clipboard"
+	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
 func (m Model) handleKeyMsg(msg tea.KeyMsg) (Model, tea.Cmd) {
-	// Scroll conversation when command palette or file picker is closed.
-	if !m.showCommands && !m.showFilePicker {
+	// Scroll conversation when command palette, file picker, or selector is closed.
+	if !m.showCommands && !m.showFilePicker && !m.showSelector {
 		switch msg.String() {
 
 		case "ctrl+up", "shift+up":
@@ -91,6 +93,19 @@ func (m Model) handleKeyMsg(msg tea.KeyMsg) (Model, tea.Cmd) {
 	}
 
 	switch msg.String() {
+	case "ctrl+y":
+		for i := len(m.conversation.Messages) - 1; i >= 0; i-- {
+			if m.conversation.Messages[i].Role == "assistant" {
+				if !strings.HasPrefix(m.conversation.Messages[i].Content, "📋") && !strings.HasPrefix(m.conversation.Messages[i].Content, "❌") && m.conversation.Messages[i].Content != "" {
+					_ = clipboard.WriteAll(m.conversation.Messages[i].Content)
+					m.conversation.AddAssistant("📋 *Copied last response to clipboard!*")
+					m.refreshViewport()
+					break
+				}
+			}
+		}
+		return m, nil
+
 	case "ctrl+c", "esc":
 		if m.loading && m.cancel != nil {
 			m.cancel()
@@ -104,6 +119,9 @@ func (m Model) handleKeyMsg(msg tea.KeyMsg) (Model, tea.Cmd) {
 		}
 		if m.agent != nil {
 			m.agent.Close()
+		}
+		if m.store != nil {
+			m.store.Close()
 		}
 		return m, tea.Quit
 	}
@@ -188,6 +206,14 @@ func (m Model) handleKeyMsg(msg tea.KeyMsg) (Model, tea.Cmd) {
 				return m, m.onCancel()
 			}
 			return m, nil
+		case "backspace":
+			if m.selectorList.FilterState() != list.Filtering {
+				m.showSelector = false
+				if m.onCancel != nil {
+					return m, m.onCancel()
+				}
+				return m, nil
+			}
 		case "enter":
 			m.showSelector = false
 			if i, ok := m.selectorList.SelectedItem().(selector.Option); ok {
@@ -197,6 +223,10 @@ func (m Model) handleKeyMsg(msg tea.KeyMsg) (Model, tea.Cmd) {
 			}
 			return m, nil
 		}
+
+		var cmd tea.Cmd
+		m.selectorList, cmd = m.selectorList.Update(msg)
+		return m, cmd
 	}
 
 	switch msg.String() {

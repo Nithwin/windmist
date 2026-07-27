@@ -1,7 +1,10 @@
 package chat
 
 import (
+	"fmt"
+	"os"
 	"strings"
+	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -23,14 +26,22 @@ var Registry = []Command{
 
 /help       Show available commands
 /new        Start a new conversation
+/clear      Clear the conversation display
 /sessions   Load a previous session
 /undo       Undo the last AI file edit
 /redo       Redo the last undone file edit
 /model      Change model
-/mode       Change agent mode
+/mode       Change agent mode (auto/build/plan)
 /provider   Change provider
 /subagent   Configure sub-agent (cheaper background model)
 /theme      Change UI theme
+/apikey     Set API Key for the current provider
+/index      Index workspace for semantic search (RAG)
+/compact    Summarize old messages to save tokens
+/export     Export the conversation to a markdown file
+/remote     Configure remote control (Telegram)
+/mcp        Install an MCP server
+/status     Show current configuration
 /exit       Exit WindMist`,
 			)
 			return nil
@@ -43,6 +54,15 @@ var Registry = []Command{
 			return func() tea.Msg {
 				return createNewSessionMsg{}
 			}
+		},
+	},
+	{
+		Name:        "/clear",
+		Description: "Clear the conversation display",
+		Execute: func(m *Model) tea.Cmd {
+			m.conversation.Clear()
+			m.conversation.AddAssistant("🧹 Conversation display cleared. Session history is preserved in the database.")
+			return nil
 		},
 	},
 	{
@@ -113,10 +133,95 @@ var Registry = []Command{
 		},
 	},
 	{
+		Name:        "/index",
+		Description: "Index workspace for semantic search (RAG)",
+		Execute: func(m *Model) tea.Cmd {
+			return func() tea.Msg {
+				return indexWorkspaceMsg{}
+			}
+		},
+	},
+	{
+		Name:        "/compact",
+		Description: "Summarize old messages to save tokens",
+		Execute: func(m *Model) tea.Cmd {
+			return func() tea.Msg {
+				return compactConversationMsg{}
+			}
+		},
+	},
+	{
+		Name:        "/remote",
+		Description: "Configure and manage remote control (Telegram, Web)",
+		Execute: func(m *Model) tea.Cmd {
+			return selectRemoteCmd(m)
+		},
+	},
+	{
 		Name:        "/mcp",
 		Description: "Install an MCP server (e.g. GitHub, Postgres)",
 		Execute: func(m *Model) tea.Cmd {
 			return selectMCPCmd(m)
+		},
+	},
+	{
+		Name:        "/export",
+		Description: "Export the conversation to a markdown file",
+		Execute: func(m *Model) tea.Cmd {
+			filename := fmt.Sprintf("windmist_export_%d.md", time.Now().Unix())
+			var b strings.Builder
+			b.WriteString(fmt.Sprintf("# WindMist Conversation Export\n\nDate: %s\n\n", time.Now().Format(time.RFC1123)))
+
+			for _, msg := range m.conversation.Messages {
+				role := "User"
+				if msg.Role == "assistant" {
+					role = "WindMist"
+				}
+				b.WriteString(fmt.Sprintf("## %s\n\n%s\n\n---\n\n", role, msg.Content))
+			}
+
+			err := os.WriteFile(filename, []byte(b.String()), 0644)
+			if err != nil {
+				m.conversation.AddAssistant(fmt.Sprintf("❌ Failed to export conversation: %v", err))
+			} else {
+				m.conversation.AddAssistant(fmt.Sprintf("✅ Conversation exported to `%s`", filename))
+			}
+			return nil
+		},
+	},
+	{
+		Name:        "/status",
+		Description: "Show current configuration",
+		Execute: func(m *Model) tea.Cmd {
+			model := "—"
+			if provider, err := m.cfg.ActiveProvider(); err == nil {
+				model = provider.Model
+			}
+			mode := "build"
+			sessionTitle := "—"
+			tokens := 0
+			if m.session != nil {
+				mode = m.session.AgentMode
+				sessionTitle = m.session.Title
+				tokens = m.session.TokenCount
+			}
+			if mode == "" {
+				mode = "build"
+			}
+
+			status := fmt.Sprintf(`**Current Configuration**
+
+| Setting       | Value               |
+|:------------- |:------------------- |
+| Provider      | %s                  |
+| Model         | %s                  |
+| Agent Mode    | %s                  |
+| Session       | %s                  |
+| Total Tokens  | %d                  |
+| Theme         | %s                  |`, m.cfg.AI.Provider, model, mode, sessionTitle, tokens, m.cfg.UI.Theme)
+
+			m.conversation.AddAssistant(status)
+			return nil
 		},
 	},
 	{
@@ -125,6 +230,9 @@ var Registry = []Command{
 		Execute: func(m *Model) tea.Cmd {
 			if m.agent != nil {
 				m.agent.Close()
+			}
+			if m.store != nil {
+				m.store.Close()
 			}
 			return tea.Quit
 		},
@@ -135,6 +243,9 @@ var Registry = []Command{
 		Execute: func(m *Model) tea.Cmd {
 			if m.agent != nil {
 				m.agent.Close()
+			}
+			if m.store != nil {
+				m.store.Close()
 			}
 			return tea.Quit
 		},

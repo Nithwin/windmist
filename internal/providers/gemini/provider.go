@@ -3,6 +3,7 @@ package gemini
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/Nithwin/WindMist/internal/ai"
 	"github.com/Nithwin/WindMist/internal/config"
@@ -131,6 +132,17 @@ func (p *Provider) Stream(
 
 			if translated.Finish != "" {
 				finalResp.Finish = translated.Finish
+			}
+
+			// Capture ThoughtSignature if it arrives in a separate chunk
+			for _, part := range candidate.Content.Parts {
+				if part.ThoughtSignature != "" {
+					for i := range finalResp.ToolCalls {
+						if strings.HasPrefix(finalResp.ToolCalls[i].ID, "call_") {
+							finalResp.ToolCalls[i].ID = part.ThoughtSignature
+						}
+					}
+				}
 			}
 
 			// Accumulate usage (Gemini sends total usage in chunks usually, we'll just take the latest)

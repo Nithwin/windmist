@@ -1,5 +1,6 @@
 # Go binaries & build artifacts
 WindMist
+windmist
 bin/
 *.exe
 *.exe~
@@ -69,3 +70,6 @@ CLAUDE_CODE_TODO.md
 
 # V2 Roadmap (internal planning)
 todo/
+
+# Conversation exports
+windmist_export_*.md

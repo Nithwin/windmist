@@ -21,7 +21,7 @@ func renderBanner(m Model) string {
 	b.WriteString(cyanStyle.Bold(true).Render(wordmark))
 	b.WriteString("\n")
 
-	b.WriteString(ui.BaseStyle.Foreground(ui.MutedLight).Render("🌀 WindMist v0.5 — AI Coding Assistant"))
+	b.WriteString(ui.BaseStyle.Foreground(ui.MutedLight).Render("🌀 WindMist v2.0 — AI Coding Assistant"))
 	b.WriteString("\n\n")
 
 	b.WriteString(ui.LabelStyle.Render("Provider : "))

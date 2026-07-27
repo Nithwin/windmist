@@ -72,8 +72,9 @@ func (a *Agent) execute(ctx context.Context, calls []ai.ToolCall, onChunk func(s
 
 			// Execute the tool.
 			res := tool.Run(ctx, tools.Call{
-				Name: call.Name,
-				Args: call.Args,
+				Name:    call.Name,
+				Args:    call.Args,
+				OnChunk: onChunk,
 			})
 
 			if onChunk != nil {
