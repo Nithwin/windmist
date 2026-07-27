@@ -11,6 +11,8 @@ import (
 	"github.com/Nithwin/WindMist/internal/ai"
 	"github.com/Nithwin/WindMist/internal/config"
 	"github.com/Nithwin/WindMist/internal/rag"
+	"github.com/Nithwin/WindMist/internal/remote"
+	"github.com/Nithwin/WindMist/internal/remote/telegram"
 	"github.com/Nithwin/WindMist/internal/store"
 	"github.com/Nithwin/WindMist/internal/tools"
 	toolagent "github.com/Nithwin/WindMist/internal/tools/agent"
@@ -21,8 +23,6 @@ import (
 	"github.com/charmbracelet/bubbles/textarea"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/Nithwin/WindMist/internal/remote"
-	"github.com/Nithwin/WindMist/internal/remote/telegram"
 )
 
 // Model represents the WindMist application.
@@ -239,7 +239,7 @@ func (m Model) Init() tea.Cmd {
 		if remote.GetHub() == nil {
 			remote.InitHub(&m.cfg.Remote)
 		}
-		
+
 		tController, err := telegram.New(m.cfg.Remote.Telegram)
 		if err == nil {
 			err = remote.GetHub().Register(tController)

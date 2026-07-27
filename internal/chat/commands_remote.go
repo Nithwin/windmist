@@ -56,7 +56,7 @@ func selectRemoteCmd(m *Model) tea.Cmd {
 									return nil
 								}
 								m.cfg.Remote.Telegram.BotToken = token
-								
+
 								return func() tea.Msg {
 									return showInlinePromptMsg{
 										Prompt:     "Enter your Telegram User ID (numeric, optional): ",
@@ -81,13 +81,13 @@ func selectRemoteCmd(m *Model) tea.Cmd {
 					if remote.GetHub() == nil {
 						remote.InitHub(&m.cfg.Remote)
 					}
-					
+
 					tController, err := telegram.New(m.cfg.Remote.Telegram)
 					if err != nil {
 						m.conversation.AddAssistant("❌ Failed to init Telegram bot: " + err.Error())
 						return nil
 					}
-					
+
 					err = remote.GetHub().Register(tController)
 					if err != nil {
 						m.conversation.AddAssistant("❌ Failed to start Telegram bot: " + err.Error())

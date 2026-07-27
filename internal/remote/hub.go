@@ -2,9 +2,9 @@ package remote
 
 import (
 	"fmt"
+	"github.com/Nithwin/WindMist/internal/config"
 	"log"
 	"sync"
-	"github.com/Nithwin/WindMist/internal/config"
 )
 
 // Controller interface defines the standard operations for any remote interface (Telegram, Web, WhatsApp).
@@ -29,8 +29,8 @@ type Hub struct {
 	// Channel to receive messages from the agent to broadcast
 	Broadcast chan string
 	// Channel to send commands from remote controllers to the agent
-	Incoming  chan Command
-	stopChan  chan struct{}
+	Incoming chan Command
+	stopChan chan struct{}
 }
 
 var globalHub *Hub

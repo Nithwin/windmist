@@ -79,7 +79,7 @@ func (m Model) sendMessageCmd(ctx context.Context, prompt string) tea.Cmd {
 
 			// Broadcast final text to remote hub
 			if hub := remote.GetHub(); hub != nil {
-				// The last assistant message was updated via StreamingMsg in real-time, 
+				// The last assistant message was updated via StreamingMsg in real-time,
 				// but here we can just broadcast the final state.
 				hub.Broadcast <- "✅ WindMist finished processing your request."
 			}

@@ -71,8 +71,8 @@ func (t *TelegramController) SendMessage(text string) error {
 
 	msg := tgbotapi.NewMessage(t.allowedID, text)
 	// Optionally set Markdown parse mode, but WindMist markdown might break Telegram's strict MDV2 parser
-	// msg.ParseMode = "Markdown" 
-	
+	// msg.ParseMode = "Markdown"
+
 	_, err := t.bot.Send(msg)
 	return err
 }
