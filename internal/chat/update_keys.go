@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/Nithwin/WindMist/internal/ui/selector"
+	"github.com/atotto/clipboard"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -91,6 +92,19 @@ func (m Model) handleKeyMsg(msg tea.KeyMsg) (Model, tea.Cmd) {
 	}
 
 	switch msg.String() {
+	case "ctrl+y":
+		for i := len(m.conversation.Messages) - 1; i >= 0; i-- {
+			if m.conversation.Messages[i].Role == "assistant" {
+				if !strings.HasPrefix(m.conversation.Messages[i].Content, "📋") && !strings.HasPrefix(m.conversation.Messages[i].Content, "❌") && m.conversation.Messages[i].Content != "" {
+					_ = clipboard.WriteAll(m.conversation.Messages[i].Content)
+					m.conversation.AddAssistant("📋 *Copied last response to clipboard!*")
+					m.refreshViewport()
+					break
+				}
+			}
+		}
+		return m, nil
+
 	case "ctrl+c", "esc":
 		if m.loading && m.cancel != nil {
 			m.cancel()
