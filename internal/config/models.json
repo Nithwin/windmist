@@ -1,23 +1,24 @@
 {
   "gemini": [
-    { "label": "gemini-2.5-flash", "description": "High-speed Gemini 2.5 Flash model (Default)", "value": "gemini-2.5-flash" },
-    { "label": "gemini-2.5-pro", "description": "Advanced reasoning Gemini 2.5 Pro model", "value": "gemini-2.5-pro" },
-    { "label": "gemini-2.0-flash", "description": "High-speed multimodal model", "value": "gemini-2.0-flash" },
-    { "label": "gemini-1.5-pro", "description": "Legacy advanced reasoning model", "value": "gemini-1.5-pro" },
-    { "label": "gemini-1.5-flash", "description": "Legacy high-speed model", "value": "gemini-1.5-flash" }
+    { "label": "gemini-3.6-flash", "description": "Latest ultra-high-speed Gemini 3.6 Flash model (Default)", "value": "gemini-3.6-flash" },
+    { "label": "gemini-3.5-flash", "description": "High-speed multimodal model", "value": "gemini-3.5-flash" }
   ],
   "openai": [
-    { "label": "gpt-4o", "description": "High-performance multimodal model (Default)", "value": "gpt-4o" },
-    { "label": "gpt-4o-mini", "description": "Fast, cost-efficient model", "value": "gpt-4o-mini" },
-    { "label": "o3-mini", "description": "Latest fast reasoning model", "value": "o3-mini" },
-    { "label": "o1", "description": "Advanced deep reasoning model", "value": "o1" },
-    { "label": "o1-mini", "description": "Faster reasoning model", "value": "o1-mini" }
+    { "label": "gpt-5.5-pro", "description": "Latest frontier GPT-5.5 Pro model for professional coding (Default)", "value": "gpt-5.5-pro" },
+    { "label": "gpt-5.4-pro", "description": "Flagship GPT-5.4 Pro balanced intelligence model", "value": "gpt-5.4-pro" },
+    { "label": "gpt-5.4", "description": "Fast, high-performance general purpose model", "value": "gpt-5.4" },
+    { "label": "o3-pro", "description": "Latest deep multi-step reasoning model", "value": "o3-pro" },
+    { "label": "o3", "description": "High-performance reasoning model", "value": "o3" },
+    { "label": "o4-mini", "description": "Ultra-fast, cost-efficient reasoning model", "value": "o4-mini" },
+    { "label": "gpt-4.5-pro", "description": "GPT-4.5 Pro model", "value": "gpt-4.5-pro" },
+    { "label": "gpt-4o", "description": "Legacy multimodal intelligence model", "value": "gpt-4o" }
   ],
   "anthropic": [
-    { "label": "claude-3-7-sonnet-latest", "description": "Hybrid reasoning Sonnet model (Default)", "value": "claude-3-7-sonnet-latest" },
-    { "label": "claude-3-5-sonnet-latest", "description": "Standard fast and intelligent model", "value": "claude-3-5-sonnet-latest" },
-    { "label": "claude-3-5-haiku-latest", "description": "Optimized for high-volume, low-latency tasks", "value": "claude-3-5-haiku-latest" },
-    { "label": "claude-3-opus-latest", "description": "Highly capable legacy flagship model", "value": "claude-3-opus-latest" }
+    { "label": "claude-fable-5", "description": "Anthropic's most capable flagship model for long-running agents", "value": "claude-fable-5" },
+    { "label": "claude-opus-4-8", "description": "Coding flagship model featuring Adaptive Thinking", "value": "claude-opus-4-8" },
+    { "label": "claude-sonnet-5", "description": "Standard model balancing speed, intelligence, and cost (Default)", "value": "claude-sonnet-5" },
+    { "label": "claude-haiku-4-5", "description": "Optimized for high-volume, low-latency tasks", "value": "claude-haiku-4-5" },
+    { "label": "claude-3-7-sonnet-latest", "description": "Hybrid reasoning Sonnet model", "value": "claude-3-7-sonnet-latest" }
   ],
   "groq": [
     { "label": "llama-3.3-70b-versatile", "description": "Fast, versatile Llama 3.3 70B model (Default)", "value": "llama-3.3-70b-versatile" },
@@ -35,9 +36,10 @@
     { "label": "codestral-latest", "description": "Codestral specialized code model", "value": "codestral-latest" }
   ],
   "kimi": [
-    { "label": "moonshot-v1-8k", "description": "Standard 8k context model (Default)", "value": "moonshot-v1-8k" },
-    { "label": "moonshot-v1-32k", "description": "Extended 32k context model", "value": "moonshot-v1-32k" },
-    { "label": "moonshot-v1-128k", "description": "Maximum 128k context model", "value": "moonshot-v1-128k" }
+    { "label": "kimi-k3", "description": "Latest flagship Kimi K3 model with 1M token context (Default)", "value": "kimi-k3" },
+    { "label": "kimi-k2.7-code", "description": "Kimi specialized coding model", "value": "kimi-k2.7-code" },
+    { "label": "moonshot-v1-8k", "description": "Legacy 8k context model", "value": "moonshot-v1-8k" },
+    { "label": "moonshot-v1-32k", "description": "Legacy 32k context model", "value": "moonshot-v1-32k" }
   ],
   "perplexity": [
     { "label": "llama-3.1-sonar-large-128k-online", "description": "Perplexity Sonar Large Online (Default)", "value": "llama-3.1-sonar-large-128k-online" },
