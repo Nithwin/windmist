@@ -25,6 +25,7 @@ var ignoredDirs = map[string]bool{
 func RepoMap(cwd string) string {
 	var sb strings.Builder
 	sb.WriteString("## Repository Map\n\n")
+	sb.WriteString(fmt.Sprintf("You are currently working in the directory: **%s**\n\n", cwd))
 	sb.WriteString("Below is a tree representation of the files in the current workspace.\n")
 	sb.WriteString("Use this map to understand the project structure and locate files instantly.\n")
 	sb.WriteString("This map is dynamically updated on every turn to reflect the current state of the filesystem.\n\n")
