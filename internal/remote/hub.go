@@ -3,7 +3,6 @@ package remote
 import (
 	"fmt"
 	"github.com/Nithwin/WindMist/internal/config"
-	"log"
 	"sync"
 )
 
@@ -86,16 +85,22 @@ func (h *Hub) Unregister(name string) error {
 	return err
 }
 
+// HasController returns true if a controller with the given name is registered.
+func (h *Hub) HasController(name string) bool {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	_, exists := h.controllers[name]
+	return exists
+}
+
 // listen waits for broadcast messages and sends them to all registered controllers.
 func (h *Hub) listen() {
 	for {
 		select {
 		case msg := <-h.Broadcast:
 			h.mu.Lock()
-			for name, c := range h.controllers {
-				if err := c.SendMessage(msg); err != nil {
-					log.Printf("Error sending message to %s: %v", name, err)
-				}
+			for _, c := range h.controllers {
+				_ = c.SendMessage(msg)
 			}
 			h.mu.Unlock()
 		case <-h.stopChan:

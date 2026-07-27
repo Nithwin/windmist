@@ -4,6 +4,7 @@ import (
 	"context"
 	"strings"
 
+	"github.com/charmbracelet/bubbles/list"
 	"github.com/Nithwin/WindMist/internal/ui/selector"
 	"github.com/atotto/clipboard"
 	tea "github.com/charmbracelet/bubbletea"
@@ -205,6 +206,14 @@ func (m Model) handleKeyMsg(msg tea.KeyMsg) (Model, tea.Cmd) {
 				return m, m.onCancel()
 			}
 			return m, nil
+		case "backspace":
+			if m.selectorList.FilterState() != list.Filtering {
+				m.showSelector = false
+				if m.onCancel != nil {
+					return m, m.onCancel()
+				}
+				return m, nil
+			}
 		case "enter":
 			m.showSelector = false
 			if i, ok := m.selectorList.SelectedItem().(selector.Option); ok {

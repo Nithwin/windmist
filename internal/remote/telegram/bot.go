@@ -2,7 +2,6 @@ package telegram
 
 import (
 	"fmt"
-	"log"
 	"strconv"
 
 	"github.com/Nithwin/WindMist/internal/config"
@@ -91,8 +90,12 @@ func (t *TelegramController) listen() {
 			}
 
 			// Validate user
-			if t.allowedID != 0 && update.Message.From.ID != t.allowedID {
-				log.Printf("Unauthorized access attempt from user %d", update.Message.From.ID)
+			if t.allowedID == 0 {
+				t.allowedID = update.Message.From.ID
+				t.SendMessage(fmt.Sprintf("✅ Telegram bot auto-bound to your user ID: %d", t.allowedID))
+			} else if update.Message.From.ID != t.allowedID {
+				msg := tgbotapi.NewMessage(update.Message.From.ID, "❌ Unauthorized access attempt.")
+				_, _ = t.bot.Send(msg)
 				continue
 			}
 
