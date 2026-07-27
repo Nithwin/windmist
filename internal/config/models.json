@@ -1,7 +1,8 @@
 {
   "gemini": [
-    { "label": "gemini-3.6-flash", "description": "Latest ultra-high-speed Gemini 3.6 Flash model (Default)", "value": "gemini-3.6-flash" },
-    { "label": "gemini-3.5-flash", "description": "High-speed multimodal model", "value": "gemini-3.5-flash" }
+    { "label": "gemini-3.6-flash", "description": "Latest ultra-high-speed Gemini 3.6 Flash model (Default)", "value": "gemini-3.6-flash-preview" },
+    { "label": "gemini-3.5-flash", "description": "High-speed multimodal model", "value": "gemini-3.5-flash-preview" },
+    { "label": "gemini-3.1-pro", "description": "Advanced reasoning model", "value": "gemini-3.1-pro-preview" }
   ],
   "openai": [
     { "label": "gpt-5.5-pro", "description": "Latest frontier GPT-5.5 Pro model for professional coding (Default)", "value": "gpt-5.5-pro" },

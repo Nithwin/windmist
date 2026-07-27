@@ -12,7 +12,8 @@ import (
 )
 
 const (
-	baseURL = "https://generativelanguage.googleapis.com/v1beta"
+	baseURLAlpha = "https://generativelanguage.googleapis.com/v1alpha"
+	baseURLBeta  = "https://generativelanguage.googleapis.com/v1beta"
 )
 
 // Client handles communication with the Gemini API.
@@ -44,10 +45,15 @@ func (c *Client) GenerateContent(
 		return nil, fmt.Errorf("marshal request: %w", err)
 	}
 
+	actualModel := c.model
+	if actualModel == "gemini-3.1-pro" {
+		actualModel = "gemini-3.1-pro-preview"
+	}
+
 	endpoint := fmt.Sprintf(
 		"%s/models/%s:generateContent?key=%s",
-		baseURL,
-		c.model,
+		baseURLBeta,
+		actualModel,
 		url.QueryEscape(c.apiKey),
 	)
 

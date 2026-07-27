@@ -24,10 +24,15 @@ func (c *Client) StreamContent(
 		return fmt.Errorf("marshal request: %w", err)
 	}
 
+	actualModel := c.model
+	if actualModel == "gemini-3.1-pro" {
+		actualModel = "gemini-3.1-pro-preview"
+	}
+
 	endpoint := fmt.Sprintf(
 		"%s/models/%s:streamGenerateContent?alt=sse&key=%s",
-		baseURL,
-		c.model,
+		baseURLBeta,
+		actualModel,
 		url.QueryEscape(c.apiKey),
 	)
 
