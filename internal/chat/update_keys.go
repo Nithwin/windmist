@@ -10,8 +10,8 @@ import (
 )
 
 func (m Model) handleKeyMsg(msg tea.KeyMsg) (Model, tea.Cmd) {
-	// Scroll conversation when command palette or file picker is closed.
-	if !m.showCommands && !m.showFilePicker {
+	// Scroll conversation when command palette, file picker, or selector is closed.
+	if !m.showCommands && !m.showFilePicker && !m.showSelector {
 		switch msg.String() {
 
 		case "ctrl+up", "shift+up":
@@ -214,6 +214,10 @@ func (m Model) handleKeyMsg(msg tea.KeyMsg) (Model, tea.Cmd) {
 			}
 			return m, nil
 		}
+
+		var cmd tea.Cmd
+		m.selectorList, cmd = m.selectorList.Update(msg)
+		return m, cmd
 	}
 
 	switch msg.String() {
