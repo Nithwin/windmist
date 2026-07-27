@@ -135,6 +135,13 @@ var Registry = []Command{
 		},
 	},
 	{
+		Name:        "/remote",
+		Description: "Configure and manage remote control (Telegram, Web)",
+		Execute: func(m *Model) tea.Cmd {
+			return selectRemoteCmd(m)
+		},
+	},
+	{
 		Name:        "/mcp",
 		Description: "Install an MCP server (e.g. GitHub, Postgres)",
 		Execute: func(m *Model) tea.Cmd {
