@@ -37,10 +37,10 @@ func renderHeader(m Model) string {
 	if err != nil {
 		cwd = "."
 	}
-	
+
 	cwdDisplay := filepath.Base(cwd)
 	dirTag := ui.BaseStyle.Foreground(ui.Muted).Render(fmt.Sprintf(" [%s]", cwdDisplay))
-	
+
 	left := lipgloss.JoinHorizontal(lipgloss.Center, logo, dirTag)
 
 	// ── right: status tags ────────────────────────────────────

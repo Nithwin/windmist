@@ -4,9 +4,9 @@ import (
 	"context"
 	"strings"
 
-	"github.com/charmbracelet/bubbles/list"
 	"github.com/Nithwin/WindMist/internal/ui/selector"
 	"github.com/atotto/clipboard"
+	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 )
 

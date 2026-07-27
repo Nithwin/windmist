@@ -61,7 +61,7 @@ func RepoMap(cwd string) string {
 		// Calculate depth
 		relPath, _ := filepath.Rel(cwd, path)
 		depth := strings.Count(relPath, string(os.PathSeparator))
-		
+
 		if depth > 2 && d.IsDir() {
 			return filepath.SkipDir
 		}

@@ -51,12 +51,12 @@ func (m Model) sendMessageCmd(ctx context.Context, prompt string) tea.Cmd {
 					Text: s,
 				})
 			})
-            
+
 			// Auto-title the session if it's the first message (Moved here to avoid concurrent API limits on Free Tier)
 			if m.session != nil && m.session.Title == "New Session" && m.store != nil {
 				go func() {
-                    // Small delay to ensure the main stream request is fully closed
-                    time.Sleep(1 * time.Second)
+					// Small delay to ensure the main stream request is fully closed
+					time.Sleep(1 * time.Second)
 					titleReq := &ai.GenerateRequest{
 						System: "You are an AI that creates extremely short, 2-4 word titles for chat sessions based on the user's first prompt. Do not use punctuation. Do not use quotes. Keep it lowercase.",
 						Messages: []ai.Message{
@@ -112,7 +112,7 @@ func (m Model) getInitialMessages() []ai.Message {
 	if err != nil || len(storeMsgs) == 0 {
 		return nil
 	}
-	
+
 	// Truncate history to last 20 messages to prevent massive token usage on free tiers
 	if len(storeMsgs) > 20 {
 		storeMsgs = storeMsgs[len(storeMsgs)-20:]

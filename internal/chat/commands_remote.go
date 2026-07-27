@@ -55,7 +55,7 @@ func selectRemoteCmd(m *Model) tea.Cmd {
 				switch val {
 				case "configure_telegram":
 					guideMsg := "🤖 **Telegram Bot Setup Guide:**\n\n1. Open Telegram and search for **@BotFather**.\n2. Send the `/newbot` command and follow the instructions to create your bot.\n3. Copy the **HTTP API Token** provided by BotFather.\n4. (Optional) To restrict access to yourself, message **@userinfobot** to get your numeric User ID.\n\nNow, let's configure your bot!"
-					
+
 					return tea.Batch(
 						func() tea.Msg {
 							return ResponseMsg{Text: guideMsg}
@@ -80,7 +80,9 @@ func selectRemoteCmd(m *Model) tea.Cmd {
 												if err := config.Save(m.cfg); err != nil {
 													return func() tea.Msg { return ResponseMsg{Text: "❌ Failed to save config: " + err.Error()} }
 												}
-												return func() tea.Msg { return ResponseMsg{Text: "✅ Telegram Bot configured successfully! You can now Start it using /remote."} }
+												return func() tea.Msg {
+													return ResponseMsg{Text: "✅ Telegram Bot configured successfully! You can now Start it using /remote."}
+												}
 											},
 										}
 									}
@@ -115,7 +117,7 @@ func selectRemoteCmd(m *Model) tea.Cmd {
 				case "stop_telegram":
 					m.cfg.Remote.Telegram.Enabled = false
 					_ = config.Save(m.cfg)
-					
+
 					if remote.GetHub() != nil {
 						_ = remote.GetHub().Unregister("telegram")
 						return func() tea.Msg { return ResponseMsg{Text: "🔴 Telegram Bot stopped (disabled on startup)."} }

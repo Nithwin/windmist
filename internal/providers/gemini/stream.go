@@ -26,7 +26,7 @@ func (c *Client) StreamContent(
 	}
 
 	actualModel := c.model
-	
+
 	// Handle users who have cached -preview models in their config
 	if actualModel == "gemini-3.5-flash-preview" {
 		actualModel = "gemini-3.5-flash"
@@ -38,7 +38,7 @@ func (c *Client) StreamContent(
 	if actualModel == "gemini-3.5-lite" {
 		actualModel = "gemini-3.5-flash-lite"
 	}
-	
+
 	// 3.1-pro requires -preview
 	if actualModel == "gemini-3.1-pro" {
 		actualModel = "gemini-3.1-pro-preview"
@@ -102,7 +102,7 @@ func (c *Client) StreamContent(
 				}
 				return fmt.Errorf("gemini api returned status %d after retries: %s", resp.StatusCode, string(data))
 			}
-			
+
 			// Sleep before retry
 			delay := baseDelay * time.Duration(1<<attempt)
 			select {

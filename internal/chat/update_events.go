@@ -281,7 +281,7 @@ func (m Model) handleEventMsg(msg tea.Msg) (Model, tea.Cmd) {
 				Mode:      m.session.AgentMode,
 			})
 		}
-		
+
 		m.conversation.AddAssistant(fmt.Sprintf("🔑 Successfully saved and applied new API key for **%s**! You can use it immediately.", msg.Provider))
 		m.refreshViewport()
 		return m, nil
