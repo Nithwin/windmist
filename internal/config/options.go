@@ -16,7 +16,7 @@ import (
 //go:embed models.json
 var embeddedModelsJSON []byte
 
-const remoteModelsManifestURL = "https://raw.githubusercontent.com/Nithwin/WindMist/main/internal/config/models.json"
+const remoteModelsManifestURL = "https://raw.githubusercontent.com/Nithwin/WindMist/v2/internal/config/models.json"
 
 type modelEntry struct {
 	Label       string `json:"label"`
