@@ -8,8 +8,35 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
+	"sync"
 	"time"
 )
+
+// Global rate limiter for Gemini API
+var (
+	lastRequestTime time.Time
+	rlMutex         sync.Mutex
+)
+
+// enforceRateLimit ensures we do not exceed requests per minute by pacing calls.
+func enforceRateLimit(model string) {
+	rlMutex.Lock()
+	defer rlMutex.Unlock()
+
+	now := time.Now()
+	elapsed := now.Sub(lastRequestTime)
+	minInterval := 4 * time.Second
+
+	if strings.Contains(model, "lite") {
+		minInterval = 2 * time.Second
+	}
+
+	if !lastRequestTime.IsZero() && elapsed < minInterval {
+		time.Sleep(minInterval - elapsed)
+	}
+	lastRequestTime = time.Now()
+}
 
 const (
 	baseURLAlpha = "https://generativelanguage.googleapis.com/v1alpha"
@@ -88,6 +115,8 @@ func (c *Client) GenerateContent(
 	for attempt := 0; attempt < maxRetries; attempt++ {
 		// Reset the request body since it gets consumed on each call
 		httpReq.Body = io.NopCloser(bytes.NewReader(body))
+
+		enforceRateLimit(actualModel)
 
 		resp, err = c.client.Do(httpReq)
 		if err != nil {
