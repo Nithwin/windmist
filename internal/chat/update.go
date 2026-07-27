@@ -185,6 +185,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.isPassword = msg.IsPassword
 		m.onPromptSubmit = msg.OnSubmit
 		m.input.Reset()
+		m.refreshViewport()
 		return m, nil
 
 	// Update text input for other key events that don't match the main handler

@@ -263,7 +263,26 @@ func (m Model) handleEventMsg(msg tea.Msg) (Model, tea.Cmd) {
 		return m, nil
 
 	case setAPIKeySuccessMsg:
-		m.conversation.AddAssistant(fmt.Sprintf("🔑 Successfully saved new API key for **%s**.\nRemember to restart WindMist or select the provider again to apply the changes.", msg.Provider))
+		provider, err := ai.New(m.cfg)
+		if err == nil {
+			m.provider = provider
+			manager := tools.NewManager()
+			defaults.RegisterAll(manager, func(cmd string) bool {
+				if program == nil {
+					return false
+				}
+				ch := make(chan bool)
+				program.Send(ApprovalRequestMsg{Command: cmd, ResponseChan: ch})
+				return <-ch
+			}, m.cfg)
+			m.agent = agent.New(provider, manager, agent.Config{
+				Store:     m.store,
+				SessionID: m.session.ID,
+				Mode:      m.session.AgentMode,
+			})
+		}
+		
+		m.conversation.AddAssistant(fmt.Sprintf("🔑 Successfully saved and applied new API key for **%s**! You can use it immediately.", msg.Provider))
 		m.refreshViewport()
 		return m, nil
 
