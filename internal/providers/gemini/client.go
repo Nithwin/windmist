@@ -46,6 +46,16 @@ func (c *Client) GenerateContent(
 	}
 
 	actualModel := c.model
+	
+	// Handle users who have cached -preview models in their config
+	if actualModel == "gemini-3.5-flash-preview" {
+		actualModel = "gemini-3.5-flash"
+	}
+	if actualModel == "gemini-3.6-flash-preview" {
+		actualModel = "gemini-3.6-flash"
+	}
+	
+	// 3.1-pro requires -preview
 	if actualModel == "gemini-3.1-pro" {
 		actualModel = "gemini-3.1-pro-preview"
 	}
