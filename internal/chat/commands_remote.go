@@ -46,6 +46,7 @@ func selectRemoteCmd(m *Model) tea.Cmd {
 
 				switch val {
 				case "configure_telegram":
+					m.conversation.AddAssistant("🤖 **Telegram Bot Setup Guide:**\n\n1. Open Telegram and search for **@BotFather**.\n2. Send the `/newbot` command and follow the instructions to create your bot.\n3. Copy the **HTTP API Token** provided by BotFather.\n4. (Optional) To restrict access to yourself, message **@userinfobot** to get your numeric User ID.\n\nNow, let's configure your bot!")
 					return func() tea.Msg {
 						return showInlinePromptMsg{
 							Prompt:     "Enter Telegram Bot Token (from @BotFather): ",
