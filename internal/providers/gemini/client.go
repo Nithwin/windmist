@@ -75,6 +75,10 @@ func (c *Client) GenerateContent(
 	actualModel := c.model
 
 	// Handle users who have cached -preview models in their config
+	if actualModel == "gemini-3.5-lite" {
+		actualModel = "gemini-3.5-flash-lite"
+	}
+
 	if actualModel == "gemini-3.5-flash-preview" {
 		actualModel = "gemini-3.5-flash"
 	}
