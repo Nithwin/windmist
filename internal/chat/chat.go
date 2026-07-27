@@ -21,6 +21,21 @@ func spinnerTickCmd() tea.Cmd {
 	})
 }
 
+// listenRemoteCmd waits for incoming commands from the remote hub.
+func listenRemoteCmd() tea.Cmd {
+	return func() tea.Msg {
+		hub := remote.GetHub()
+		if hub == nil {
+			return nil
+		}
+		cmd := <-hub.Incoming
+		return remoteCommandMsg{
+			Type: cmd.Type,
+			Args: cmd.Args,
+		}
+	}
+}
+
 // sendMessageCmd returns a tea.Cmd that starts the AI request in a goroutine
 // and immediately begins the spinner tick loop.
 func (m Model) sendMessageCmd(ctx context.Context, prompt string) tea.Cmd {

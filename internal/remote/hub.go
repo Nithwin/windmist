@@ -15,6 +15,12 @@ type Controller interface {
 	Name() string
 }
 
+// Command represents a request from a remote controller to the agent.
+type Command struct {
+	Type string
+	Args []string
+}
+
 // Hub manages all active remote controllers.
 type Hub struct {
 	mu          sync.Mutex
@@ -22,6 +28,8 @@ type Hub struct {
 	controllers map[string]Controller
 	// Channel to receive messages from the agent to broadcast
 	Broadcast chan string
+	// Channel to send commands from remote controllers to the agent
+	Incoming  chan Command
 	stopChan  chan struct{}
 }
 
@@ -33,6 +41,7 @@ func InitHub(cfg *config.RemoteConfig) *Hub {
 		config:      cfg,
 		controllers: make(map[string]Controller),
 		Broadcast:   make(chan string, 100),
+		Incoming:    make(chan Command, 100),
 		stopChan:    make(chan struct{}),
 	}
 	go globalHub.listen()

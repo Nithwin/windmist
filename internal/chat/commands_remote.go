@@ -91,10 +91,11 @@ func selectRemoteCmd(m *Model) tea.Cmd {
 					err = remote.GetHub().Register(tController)
 					if err != nil {
 						m.conversation.AddAssistant("❌ Failed to start Telegram bot: " + err.Error())
+						return nil
 					} else {
 						m.conversation.AddAssistant("🟢 Telegram Bot started successfully!")
+						return listenRemoteCmd()
 					}
-					return nil
 
 				case "stop_telegram":
 					if remote.GetHub() != nil {

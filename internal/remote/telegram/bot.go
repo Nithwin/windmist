@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"strconv"
-	"strings"
 
 	"github.com/Nithwin/WindMist/internal/config"
 	"github.com/Nithwin/WindMist/internal/remote"
@@ -100,8 +99,8 @@ func (t *TelegramController) listen() {
 			if update.Message.IsCommand() {
 				t.handleCommand(update.Message)
 			} else {
-				// We can route text messages to WindMist if needed, or ignore for now
-				t.SendMessage(fmt.Sprintf("Received: %s", update.Message.Text))
+				// Treat normal text as a prompt
+				t.hub.Incoming <- remote.Command{Type: "ask", Args: []string{update.Message.Text}}
 			}
 		case <-t.stopChan:
 			return
@@ -113,10 +112,32 @@ func (t *TelegramController) handleCommand(message *tgbotapi.Message) {
 	switch message.Command() {
 	case "status":
 		t.SendMessage("🌀 WindMist is running and connected!")
+	case "providers":
+		t.hub.Incoming <- remote.Command{Type: "list_providers"}
+	case "models":
+		t.hub.Incoming <- remote.Command{Type: "list_models"}
+	case "provider":
+		args := message.CommandArguments()
+		if args == "" {
+			t.SendMessage("Usage: /provider <name>")
+			return
+		}
+		t.hub.Incoming <- remote.Command{Type: "provider", Args: []string{args}}
+	case "model":
+		args := message.CommandArguments()
+		if args == "" {
+			t.SendMessage("Usage: /model <name>")
+			return
+		}
+		t.hub.Incoming <- remote.Command{Type: "model", Args: []string{args}}
 	case "ask":
-		prompt := strings.Replace(message.Text, "/ask ", "", 1)
-		t.SendMessage("Processing: " + prompt + " (Note: Full interactive support coming in Phase 2)")
+		args := message.CommandArguments()
+		if args == "" {
+			t.SendMessage("Usage: /ask <prompt>")
+			return
+		}
+		t.hub.Incoming <- remote.Command{Type: "ask", Args: []string{args}}
 	default:
-		t.SendMessage("Unknown command. Supported: /status, /ask")
+		t.SendMessage("Unknown command. Supported:\n/status\n/providers\n/provider <name>\n/models\n/model <name>\n/ask <prompt>")
 	}
 }

@@ -115,3 +115,9 @@ type showInlinePromptMsg struct {
 	IsPassword bool
 	OnSubmit   func(string) tea.Cmd
 }
+
+// remoteCommandMsg is sent when a remote controller issues a command.
+type remoteCommandMsg struct {
+	Type string
+	Args []string
+}

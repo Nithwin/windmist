@@ -21,6 +21,8 @@ import (
 	"github.com/charmbracelet/bubbles/textarea"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/Nithwin/WindMist/internal/remote"
+	"github.com/Nithwin/WindMist/internal/remote/telegram"
 )
 
 // Model represents the WindMist application.
@@ -227,12 +229,27 @@ func New() (Model, error) {
 
 // Init initializes the application.
 func (m Model) Init() tea.Cmd {
-	return tea.Batch(
-		textarea.Blink,
-		func() tea.Msg {
-			return WorkspaceFilesMsg{Files: getWorkspaceFiles()}
-		},
-	)
+	var cmds []tea.Cmd
+	cmds = append(cmds, textarea.Blink)
+	cmds = append(cmds, func() tea.Msg {
+		return WorkspaceFilesMsg{Files: getWorkspaceFiles()}
+	})
+
+	if m.cfg.Remote.Telegram.Enabled && m.cfg.Remote.Telegram.BotToken != "" {
+		if remote.GetHub() == nil {
+			remote.InitHub(&m.cfg.Remote)
+		}
+		
+		tController, err := telegram.New(m.cfg.Remote.Telegram)
+		if err == nil {
+			err = remote.GetHub().Register(tController)
+			if err == nil {
+				cmds = append(cmds, listenRemoteCmd())
+			}
+		}
+	}
+
+	return tea.Batch(cmds...)
 }
 
 // MaxContentWidth calculates the maximum width for the UI content based on the window size.
