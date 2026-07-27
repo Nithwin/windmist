@@ -1,7 +1,6 @@
 {
   "gemini": [
     { "label": "gemini-3.6-flash", "description": "Latest ultra-high-speed Gemini 3.6 Flash model (Default)", "value": "gemini-3.6-flash" },
-    { "label": "gemini-3.6-pro", "description": "Latest advanced reasoning Gemini 3.6 Pro model", "value": "gemini-3.6-pro" },
     { "label": "gemini-3.5-flash", "description": "High-speed multimodal model", "value": "gemini-3.5-flash" },
     { "label": "gemini-3.1-pro", "description": "Advanced reasoning model", "value": "gemini-3.1-pro" }
   ],
