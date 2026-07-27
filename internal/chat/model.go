@@ -155,11 +155,16 @@ func New() (Model, error) {
 	// For now, create a new session on startup
 	// Later we can implement logic to load an existing session
 	// using the /session commands
+	cwd, err := os.Getwd()
+	if err != nil {
+		cwd = "."
+	}
+
 	activeModel, _ := cfg.ActiveModel()
 	sess := &store.Session{
 		ID:          fmt.Sprintf("sess_%d", time.Now().Unix()),
 		Title:       "New Session",
-		ProjectPath: ".",
+		ProjectPath: cwd,
 		Provider:    cfg.AI.Provider,
 		Model:       activeModel,
 		AgentMode:   "auto",
