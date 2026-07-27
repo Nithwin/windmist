@@ -42,7 +42,7 @@ func selectRemoteCmd(m *Model) tea.Cmd {
 			Title:   "Remote Control",
 			Options: options,
 			OnSelect: func(opt selector.Option) tea.Cmd {
-				val := opt.FilterValue()
+				val := opt.Value
 
 				switch val {
 				case "configure_telegram":
