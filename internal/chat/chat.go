@@ -71,6 +71,9 @@ func (m Model) sendMessageCmd(ctx context.Context, prompt string) tea.Cmd {
 			})
 
 			if err != nil {
+				if hub := remote.GetHub(); hub != nil {
+					hub.Broadcast <- "❌ Error: " + err.Error()
+				}
 				return StreamingMsg{
 					Err:  err,
 					Done: true,

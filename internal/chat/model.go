@@ -140,14 +140,16 @@ func New() (Model, error) {
 	ragSearcher := rag.NewSearcher(ragStore, ragEmbedder)
 	ragIndexer := rag.NewIndexer(ragStore, ragEmbedder)
 
-	// Rebuild vocabulary on startup if we have indexed chunks
-	if chunks, err := ragStore.GetAllChunks(); err == nil && len(chunks) > 0 {
-		docs := make([]string, len(chunks))
-		for i, c := range chunks {
-			docs[i] = c.Content
+	// Rebuild vocabulary on startup if we have indexed chunks (run in background to avoid UI lag)
+	go func() {
+		if chunks, err := ragStore.GetAllChunks(); err == nil && len(chunks) > 0 {
+			docs := make([]string, len(chunks))
+			for i, c := range chunks {
+				docs[i] = c.Content
+			}
+			ragEmbedder.BuildVocabulary(docs)
 		}
-		ragEmbedder.BuildVocabulary(docs)
-	}
+	}()
 
 	// Register Semantic Search Tool
 	manager.Register(toolagent.NewSemanticSearchTool(ragSearcher))

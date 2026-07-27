@@ -3,6 +3,7 @@ package chat
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/Nithwin/WindMist/internal/ui"
@@ -37,12 +38,7 @@ func renderHeader(m Model) string {
 		cwd = "."
 	}
 	
-	// Truncate path if too long
-	cwdDisplay := cwd
-	if len(cwdDisplay) > 40 {
-		cwdDisplay = "..." + cwdDisplay[len(cwdDisplay)-37:]
-	}
-	
+	cwdDisplay := filepath.Base(cwd)
 	dirTag := ui.BaseStyle.Foreground(ui.Muted).Render(fmt.Sprintf(" [%s]", cwdDisplay))
 	
 	left := lipgloss.JoinHorizontal(lipgloss.Center, logo, dirTag)

@@ -90,6 +90,9 @@ func selectRemoteCmd(m *Model) tea.Cmd {
 					)
 
 				case "start_telegram":
+					m.cfg.Remote.Telegram.Enabled = true
+					_ = config.Save(m.cfg)
+
 					if remote.GetHub() == nil {
 						remote.InitHub(&m.cfg.Remote)
 					}
@@ -110,9 +113,12 @@ func selectRemoteCmd(m *Model) tea.Cmd {
 					}
 
 				case "stop_telegram":
+					m.cfg.Remote.Telegram.Enabled = false
+					_ = config.Save(m.cfg)
+					
 					if remote.GetHub() != nil {
 						_ = remote.GetHub().Unregister("telegram")
-						return func() tea.Msg { return ResponseMsg{Text: "🔴 Telegram Bot stopped."} }
+						return func() tea.Msg { return ResponseMsg{Text: "🔴 Telegram Bot stopped (disabled on startup)."} }
 					}
 					return nil
 
