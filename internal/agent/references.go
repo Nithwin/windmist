@@ -81,7 +81,7 @@ func (i *ReferenceInjector) fetchURL(url string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	
+
 	// Truncate if it's too large (e.g. > 100KB)
 	content := string(body)
 	if len(content) > 100000 {
@@ -99,7 +99,7 @@ func (i *ReferenceInjector) fetchFile(path string) (string, error) {
 	}
 
 	fullPath := filepath.Join(i.workspaceDir, cleanPath)
-	
+
 	// Check if it's a directory
 	info, err := os.Stat(fullPath)
 	if err != nil {

@@ -72,7 +72,7 @@ func (s *DocumentStore) InsertChunk(chunk Chunk, vector Vector) error {
 		INSERT INTO rag_chunks (file_path, start_line, end_line, content, vector, indexed_at)
 		VALUES (:file_path, :start_line, :end_line, :content, :vector, :indexed_at)
 	`
-	
+
 	record := IndexedChunk{
 		FilePath:  chunk.FilePath,
 		StartLine: chunk.StartLine,

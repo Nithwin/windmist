@@ -31,7 +31,7 @@ func (i *Indexer) IndexProject(rootDir string) (int, error) {
 		if err != nil {
 			return err
 		}
-		
+
 		if d.IsDir() {
 			name := d.Name()
 			// Skip hidden and common ignored directories
@@ -40,17 +40,17 @@ func (i *Indexer) IndexProject(rootDir string) (int, error) {
 			}
 			return nil
 		}
-		
+
 		// Only index code/text files. Very basic filter for now.
 		ext := filepath.Ext(path)
 		switch ext {
 		case ".go", ".md", ".txt", ".js", ".ts", ".py", ".rs", ".c", ".cpp", ".h", ".json", ".yaml", ".yml":
 			files = append(files, path)
 		}
-		
+
 		return nil
 	})
-	
+
 	if err != nil {
 		return 0, fmt.Errorf("scan project: %w", err)
 	}
@@ -58,29 +58,29 @@ func (i *Indexer) IndexProject(rootDir string) (int, error) {
 	// 2. Read and chunk all files
 	var allChunks []Chunk
 	var documents []string // Just the text content for building vocabulary
-	
+
 	cfg := DefaultChunkConfig()
-	
+
 	for _, path := range files {
 		contentBytes, err := os.ReadFile(path)
 		if err != nil {
 			continue // Skip unreadable files
 		}
 		content := string(contentBytes)
-		
+
 		// Get relative path for cleaner storage
 		relPath, _ := filepath.Rel(rootDir, path)
 		if relPath == "" {
 			relPath = path
 		}
-		
+
 		chunks := ChunkFile(relPath, content, cfg)
 		for _, c := range chunks {
 			allChunks = append(allChunks, c)
 			documents = append(documents, c.Content)
 		}
 	}
-	
+
 	if len(allChunks) == 0 {
 		return 0, nil
 	}
@@ -100,7 +100,7 @@ func (i *Indexer) IndexProject(rootDir string) (int, error) {
 		if vec == nil {
 			continue
 		}
-		
+
 		if err := i.store.InsertChunk(chunk, vec); err != nil {
 			// Log error but continue
 			fmt.Printf("Warning: failed to insert chunk for %s: %v\n", chunk.FilePath, err)

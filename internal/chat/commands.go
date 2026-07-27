@@ -148,7 +148,7 @@ var Registry = []Command{
 			filename := fmt.Sprintf("windmist_export_%d.md", time.Now().Unix())
 			var b strings.Builder
 			b.WriteString(fmt.Sprintf("# WindMist Conversation Export\n\nDate: %s\n\n", time.Now().Format(time.RFC1123)))
-			
+
 			for _, msg := range m.conversation.Messages {
 				role := "User"
 				if msg.Role == "assistant" {
@@ -156,7 +156,7 @@ var Registry = []Command{
 				}
 				b.WriteString(fmt.Sprintf("## %s\n\n%s\n\n---\n\n", role, msg.Content))
 			}
-			
+
 			err := os.WriteFile(filename, []byte(b.String()), 0644)
 			if err != nil {
 				m.conversation.AddAssistant(fmt.Sprintf("❌ Failed to export conversation: %v", err))

@@ -48,7 +48,7 @@ func (s *Searcher) Search(query string, topK int) ([]SearchResult, error) {
 		}
 
 		similarity := CosineSimilarity(queryVector, chunkVector)
-		
+
 		// Only consider positive similarities above a small threshold
 		if similarity > 0.05 {
 			results = append(results, SearchResult{

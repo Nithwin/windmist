@@ -310,7 +310,7 @@ func (m Model) handleEventMsg(msg tea.Msg) (Model, tea.Cmd) {
 		}
 
 		initialMessages := m.getInitialMessages()
-		
+
 		// If it's too short, let user know
 		if len(initialMessages) <= 6 {
 			m.conversation.AddAssistant("ℹ️ Conversation is already short. Compaction not needed.")

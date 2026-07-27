@@ -30,12 +30,12 @@ func (s *Summarizer) ShouldSummarize(messages []ai.Message) bool {
 	if len(messages) <= 3 {
 		return false // Too short to summarize meaningfully
 	}
-	
+
 	totalTokens := 0
 	for _, msg := range messages {
 		totalTokens += countMessageTokens(msg)
 	}
-	
+
 	return totalTokens > s.threshold
 }
 

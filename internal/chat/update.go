@@ -1,11 +1,11 @@
 package chat
 
 import (
+	"fmt"
 	"github.com/Nithwin/WindMist/internal/ui"
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"fmt"
 )
 
 // Update handles all user interactions and routes them to specific handlers.
