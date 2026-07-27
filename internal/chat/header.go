@@ -29,7 +29,7 @@ func renderHeader(m Model) string {
 	logo := ui.BaseStyle.
 		Bold(true).
 		Foreground(ui.BrandCyan).
-		Render("🌀 WindMist v0.5")
+		Render("🌀 WindMist v2.0")
 
 	// ── right: status tags ────────────────────────────────────
 	tokens := 0
