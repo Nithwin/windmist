@@ -42,8 +42,9 @@ type Definition struct {
 }
 
 type Call struct {
-	Name string
-	Args map[string]any
+	Name    string
+	Args    map[string]any
+	OnChunk func(string) // Optional callback for real-time output streaming
 }
 
 type FileState struct {

@@ -48,6 +48,11 @@ func (a *Agent) runLoop(ctx context.Context, messages []ai.Message, userPrompt s
 			Tools:    a.toolDefinitions(modeConfig),
 		}
 
+		// Enforce rate limits before making the API call
+		if err := a.limiter.Wait(ctx); err != nil {
+			return nil, fmt.Errorf("rate limit exceeded or context cancelled: %w", err)
+		}
+
 		var resp *ai.GenerateResponse
 		var err error
 

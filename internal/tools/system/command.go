@@ -9,6 +9,19 @@ import (
 	"github.com/Nithwin/WindMist/internal/tools"
 )
 
+type streamWriter struct {
+	callback func(string)
+	buf      []byte
+}
+
+func (s *streamWriter) Write(p []byte) (n int, err error) {
+	if s.callback != nil {
+		s.callback(string(p))
+	}
+	s.buf = append(s.buf, p...)
+	return len(p), nil
+}
+
 // ApprovalCallback is a function that asks the user for permission.
 type ApprovalCallback func(cmd string) bool
 
@@ -59,8 +72,13 @@ func (t *CommandTool) Run(ctx context.Context, call tools.Call) tools.Result {
 	defer cancel()
 
 	cmd := exec.CommandContext(ctx, "bash", "-c", cmdStr)
+	
+	sw := &streamWriter{callback: call.OnChunk}
+	cmd.Stdout = sw
+	cmd.Stderr = sw
 
-	output, err := cmd.CombinedOutput()
+	err := cmd.Run()
+	output := sw.buf
 
 	// If it timed out, append a notice
 	if ctx.Err() == context.DeadlineExceeded {

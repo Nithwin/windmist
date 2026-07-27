@@ -12,6 +12,7 @@ import (
 	"github.com/Nithwin/WindMist/internal/mcp"
 	"github.com/Nithwin/WindMist/internal/store"
 	"github.com/Nithwin/WindMist/internal/tools"
+	"golang.org/x/time/rate"
 )
 
 // Config configures the behavior of the agent.
@@ -50,6 +51,7 @@ type Agent struct {
 	config     Config
 	lspManager *lsp.Manager
 	mcpManager *mcp.Manager
+	limiter    *rate.Limiter
 }
 
 // New creates a new Agent.
@@ -77,6 +79,8 @@ func New(
 		config:     config,
 		lspManager: lsp.NewManager(),
 		mcpManager: mcp.NewManager(),
+		// Rate limit: 20 requests per minute with a burst of 5
+		limiter:    rate.NewLimiter(rate.Every(time.Minute/20), 5),
 	}
 
 	// Start MCP servers asynchronously so it doesn't block UI load
