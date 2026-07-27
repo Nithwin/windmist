@@ -34,6 +34,10 @@ func (c *Client) StreamContent(
 	if actualModel == "gemini-3.6-flash-preview" {
 		actualModel = "gemini-3.6-flash"
 	}
+
+	if actualModel == "gemini-3.5-lite" {
+		actualModel = "gemini-3.5-flash-lite"
+	}
 	
 	// 3.1-pro requires -preview
 	if actualModel == "gemini-3.1-pro" {
