@@ -3,7 +3,6 @@ package chat
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"time"
 
 	"github.com/Nithwin/WindMist/internal/ai"
@@ -54,6 +53,8 @@ func (m Model) sendMessageCmd(ctx context.Context, prompt string) tea.Cmd {
 
 			// Auto-title the session if it's the first message (Moved here to avoid concurrent API limits on Free Tier)
 			if m.session != nil && m.session.Title == "New Session" && m.store != nil {
+				sessionID := m.session.ID
+				provider := m.provider
 				go func() {
 					// Small delay to ensure the main stream request is fully closed
 					time.Sleep(1 * time.Second)
@@ -64,10 +65,12 @@ func (m Model) sendMessageCmd(ctx context.Context, prompt string) tea.Cmd {
 						},
 						MaxTokens: 20,
 					}
-					resp, err := m.provider.Generate(context.Background(), titleReq)
-					if err == nil && resp.Text != "" {
-						m.session.Title = resp.Text
-						_ = m.store.UpdateSession(m.session)
+					resp, err := provider.Generate(context.Background(), titleReq)
+					if err == nil && resp.Text != "" && program != nil {
+						program.Send(sessionTitleMsg{
+							SessionID: sessionID,
+							Title:     resp.Text,
+						})
 					}
 				}()
 			}
@@ -94,10 +97,10 @@ func (m Model) sendMessageCmd(ctx context.Context, prompt string) tea.Cmd {
 			duration := time.Since(startTime)
 
 			return StreamingMsg{
-				Text:     "\n\n(Finished in " + fmt.Sprintf("%d turns", res.Turns) + ")",
 				Done:     true,
 				Usage:    res.Usage,
 				Duration: duration,
+				Turns:    res.Turns,
 			}
 		},
 	)

@@ -51,13 +51,13 @@ type Client struct {
 }
 
 // NewClient creates a new Gemini HTTP client.
+// Timeout is left unset so long-running streams are not killed mid-response;
+// callers should cancel via context instead.
 func NewClient(apiKey, model string) *Client {
 	return &Client{
 		apiKey: apiKey,
 		model:  model,
-		client: &http.Client{
-			Timeout: 60 * time.Second,
-		},
+		client: &http.Client{},
 	}
 }
 

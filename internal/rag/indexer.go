@@ -34,8 +34,9 @@ func (i *Indexer) IndexProject(rootDir string) (int, error) {
 
 		if d.IsDir() {
 			name := d.Name()
-			// Skip hidden and common ignored directories
-			if strings.HasPrefix(name, ".") || name == "vendor" || name == "node_modules" || name == "dist" || name == "build" {
+			// Never skip the walk root itself (Name() is "." for rootDir="."),
+			// otherwise the entire tree is skipped and indexing is a no-op.
+			if path != rootDir && (strings.HasPrefix(name, ".") || name == "vendor" || name == "node_modules" || name == "dist" || name == "build") {
 				return filepath.SkipDir
 			}
 			return nil

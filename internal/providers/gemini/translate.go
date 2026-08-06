@@ -37,7 +37,24 @@ func translateTools(tools []ai.ToolDefinition) []Tool {
 
 			var itemsSchema *Schema
 			if schemaType == "ARRAY" {
-				itemsSchema = &Schema{Type: "STRING"}
+				itemType := "STRING"
+				switch strings.ToLower(p.ItemsType) {
+				case "int", "integer":
+					itemType = "INTEGER"
+				case "float", "number":
+					itemType = "NUMBER"
+				case "bool", "boolean":
+					itemType = "BOOLEAN"
+				case "object":
+					itemType = "OBJECT"
+				case "array":
+					itemType = "ARRAY"
+				case "string", "":
+					itemType = "STRING"
+				default:
+					itemType = "STRING"
+				}
+				itemsSchema = &Schema{Type: itemType}
 			}
 
 			properties[p.Name] = &Schema{
@@ -78,10 +95,15 @@ func translateTools(tools []ai.ToolDefinition) []Tool {
 	}
 }
 
+// isThoughtSignature reports whether an ID is a Gemini thought signature
+// (as opposed to a synthetic call_* tool-call ID).
+func isThoughtSignature(id string) bool {
+	return id != "" && !strings.HasPrefix(id, "call_")
+}
+
 // translateMessages converts ai.Messages into Gemini Content items.
 func translateMessages(messages []ai.Message) []Content {
 	contents := make([]Content, 0, len(messages))
-	var lastThoughtSig string
 
 	for _, msg := range messages {
 		switch msg.Role {
@@ -96,23 +118,26 @@ func translateMessages(messages []ai.Message) []Content {
 			})
 
 		case ai.RoleAssistant:
-			parts := make([]Part, 0, 1+len(msg.ToolCalls)+1)
+			parts := make([]Part, 0, 1+len(msg.ToolCalls))
 			if msg.Content != "" {
 				parts = append(parts, Part{Text: msg.Content})
 			}
+			// Gemini 3 requires thoughtSignature on the same Part as the
+			// first functionCall — never as a standalone Part, and never
+			// on functionResponse Parts.
+			sigAttached := false
 			for _, call := range msg.ToolCalls {
-				parts = append(parts, Part{
+				part := Part{
 					FunctionCall: &FunctionCall{
 						Name: call.Name,
 						Args: call.Args,
 					},
-				})
-				if !strings.HasPrefix(call.ID, "call_") {
-					lastThoughtSig = call.ID
 				}
-			}
-			if lastThoughtSig != "" {
-				parts = append(parts, Part{ThoughtSignature: lastThoughtSig})
+				if !sigAttached && isThoughtSignature(call.ID) {
+					part.ThoughtSignature = call.ID
+					sigAttached = true
+				}
+				parts = append(parts, part)
 			}
 			if len(parts) > 0 {
 				contents = append(contents, Content{
@@ -122,7 +147,7 @@ func translateMessages(messages []ai.Message) []Content {
 			}
 
 		case ai.RoleTool:
-			parts := make([]Part, 0, len(msg.ToolResults)+1)
+			parts := make([]Part, 0, len(msg.ToolResults))
 			for _, res := range msg.ToolResults {
 				parts = append(parts, Part{
 					FunctionResponse: &FunctionResponse{
@@ -133,9 +158,6 @@ func translateMessages(messages []ai.Message) []Content {
 						},
 					},
 				})
-			}
-			if lastThoughtSig != "" {
-				parts = append(parts, Part{ThoughtSignature: lastThoughtSig})
 			}
 			if len(parts) > 0 {
 				contents = append(contents, Content{
@@ -160,7 +182,10 @@ func translateResponse(candidate Candidate, model string, resp *GenerateContentR
 		if part.Text != "" {
 			textBuilder.WriteString(part.Text)
 		}
-		if part.ThoughtSignature != "" {
+		// Prefer signature attached to the functionCall part itself.
+		if part.FunctionCall != nil && part.ThoughtSignature != "" {
+			thoughtSig = part.ThoughtSignature
+		} else if part.ThoughtSignature != "" && thoughtSig == "" {
 			thoughtSig = part.ThoughtSignature
 		}
 		if part.FunctionCall != nil {
@@ -173,7 +198,8 @@ func translateResponse(candidate Candidate, model string, resp *GenerateContentR
 	}
 
 	for i := range toolCalls {
-		if thoughtSig != "" {
+		if i == 0 && thoughtSig != "" {
+			// Only the first parallel function call carries the signature.
 			toolCalls[i].ID = thoughtSig
 		} else {
 			toolCalls[i].ID = fmt.Sprintf("call_%s_%d", toolCalls[i].Name, i)

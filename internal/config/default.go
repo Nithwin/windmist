@@ -9,7 +9,7 @@ func DefaultConfig() *Config {
 
 		Providers: map[string]ProviderConfig{
 			"gemini": {
-				Model: "gemini-2.5-flash",
+				Model: "gemini-3.6-flash",
 			},
 			"groq": {
 				Model: "llama-3.3-70b-versatile",

@@ -113,6 +113,27 @@ func (a *Agent) Close() {
 	}
 }
 
+// Reconfigure updates session/mode/store settings without restarting MCP/LSP.
+func (a *Agent) Reconfigure(cfg Config) {
+	if cfg.Mode == "" {
+		cfg.Mode = string(ModeBuild)
+	}
+	a.config.SessionID = cfg.SessionID
+	a.config.Mode = cfg.Mode
+	if cfg.Store != nil {
+		a.config.Store = cfg.Store
+	}
+	if cfg.MaxTurns > 0 {
+		a.config.MaxTurns = cfg.MaxTurns
+	}
+	if cfg.MaxContextTokens > 0 {
+		a.config.MaxContextTokens = cfg.MaxContextTokens
+	}
+	if cfg.Memory != nil {
+		a.config.Memory = cfg.Memory
+	}
+}
+
 // Manager returns the tools manager associated with the agent.
 func (a *Agent) Manager() *tools.Manager {
 	return a.manager

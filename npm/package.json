@@ -1,6 +1,6 @@
 {
   "name": "windmist-cli",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "AI coding agent for the terminal",
   "main": "index.js",
   "bin": {

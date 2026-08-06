@@ -27,5 +27,6 @@ var rootCmd = &cobra.Command{
 
 // Execute runs the root command.
 func Execute() error {
+	rootCmd.Version = Version
 	return rootCmd.Execute()
 }

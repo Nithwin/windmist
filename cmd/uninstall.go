@@ -21,7 +21,7 @@ var (
 var uninstallCmd = &cobra.Command{
 	Use:   "uninstall",
 	Short: "Uninstall the WindMist CLI executable and optionally purge configuration",
-	Long:  `Safely removes the WindMist CLI executable from your system binary path and optionally cleans up saved configuration files (` + "`~/.config/windmist`" + `).`,
+	Long:  `Safely removes the WindMist CLI executable from your system binary path and optionally cleans up saved configuration and data (` + "`~/.config/windmist`" + ` and ` + "`~/.windmist`" + `).`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		execPath, err := os.Executable()
 		if err != nil {
@@ -47,9 +47,34 @@ var uninstallCmd = &cobra.Command{
 
 		if !uninstallPurgeFlag && !uninstallYesFlag {
 			cfgDir, _ := config.ConfigDir()
-			if cfgDir != "" {
-				if _, err := os.Stat(cfgDir); err == nil {
-					fmt.Printf("❓ Also remove all configuration and chat history in %s? [y/N]: ", cfgDir)
+			home, _ := os.UserHomeDir()
+			dataDir := ""
+			if home != "" {
+				dataDir = filepath.Join(home, ".windmist")
+			}
+			purgeTarget := cfgDir
+			if dataDir != "" {
+				if purgeTarget != "" {
+					purgeTarget = purgeTarget + " and " + dataDir
+				} else {
+					purgeTarget = dataDir
+				}
+			}
+			if purgeTarget != "" {
+				cfgExists := false
+				if cfgDir != "" {
+					if _, err := os.Stat(cfgDir); err == nil {
+						cfgExists = true
+					}
+				}
+				dataExists := false
+				if dataDir != "" {
+					if _, err := os.Stat(dataDir); err == nil {
+						dataExists = true
+					}
+				}
+				if cfgExists || dataExists {
+					fmt.Printf("❓ Also remove all configuration and chat history in %s? [y/N]: ", purgeTarget)
 					input, _ := reader.ReadString('\n')
 					input = strings.TrimSpace(input)
 					if strings.EqualFold(input, "y") || strings.EqualFold(input, "yes") {
@@ -85,6 +110,15 @@ var uninstallCmd = &cobra.Command{
 					fmt.Printf("🗑️  Removing configuration directory at %s...\n", cfgDir)
 					if err := os.RemoveAll(cfgDir); err != nil {
 						fmt.Printf("⚠️  Warning: failed to remove configuration directory: %v\n", err)
+					}
+				}
+			}
+			if home, err := os.UserHomeDir(); err == nil {
+				dataDir := filepath.Join(home, ".windmist")
+				if _, err := os.Stat(dataDir); err == nil {
+					fmt.Printf("🗑️  Removing data directory at %s...\n", dataDir)
+					if err := os.RemoveAll(dataDir); err != nil {
+						fmt.Printf("⚠️  Warning: failed to remove data directory: %v\n", err)
 					}
 				}
 			}
