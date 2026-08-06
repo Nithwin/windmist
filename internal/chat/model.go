@@ -140,7 +140,8 @@ func New() (Model, error) {
 	ragSearcher := rag.NewSearcher(ragStore, ragEmbedder)
 	ragIndexer := rag.NewIndexer(ragStore, ragEmbedder)
 
-	// Rebuild vocabulary on startup if we have indexed chunks (run in background to avoid UI lag)
+	// Rebuild vocabulary on startup if we have indexed chunks, then re-embed
+	// so stored vectors stay aligned with the rebuilt vocabulary.
 	go func() {
 		if chunks, err := ragStore.GetAllChunks(); err == nil && len(chunks) > 0 {
 			docs := make([]string, len(chunks))
@@ -148,6 +149,13 @@ func New() (Model, error) {
 				docs[i] = c.Content
 			}
 			ragEmbedder.BuildVocabulary(docs)
+			for _, c := range chunks {
+				vec := ragEmbedder.Embed(c.Content)
+				if vec == nil {
+					continue
+				}
+				_ = ragStore.UpdateChunkVector(c.ID, vec)
+			}
 		}
 	}()
 
@@ -164,9 +172,9 @@ func New() (Model, error) {
 
 	activeModel, _ := cfg.ActiveModel()
 	sess := &store.Session{
-		ID:          fmt.Sprintf("sess_%d", time.Now().Unix()),
+		ID:          fmt.Sprintf("sess_%d", time.Now().UnixNano()),
 		Title:       "New Session",
-		ProjectPath: cwd,
+		ProjectPath: filepath.Clean(cwd),
 		Provider:    cfg.AI.Provider,
 		Model:       activeModel,
 		AgentMode:   "auto",

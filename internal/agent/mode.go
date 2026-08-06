@@ -8,8 +8,10 @@ import (
 type Mode string
 
 const (
-	// ModeAuto automatically decides between Plan and Build based on the prompt.
+	// ModeAuto automatically decides between Chat, Plan, and Build based on the prompt.
 	ModeAuto Mode = "auto"
+	// ModeChat is a lightweight conversational mode: no tools, minimal prompt.
+	ModeChat Mode = "chat"
 	// ModeBuild has full read/write access and autonomy.
 	ModeBuild Mode = "build"
 	// ModePlan is read-only. It can search and analyze, but cannot write files.
@@ -23,46 +25,64 @@ type ModeConfig struct {
 	SystemPrompt   string
 	AllowFileEdits bool
 	AllowCommands  bool
+	// AllowTools controls whether any tools (including MCP) are sent to the model.
+	AllowTools bool
+	// IncludeRepoMap injects a workspace file tree into the system prompt.
+	IncludeRepoMap bool
 }
 
 // GetModeConfig returns the configuration for a given mode.
 func GetModeConfig(mode Mode) ModeConfig {
 	switch mode {
+	case ModeChat:
+		return ModeConfig{
+			Name:           ModeChat,
+			Description:    "Lightweight chat. No tools; minimal prompt for greetings and simple questions.",
+			SystemPrompt:   "You are WindMist, a concise coding assistant. Answer briefly and helpfully. Do not invent file contents or pretend to have edited code. If the user wants changes in their project, tell them to ask you to implement it.",
+			AllowFileEdits: false,
+			AllowCommands:  false,
+			AllowTools:     false,
+			IncludeRepoMap: false,
+		}
 	case ModePlan:
 		return ModeConfig{
 			Name:           ModePlan,
-			Description:    "Safe Chat & Plan Mode. Analyzes and plans but cannot edit files.",
-			SystemPrompt:   "You are WindMist in CHAT/PLAN mode. Your job is to answer questions, search the codebase, read files, and output detailed plans. YOU CANNOT MODIFY FILES OR WRITE CODE TO DISK. Do not attempt to use any write tools.",
+			Description:    "Read-only analysis and planning. Cannot edit files.",
+			SystemPrompt:   "You are WindMist in PLAN mode. Answer questions, search/read the codebase, and propose plans. Do NOT modify files or run destructive commands.",
 			AllowFileEdits: false,
 			AllowCommands:  false,
+			AllowTools:     true,
+			IncludeRepoMap: true,
 		}
 	default:
-		// Default to build (even if auto, the actual execution mode resolves to build/plan)
+		// Default to build (even if auto, execution resolves to chat/plan/build)
 		return ModeConfig{
 			Name:           ModeBuild,
 			Description:    "Full autonomy mode. Can read, write, and execute.",
-			SystemPrompt:   "You are WindMist, an expert autonomous coding agent in BUILD mode. Your job is to implement features, fix bugs, and refactor code directly. You have full access to the filesystem. When asked to complete a task, you should read relevant files, make the necessary edits using your tools, and run commands to verify your work. Act surgically and efficiently.",
+			SystemPrompt:   "You are WindMist in BUILD mode. Implement features, fix bugs, and edit files directly. Inspect before editing. Prefer the smallest safe change. Verify when practical.",
 			AllowFileEdits: true,
 			AllowCommands:  true,
+			AllowTools:     true,
+			IncludeRepoMap: true,
 		}
 	}
 }
 
 // FilterTools returns only the tools allowed by the given ModeConfig.
 func FilterTools(manager *tools.Manager, config ModeConfig) []tools.Definition {
+	if !config.AllowTools {
+		return nil
+	}
+
 	var allowed []tools.Definition
 
 	for _, tool := range manager.List() {
 		def := tool.Definition()
 
-		// If edits are denied, filter out PermWrite and PermDangerous
+		// If edits are denied, filter out write/dangerous tools
 		if !config.AllowFileEdits && (def.Category == tools.CategoryEditing || def.Permission == tools.PermWrite || def.Permission == tools.PermDangerous) {
 			continue
 		}
-
-		// Wait, if commands are denied, we could filter out system/command tools,
-		// but maybe we just require permission instead of completely filtering.
-		// For now, in plan mode, we completely disable editing tools.
 
 		allowed = append(allowed, def)
 	}

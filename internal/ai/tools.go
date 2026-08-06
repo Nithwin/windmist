@@ -7,6 +7,8 @@ type ToolParameter struct {
 	Description string   `json:"description"`
 	Required    bool     `json:"required"`
 	Enum        []string `json:"enum,omitempty"`
+	// ItemsType is the element type when Type is "array" (e.g. "string", "number", "object").
+	ItemsType string `json:"items_type,omitempty"`
 }
 
 // ToolDefinition defines the schema of a tool available to the model.

@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [v2.0.1] - 2026-08-06
+
+### Fixed
+- **Release packaging**: GoReleaser archive names now match `install.sh` / npm (`Linux`/`macOS`/`Windows` + `x86_64`), and ldflags correctly inject `cmd.Version` / `Commit` / `Date`.
+- **Gemini tool calling**: Thought signatures are attached to the first `functionCall` Part (required by Gemini 3); removed invalid signatures on tool-response Parts.
+- **Gemini streaming**: Removed the hard 60s HTTP client timeout that aborted long generations.
+- **RAG indexing**: `IndexProject(".")` no longer skips the entire workspace; vocabulary ranking is deterministic and vectors are re-embedded after rebuild.
+- **Sessions**: Absolute project paths on `/new`, nanosecond session IDs, and race-free async title updates via the Bubble Tea main loop.
+- **Agent lifecycle**: Provider/model switches close the previous agent (MCP/LSP) before creating a new one; session/mode changes use `Reconfigure` instead of leaking processes.
+- **Remote `/provider`**: No longer wipes the configured model when switching providers.
+- **MCP**: Safe type assertions when parsing tool schemas; array `items` types are preserved for Gemini.
+- **Uninstall `--purge`**: Also removes `~/.windmist` (sessions + RAG), not only `~/.config/windmist`.
+- **CI**: Go 1.26, `go vet`, and race tests aligned with `go.mod` / CHANGELOG claims.
+- **Docs/install**: Correct module path and `go build` instructions in README.
+
+### Changed
+- **Token efficiency (free-tier friendly)**: New `chat` mode for greetings/simple questions (no tools, tiny system prompt). Auto-router uses local heuristics first so "hi" no longer burns a classify call or drops into plan mode. System prompts collapsed; repo map capped at 80 files; history/context windows tightened.
+
+---
+
 ## [v2.0.0] - 2026-07-27
 
 ### Added

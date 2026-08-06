@@ -186,7 +186,7 @@ func (a *Agent) execute(ctx context.Context, calls []ai.ToolCall, onChunk func(s
 
 // toolDefinitions converts the registered tool definitions from tools.Manager into ai.ToolDefinition format.
 func (a *Agent) toolDefinitions(modeConfig ModeConfig) []ai.ToolDefinition {
-	if a.manager == nil {
+	if a.manager == nil || !modeConfig.AllowTools {
 		return nil
 	}
 
@@ -211,7 +211,8 @@ func (a *Agent) toolDefinitions(modeConfig ModeConfig) []ai.ToolDefinition {
 		})
 	}
 
-	if a.mcpManager != nil {
+	// MCP tools are write-capable; only attach them in build mode.
+	if a.mcpManager != nil && modeConfig.AllowFileEdits {
 		defs = append(defs, a.mcpManager.GetTools()...)
 	}
 

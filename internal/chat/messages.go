@@ -20,6 +20,7 @@ type StreamingMsg struct {
 	Err      error
 	Usage    ai.Usage
 	Duration time.Duration
+	Turns    int
 }
 
 // DoneMsg signals that streaming has completed.
@@ -49,6 +50,12 @@ type switchSessionSuccessMsg struct {
 
 // createNewSessionMsg signals to spin up a new session.
 type createNewSessionMsg struct{}
+
+// sessionTitleMsg updates a session title from a background goroutine.
+type sessionTitleMsg struct {
+	SessionID string
+	Title     string
+}
 
 // undoFileChangeMsg signals to undo the last file edit.
 type undoFileChangeMsg struct{}

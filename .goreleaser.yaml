@@ -17,17 +17,17 @@ builds:
       - CGO_ENABLED=0
     ldflags:
       - -s -w
-      - -X main.version={{.Version}}
-      - -X main.commit={{.ShortCommit}}
-      - -X main.date={{.Date}}
-      - -X main.builtBy=goreleaser
+      - -X github.com/Nithwin/WindMist/cmd.Version={{.Version}}
+      - -X github.com/Nithwin/WindMist/cmd.Commit={{.ShortCommit}}
+      - -X github.com/Nithwin/WindMist/cmd.Date={{.Date}}
 
 archives:
-  - format: tar.gz
-    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+  - formats: [tar.gz]
+    name_template: >-
+      {{ .ProjectName }}_{{ .Version }}_{{ if eq .Os "darwin" }}macOS{{ else }}{{ title .Os }}{{ end }}_{{ if eq .Arch "amd64" }}x86_64{{ else }}{{ .Arch }}{{ end }}
     format_overrides:
       - goos: windows
-        format: zip
+        formats: [zip]
 
 checksum:
   name_template: "checksums.txt"
@@ -52,4 +52,4 @@ brews:
     homepage: "https://github.com/Nithwin/WindMist"
     description: "AI coding agent for the terminal."
     test: |
-      system "#{bin}/windmist --version"
+      system "#{bin}/windmist", "version"

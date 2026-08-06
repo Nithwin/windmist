@@ -31,7 +31,7 @@ func (m Model) handleStreamMsg(msg StreamingMsg) (Model, tea.Cmd) {
 	if len(m.conversation.Messages) > 0 {
 		last := &m.conversation.Messages[len(m.conversation.Messages)-1]
 
-		if last.Role == "assistant" {
+		if last.Role == "assistant" && msg.Text != "" {
 			last.Content += msg.Text
 			m.refreshViewport()
 		}

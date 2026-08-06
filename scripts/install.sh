@@ -4,7 +4,7 @@
 
 set -euo pipefail
 
-REPO="Nithwin/windmist"
+REPO="Nithwin/WindMist"
 INSTALL_DIR="/usr/local/bin"
 
 echo "🌪️  Installing WindMist CLI..."
@@ -30,13 +30,14 @@ echo "🔍 Fetching latest release tag from GitHub..."
 LATEST_TAG="$(curl -sSL "https://api.github.com/repos/$REPO/releases/latest" | grep '"tag_name":' | sed -E 's/.*"tag_name": "([^"]+)".*/\1/' || true)"
 
 if [ -z "$LATEST_TAG" ]; then
-  # Fallback if API rate limited or offline, default to v1.0.1
+  # Fallback if API rate limited or offline
   LATEST_TAG="v1.0.1"
+  echo "⚠️  Could not reach GitHub API; falling back to $LATEST_TAG"
 fi
 
 VERSION="${LATEST_TAG#v}" # strip leading 'v'
 
-# Handle transition between earlier 'Darwin' template in v1.0.1 and new 'macOS' template in v1.0.2+
+# Handle transition between earlier 'Darwin' template in v1.0.1 and 'macOS' in later releases
 DOWNLOAD_OS="$OS_NAME"
 if [ "$OS_NAME" = "macOS" ] && [ "$LATEST_TAG" = "v1.0.1" ]; then
   DOWNLOAD_OS="Darwin"

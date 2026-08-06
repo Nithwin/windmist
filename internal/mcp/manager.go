@@ -67,14 +67,22 @@ func (m *Manager) StartAll(ctx context.Context, cfg *config.Config) error {
 			var params []ai.ToolParameter
 			if props, ok := t.InputSchema["properties"].(map[string]interface{}); ok {
 				for propName, propVal := range props {
-					propMap := propVal.(map[string]interface{})
+					propMap, ok := propVal.(map[string]interface{})
+					if !ok {
+						continue
+					}
 					desc, _ := propMap["description"].(string)
 					typ, _ := propMap["type"].(string)
+					itemsType := ""
+					if items, ok := propMap["items"].(map[string]interface{}); ok {
+						itemsType, _ = items["type"].(string)
+					}
 
 					required := false
 					if reqArr, ok := t.InputSchema["required"].([]interface{}); ok {
 						for _, req := range reqArr {
-							if req.(string) == propName {
+							reqName, ok := req.(string)
+							if ok && reqName == propName {
 								required = true
 								break
 							}
@@ -86,6 +94,7 @@ func (m *Manager) StartAll(ctx context.Context, cfg *config.Config) error {
 						Type:        typ,
 						Description: desc,
 						Required:    required,
+						ItemsType:   itemsType,
 					})
 				}
 			}

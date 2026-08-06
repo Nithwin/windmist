@@ -134,13 +134,12 @@ func (p *Provider) Stream(
 				finalResp.Finish = translated.Finish
 			}
 
-			// Capture ThoughtSignature if it arrives in a separate chunk
+			// Capture ThoughtSignature if it arrives in a separate chunk.
+			// Only the first tool call should carry the signature.
 			for _, part := range candidate.Content.Parts {
-				if part.ThoughtSignature != "" {
-					for i := range finalResp.ToolCalls {
-						if strings.HasPrefix(finalResp.ToolCalls[i].ID, "call_") {
-							finalResp.ToolCalls[i].ID = part.ThoughtSignature
-						}
+				if part.ThoughtSignature != "" && len(finalResp.ToolCalls) > 0 {
+					if strings.HasPrefix(finalResp.ToolCalls[0].ID, "call_") || finalResp.ToolCalls[0].ID == "" {
+						finalResp.ToolCalls[0].ID = part.ThoughtSignature
 					}
 				}
 			}

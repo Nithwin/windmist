@@ -31,7 +31,7 @@ var Registry = []Command{
 /undo       Undo the last AI file edit
 /redo       Redo the last undone file edit
 /model      Change model
-/mode       Change agent mode (auto/build/plan)
+/mode       Change agent mode (auto/chat/build/plan)
 /provider   Change provider
 /subagent   Configure sub-agent (cheaper background model)
 /theme      Change UI theme

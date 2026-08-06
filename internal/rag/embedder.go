@@ -63,15 +63,20 @@ func (e *TFIDFEmbedder) BuildVocabulary(documents []string) {
 		ranked = append(ranked, tokenFreq{tok, docFreq[tok]})
 	}
 
-	// Sort by frequency (descending), but skip tokens that appear in
-	// too many documents (>80%) as they're not discriminative.
+	// Sort by frequency (descending). Drop ultra-common tokens (>80% of docs)
+	// only when the corpus is large enough for that signal to be meaningful.
 	totalDocs := len(documents)
 	filtered := make([]tokenFreq, 0, len(ranked))
 	for _, tf := range ranked {
-		ratio := float64(tf.freq) / float64(totalDocs)
-		if ratio < 0.8 && tf.freq > 1 {
-			filtered = append(filtered, tf)
+		if totalDocs > 5 {
+			ratio := float64(tf.freq) / float64(totalDocs)
+			if ratio >= 0.8 || tf.freq < 2 {
+				continue
+			}
+		} else if tf.freq < 1 {
+			continue
 		}
+		filtered = append(filtered, tf)
 	}
 
 	// Sort by frequency (descending) using a simple selection sort
@@ -83,7 +88,8 @@ func (e *TFIDFEmbedder) BuildVocabulary(documents []string) {
 	for i := 0; i < dim; i++ {
 		maxIdx := i
 		for j := i + 1; j < len(filtered); j++ {
-			if filtered[j].freq > filtered[maxIdx].freq {
+			if filtered[j].freq > filtered[maxIdx].freq ||
+				(filtered[j].freq == filtered[maxIdx].freq && filtered[j].token < filtered[maxIdx].token) {
 				maxIdx = j
 			}
 		}

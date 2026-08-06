@@ -26,10 +26,10 @@ func enforceRateLimit(model string) {
 
 	now := time.Now()
 	elapsed := now.Sub(lastRequestTime)
-	minInterval := 4 * time.Second
+	minInterval := 6 * time.Second
 
 	if strings.Contains(model, "lite") {
-		minInterval = 2 * time.Second
+		minInterval = 3 * time.Second
 	}
 
 	if !lastRequestTime.IsZero() && elapsed < minInterval {
@@ -51,13 +51,13 @@ type Client struct {
 }
 
 // NewClient creates a new Gemini HTTP client.
+// Timeout is left unset so long-running streams are not killed mid-response;
+// callers should cancel via context instead.
 func NewClient(apiKey, model string) *Client {
 	return &Client{
 		apiKey: apiKey,
 		model:  model,
-		client: &http.Client{
-			Timeout: 60 * time.Second,
-		},
+		client: &http.Client{},
 	}
 }
 
@@ -75,15 +75,15 @@ func (c *Client) GenerateContent(
 	actualModel := c.model
 
 	// Handle users who have cached -preview models in their config
+	if actualModel == "gemini-3.5-lite" {
+		actualModel = "gemini-3.5-flash-lite"
+	}
+
 	if actualModel == "gemini-3.5-flash-preview" {
 		actualModel = "gemini-3.5-flash"
 	}
 	if actualModel == "gemini-3.6-flash-preview" {
 		actualModel = "gemini-3.6-flash"
-	}
-
-	if actualModel == "gemini-3.5-lite" {
-		actualModel = "gemini-3.5-flash-lite"
 	}
 
 	// 3.1-pro requires -preview

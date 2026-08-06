@@ -21,6 +21,21 @@ import (
 
 func (m Model) handleEventMsg(msg tea.Msg) (Model, tea.Cmd) {
 	switch msg := msg.(type) {
+	case sessionTitleMsg:
+		if m.session != nil && m.session.ID == msg.SessionID {
+			m.session.Title = msg.Title
+			if m.store != nil {
+				_ = m.store.UpdateSession(m.session)
+			}
+		} else if m.store != nil {
+			// Session may have switched; update the titled session directly.
+			if sess, err := m.store.GetSession(msg.SessionID); err == nil {
+				sess.Title = msg.Title
+				_ = m.store.UpdateSession(sess)
+			}
+		}
+		return m, nil
+
 	case ApprovalRequestMsg:
 		m.waitingApproval = true
 		m.approvalCommand = msg.Command
@@ -34,8 +49,8 @@ func (m Model) handleEventMsg(msg tea.Msg) (Model, tea.Cmd) {
 			_ = m.store.UpdateSession(m.session)
 		}
 
-		// Update Agent config mode
-		m.agent = agent.New(m.provider, m.agent.Manager(), agent.Config{
+		// Update Agent config mode without restarting MCP servers
+		m.agent.Reconfigure(agent.Config{
 			Store:     m.store,
 			SessionID: m.session.ID,
 			Mode:      m.session.AgentMode,
@@ -46,11 +61,15 @@ func (m Model) handleEventMsg(msg tea.Msg) (Model, tea.Cmd) {
 		return m, nil
 
 	case createNewSessionMsg:
+		cwd, err := os.Getwd()
+		if err != nil {
+			cwd = "."
+		}
 		activeModel, _ := m.cfg.ActiveModel()
 		sess := &store.Session{
-			ID:          fmt.Sprintf("sess_%d", time.Now().Unix()),
+			ID:          fmt.Sprintf("sess_%d", time.Now().UnixNano()),
 			Title:       "New Session",
-			ProjectPath: ".",
+			ProjectPath: filepath.Clean(cwd),
 			Provider:    m.cfg.AI.Provider,
 			Model:       activeModel,
 			AgentMode:   "auto",
@@ -60,7 +79,7 @@ func (m Model) handleEventMsg(msg tea.Msg) (Model, tea.Cmd) {
 		}
 
 		m.session = sess
-		m.agent = agent.New(m.provider, m.agent.Manager(), agent.Config{
+		m.agent.Reconfigure(agent.Config{
 			Store:     m.store,
 			SessionID: sess.ID,
 			Mode:      sess.AgentMode,
@@ -136,7 +155,7 @@ func (m Model) handleEventMsg(msg tea.Msg) (Model, tea.Cmd) {
 		}
 
 		m.session = sess
-		m.agent = agent.New(m.provider, m.agent.Manager(), agent.Config{
+		m.agent.Reconfigure(agent.Config{
 			Store:     m.store,
 			SessionID: sess.ID,
 			Mode:      sess.AgentMode,
@@ -171,7 +190,15 @@ func (m Model) handleEventMsg(msg tea.Msg) (Model, tea.Cmd) {
 
 	case switchProviderSuccessMsg:
 		m.cfg.SetProvider(msg.Provider)
-		m.cfg.SetModel(msg.Provider, msg.Model)
+		model := msg.Model
+		if model == "" {
+			// Remote /provider may omit model — keep the provider's configured model.
+			if p, err := m.cfg.ActiveProvider(); err == nil {
+				model = p.Model
+			}
+		} else {
+			m.cfg.SetModel(msg.Provider, model)
+		}
 		_ = config.Save(m.cfg)
 
 		provider, err := ai.New(m.cfg)
@@ -186,6 +213,9 @@ func (m Model) handleEventMsg(msg tea.Msg) (Model, tea.Cmd) {
 				program.Send(ApprovalRequestMsg{Command: cmd, ResponseChan: ch})
 				return <-ch
 			}, m.cfg)
+			if m.agent != nil {
+				m.agent.Close()
+			}
 			m.agent = agent.New(provider, manager, agent.Config{
 				Store:     m.store,
 				SessionID: m.session.ID,
@@ -193,7 +223,7 @@ func (m Model) handleEventMsg(msg tea.Msg) (Model, tea.Cmd) {
 			})
 		}
 
-		m.conversation.AddAssistant(fmt.Sprintf("✨ Provider switched to **%s** (model: `%s`)", msg.Provider, msg.Model))
+		m.conversation.AddAssistant(fmt.Sprintf("✨ Provider switched to **%s** (model: `%s`)", msg.Provider, model))
 		m.refreshViewport()
 		m.loading = false
 		return m, nil
@@ -214,6 +244,9 @@ func (m Model) handleEventMsg(msg tea.Msg) (Model, tea.Cmd) {
 				program.Send(ApprovalRequestMsg{Command: cmd, ResponseChan: ch})
 				return <-ch
 			}, m.cfg)
+			if m.agent != nil {
+				m.agent.Close()
+			}
 			m.agent = agent.New(provider, manager, agent.Config{
 				Store:     m.store,
 				SessionID: m.session.ID,
@@ -241,6 +274,9 @@ func (m Model) handleEventMsg(msg tea.Msg) (Model, tea.Cmd) {
 			program.Send(ApprovalRequestMsg{Command: cmd, ResponseChan: ch})
 			return <-ch
 		}, m.cfg)
+		if m.agent != nil {
+			m.agent.Close()
+		}
 		m.agent = agent.New(m.provider, manager, agent.Config{
 			Store:     m.store,
 			SessionID: m.session.ID,
@@ -275,6 +311,9 @@ func (m Model) handleEventMsg(msg tea.Msg) (Model, tea.Cmd) {
 				program.Send(ApprovalRequestMsg{Command: cmd, ResponseChan: ch})
 				return <-ch
 			}, m.cfg)
+			if m.agent != nil {
+				m.agent.Close()
+			}
 			m.agent = agent.New(provider, manager, agent.Config{
 				Store:     m.store,
 				SessionID: m.session.ID,

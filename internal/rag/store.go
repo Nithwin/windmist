@@ -99,3 +99,10 @@ func (s *DocumentStore) GetChunksByFile(filePath string) ([]IndexedChunk, error)
 	err := s.db.Select(&chunks, "SELECT * FROM rag_chunks WHERE file_path = ? ORDER BY start_line ASC", filePath)
 	return chunks, err
 }
+
+// UpdateChunkVector replaces the embedding for an existing chunk so query
+// vectors stay aligned after vocabulary rebuilds.
+func (s *DocumentStore) UpdateChunkVector(id int, vector Vector) error {
+	_, err := s.db.Exec("UPDATE rag_chunks SET vector = ? WHERE id = ?", EncodeVector(vector), id)
+	return err
+}

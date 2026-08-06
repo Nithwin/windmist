@@ -2,6 +2,7 @@ package store
 
 import (
 	"fmt"
+	"path/filepath"
 	"time"
 )
 
@@ -31,7 +32,8 @@ func (s *Store) GetSession(id string) (*Session, error) {
 // ListSessionsByProject gets all sessions for a specific project
 func (s *Store) ListSessionsByProject(projectPath string) ([]Session, error) {
 	var sessions []Session
-	err := s.db.Select(&sessions, "SELECT * FROM sessions WHERE project_path = ? OR project_path = '.' ORDER BY updated_at DESC", projectPath)
+	cleaned := filepath.Clean(projectPath)
+	err := s.db.Select(&sessions, "SELECT * FROM sessions WHERE project_path = ? OR project_path = '.' ORDER BY updated_at DESC", cleaned)
 	return sessions, err
 }
 

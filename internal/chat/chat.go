@@ -3,9 +3,9 @@ package chat
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"time"
 
+	"github.com/Nithwin/WindMist/internal/agent"
 	"github.com/Nithwin/WindMist/internal/ai"
 	"github.com/Nithwin/WindMist/internal/remote"
 	tea "github.com/charmbracelet/bubbletea"
@@ -53,7 +53,9 @@ func (m Model) sendMessageCmd(ctx context.Context, prompt string) tea.Cmd {
 			})
 
 			// Auto-title the session if it's the first message (Moved here to avoid concurrent API limits on Free Tier)
-			if m.session != nil && m.session.Title == "New Session" && m.store != nil {
+			if m.session != nil && m.session.Title == "New Session" && m.store != nil && !agent.IsTrivialPrompt(prompt) {
+				sessionID := m.session.ID
+				provider := m.provider
 				go func() {
 					// Small delay to ensure the main stream request is fully closed
 					time.Sleep(1 * time.Second)
@@ -64,12 +66,20 @@ func (m Model) sendMessageCmd(ctx context.Context, prompt string) tea.Cmd {
 						},
 						MaxTokens: 20,
 					}
-					resp, err := m.provider.Generate(context.Background(), titleReq)
-					if err == nil && resp.Text != "" {
-						m.session.Title = resp.Text
-						_ = m.store.UpdateSession(m.session)
+					resp, err := provider.Generate(context.Background(), titleReq)
+					if err == nil && resp.Text != "" && program != nil {
+						program.Send(sessionTitleMsg{
+							SessionID: sessionID,
+							Title:     resp.Text,
+						})
 					}
 				}()
+			} else if m.session != nil && m.session.Title == "New Session" && agent.IsTrivialPrompt(prompt) && program != nil {
+				// Cheap local title — don't burn a free-tier API call on "hi".
+				program.Send(sessionTitleMsg{
+					SessionID: m.session.ID,
+					Title:     "quick chat",
+				})
 			}
 
 			if err != nil {
@@ -94,10 +104,10 @@ func (m Model) sendMessageCmd(ctx context.Context, prompt string) tea.Cmd {
 			duration := time.Since(startTime)
 
 			return StreamingMsg{
-				Text:     "\n\n(Finished in " + fmt.Sprintf("%d turns", res.Turns) + ")",
 				Done:     true,
 				Usage:    res.Usage,
 				Duration: duration,
+				Turns:    res.Turns,
 			}
 		},
 	)
@@ -113,9 +123,9 @@ func (m Model) getInitialMessages() []ai.Message {
 		return nil
 	}
 
-	// Truncate history to last 20 messages to prevent massive token usage on free tiers
-	if len(storeMsgs) > 20 {
-		storeMsgs = storeMsgs[len(storeMsgs)-20:]
+	// Truncate history to keep free-tier prompts lean
+	if len(storeMsgs) > 12 {
+		storeMsgs = storeMsgs[len(storeMsgs)-12:]
 	}
 
 	var msgs []ai.Message
