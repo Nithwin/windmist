@@ -109,9 +109,10 @@ func selectModelCmd(m *Model) tea.Cmd {
 func selectModeCmd(m *Model) tea.Cmd {
 	return func() tea.Msg {
 		options := []selector.Option{
-			{Label: "Auto", Desc: "Dynamically switches between Build and Plan based on prompt", Value: "auto"},
-			{Label: "Build", Desc: "Full autonomy mode with read/write access", Value: "build"},
-			{Label: "Plan", Desc: "Read-only mode for architecture and analysis", Value: "plan"},
+			{Label: "Auto", Desc: "Routes to Chat / Plan / Build (local rules first, saves tokens)", Value: "auto"},
+			{Label: "Chat", Desc: "Lightweight replies — no tools, minimal prompt (best for free tier)", Value: "chat"},
+			{Label: "Build", Desc: "Full autonomy with read/write access", Value: "build"},
+			{Label: "Plan", Desc: "Read-only analysis and architecture planning", Value: "plan"},
 		}
 
 		return showInlineSelectorMsg{

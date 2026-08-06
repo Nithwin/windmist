@@ -22,6 +22,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **CI**: Go 1.26, `go vet`, and race tests aligned with `go.mod` / CHANGELOG claims.
 - **Docs/install**: Correct module path and `go build` instructions in README.
 
+### Changed
+- **Token efficiency (free-tier friendly)**: New `chat` mode for greetings/simple questions (no tools, tiny system prompt). Auto-router uses local heuristics first so "hi" no longer burns a classify call or drops into plan mode. System prompts collapsed; repo map capped at 80 files; history/context windows tightened.
+
 ---
 
 ## [v2.0.0] - 2026-07-27

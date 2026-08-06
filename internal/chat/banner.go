@@ -37,10 +37,13 @@ func renderBanner(m Model) string {
 	b.WriteString(ui.LabelStyle.Render("Mode     : "))
 	if m.session != nil {
 		modeColor := ui.SuccessStyle
-		if m.session.AgentMode == "plan" {
+		switch m.session.AgentMode {
+		case "plan":
 			modeColor = ui.BaseStyle.Foreground(ui.Amber)
-		} else if m.session.AgentMode == "auto" {
+		case "auto":
 			modeColor = ui.BaseStyle.Foreground(ui.Purple)
+		case "chat":
+			modeColor = ui.BaseStyle.Foreground(ui.Cyan)
 		}
 		b.WriteString(modeColor.Render(strings.ToUpper(m.session.AgentMode)))
 	} else {

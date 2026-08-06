@@ -6,32 +6,41 @@ import (
 	"strings"
 )
 
-// Build constructs the complete system prompt for WindMist.
-// It dynamically generates a map of the workspace if cwd is provided.
-func Build(cwd string, modeSystemPrompt string) string {
+// Options controls which optional sections are included in the system prompt.
+type Options struct {
+	IncludeRepoMap bool
+	IncludeGuides  bool // developer + tool workflow guidance
+}
+
+// Build constructs the system prompt for WindMist.
+func Build(cwd string, modeSystemPrompt string, opts Options) string {
 	if modeSystemPrompt == "" {
 		modeSystemPrompt = System()
 	}
 
-	sections := []string{
-		modeSystemPrompt,
-		Developer(),
-		Tools(),
+	sections := []string{modeSystemPrompt}
+
+	if opts.IncludeGuides {
+		sections = append(sections, Workflow())
+	}
+
+	if opts.IncludeRepoMap && cwd != "" {
+		sections = append(sections, RepoMap(cwd))
 	}
 
 	if cwd != "" {
-		sections = append(sections, RepoMap(cwd))
-
-		// Look for custom AGENTS.md or .windmist/prompt.md conventions
 		if custom := loadCustomPrompt(cwd); custom != "" {
-			sections = append(sections, "## Workspace Conventions\n\nThe following rules apply specifically to this workspace:\n\n"+custom)
+			// Cap custom prompts to avoid blowing free-tier context.
+			if len(custom) > 4000 {
+				custom = custom[:4000] + "\n…[truncated]"
+			}
+			sections = append(sections, "## Workspace Conventions\n\n"+custom)
 		}
 	}
 
 	return strings.Join(sections, "\n\n")
 }
 
-// loadCustomPrompt checks for local workspace prompt files.
 func loadCustomPrompt(cwd string) string {
 	paths := []string{
 		filepath.Join(cwd, "AGENTS.md"),

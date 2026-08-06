@@ -24,9 +24,10 @@ func (a *Agent) runLoop(ctx context.Context, messages []ai.Message, userPrompt s
 
 	effectiveMode := a.config.Mode
 	if effectiveMode == string(ModeAuto) {
-		resolvedMode := a.orchestrateMode(ctx, userPrompt)
+		resolvedMode, viaLLM := a.resolveMode(ctx, userPrompt)
 		effectiveMode = resolvedMode
-		if onChunk != nil {
+		// Only announce when we spent an LLM call or selected an engineering mode.
+		if onChunk != nil && (viaLLM || resolvedMode != string(ModeChat)) {
 			onChunk(fmt.Sprintf("\n> 🤖 **Auto-Router**: Selected `%s` mode.\n\n", resolvedMode))
 		}
 	}
@@ -37,11 +38,12 @@ func (a *Agent) runLoop(ctx context.Context, messages []ai.Message, userPrompt s
 		}
 
 		prunedHistory := a.config.Memory.Prune(messages, a.config.MaxContextTokens)
-		// Build dynamic system prompt based on mode.
-		// Re-read cwd each turn in case a tool changed directory.
 		cwd, _ = os.Getwd()
 		modeConfig := GetModeConfig(Mode(effectiveMode))
-		dynamicSystemPrompt := prompt.Build(cwd, modeConfig.SystemPrompt)
+		dynamicSystemPrompt := prompt.Build(cwd, modeConfig.SystemPrompt, prompt.Options{
+			IncludeRepoMap: modeConfig.IncludeRepoMap,
+			IncludeGuides:  modeConfig.AllowTools,
+		})
 
 		req := &ai.GenerateRequest{
 			System:   dynamicSystemPrompt,
@@ -49,7 +51,6 @@ func (a *Agent) runLoop(ctx context.Context, messages []ai.Message, userPrompt s
 			Tools:    a.toolDefinitions(modeConfig),
 		}
 
-		// Enforce rate limits before making the API call
 		if err := a.limiter.Wait(ctx); err != nil {
 			return nil, fmt.Errorf("rate limit exceeded or context cancelled: %w", err)
 		}
@@ -66,7 +67,6 @@ func (a *Agent) runLoop(ctx context.Context, messages []ai.Message, userPrompt s
 				break
 			}
 
-			// Don't retry if context is cancelled by user
 			if ctx.Err() != nil {
 				break
 			}
@@ -75,7 +75,6 @@ func (a *Agent) runLoop(ctx context.Context, messages []ai.Message, userPrompt s
 				break
 			}
 
-			// Wait before retrying with exponential backoff
 			timer := time.NewTimer(backoff)
 			select {
 			case <-ctx.Done():
@@ -107,7 +106,6 @@ func (a *Agent) runLoop(ctx context.Context, messages []ai.Message, userPrompt s
 			}, nil
 		}
 
-		// Enforce MaxToolCallsPerTurn to prevent runaway tool execution
 		calls := resp.ToolCalls
 		if len(calls) > MaxToolCallsPerTurn {
 			if onChunk != nil {
@@ -124,33 +122,43 @@ func (a *Agent) runLoop(ctx context.Context, messages []ai.Message, userPrompt s
 	return nil, ErrMaxTurnsExceeded
 }
 
+// resolveMode picks chat/plan/build. Prefer local heuristics to save free-tier quota.
+// viaLLM is true only when the LLM classifier was actually called.
+func (a *Agent) resolveMode(ctx context.Context, userPrompt string) (mode string, viaLLM bool) {
+	if m, ok := ClassifyIntent(userPrompt); ok {
+		return string(m), false
+	}
+	return a.orchestrateMode(ctx, userPrompt), true
+}
+
 // orchestrateMode sends a fast prompt to the LLM to classify the user's intent.
 func (a *Agent) orchestrateMode(ctx context.Context, userPrompt string) string {
-	systemPrompt := `You are an AI orchestrator for a coding assistant. 
-Your ONLY job is to classify the user's prompt into one of two modes:
-1. "build" - The user wants you to write code, fix a bug, create a file, or modify the codebase.
-2. "plan" - The user just wants you to analyze, review, explain, search, or output a step-by-step plan WITHOUT modifying any files.
+	systemPrompt := `Classify the user message into exactly one mode:
+- chat: greeting, thanks, small talk, or a short question that needs no codebase tools
+- plan: analyze/explain/search/review the project without editing files
+- build: write, edit, fix, create, or otherwise change files/code
 
-Reply with EXACTLY ONE WORD: either "build" or "plan". Do not include any punctuation or extra text.`
+Reply with ONE word only: chat, plan, or build.`
 
 	req := &ai.GenerateRequest{
 		System: systemPrompt,
 		Messages: []ai.Message{
 			{Role: ai.RoleUser, Content: userPrompt},
 		},
-		// No tools needed for classification
 	}
 
-	// We use the same provider to classify, but ideally a smaller model.
-	// For now, we just use the active model.
 	resp, err := a.provider.Generate(ctx, req)
 	if err != nil {
-		return string(ModeBuild) // Default fallback
+		return string(ModeChat) // Prefer cheap fallback on free tier
 	}
 
 	res := strings.ToLower(strings.TrimSpace(resp.Text))
-	if strings.Contains(res, "plan") {
+	switch {
+	case strings.Contains(res, "build"):
+		return string(ModeBuild)
+	case strings.Contains(res, "plan"):
 		return string(ModePlan)
+	default:
+		return string(ModeChat)
 	}
-	return string(ModeBuild)
 }
