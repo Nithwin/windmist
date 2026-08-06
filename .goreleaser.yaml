@@ -2,6 +2,10 @@ version: 2
 
 project_name: windmist
 
+# Allow goreleaser to overwrite existing release assets when re-running
+release:
+  overwrite: true
+
 builds:
   - id: windmist
     binary: windmist
